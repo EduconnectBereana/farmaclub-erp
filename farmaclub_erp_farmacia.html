@@ -10,14 +10,14 @@
 body{font-family:system-ui,-apple-system,sans-serif;background:#f4f4f2;color:#1a1a1a;font-size:14px;display:flex;min-height:100vh}
 button,input,select,textarea{font-family:inherit}
 input,select,textarea{background:#fff;color:#1a1a1a;border:1px solid #ddd;border-radius:7px;padding:7px 10px;font-size:12px;width:100%}
-input:focus,select:focus{outline:none;border-color:#0d9488}
+input:focus,select:focus{outline:none;border-color:#3BAA35}
 #sidebar{width:175px;background:#fff;border-right:1px solid #e8e8e8;padding:18px 10px;display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
-.logo-title{font-size:14px;font-weight:700;color:#0d9488;padding:0 8px}
+.logo-title{font-size:14px;font-weight:700;color:#3BAA35;padding:0 8px}
 .logo-sub{font-size:10px;color:#aaa;padding:0 8px;margin-top:2px;margin-bottom:18px;line-height:1.5}
 .nav-sec{font-size:10px;color:#bbb;font-weight:600;letter-spacing:.6px;padding:10px 10px 4px;text-transform:uppercase}
 .nav-btn{display:flex;align-items:center;gap:8px;width:100%;padding:7px 10px;border-radius:8px;border:none;border-left:3px solid transparent;background:transparent;color:#666;font-size:12px;text-align:left;cursor:pointer;margin-bottom:2px;transition:all .12s}
 .nav-btn:hover{background:#f5f5f5}
-.nav-btn.ativo{background:#0d9488;color:#fff;border-left-color:#0d9488}
+.nav-btn.ativo{background:#3BAA35;color:#fff;border-left-color:#3BAA35}
 #main{flex:1;display:flex;flex-direction:column;min-width:0}
 #topbar{padding:12px 20px;background:#fff;border-bottom:1px solid #e8e8e8;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
 #content{padding:20px;flex:1;overflow:auto}
@@ -33,7 +33,7 @@ td{padding:8px 12px;font-size:12px;border-bottom:1px solid #f5f5f5}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:#fafafa}
 .badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:600}
-.btn-pri{padding:7px 14px;background:#0d9488;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer}
+.btn-pri{padding:7px 14px;background:#3BAA35;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer}
 .btn-sec{padding:7px 14px;background:#fff;border:1px solid #ddd;border-radius:8px;font-size:12px;color:#555;cursor:pointer}
 .btn-sm{padding:5px 11px;font-size:11px;border-radius:6px;border:none;cursor:pointer;font-weight:500}
 .prog-wrap{height:4px;background:#eee;border-radius:2px;overflow:hidden;margin-top:4px}
@@ -59,7 +59,7 @@ tr:hover td{background:#fafafa}
   <button class="nav-btn" data-tab="clientes" onclick="setTab('clientes')"><span style="font-size:10px">◑</span> Clientes</button>
   <button class="nav-btn" data-tab="relatorios" onclick="setTab('relatorios')"><span style="font-size:10px">★</span> Relatórios</button>
   <div style="margin-top:auto;padding-top:12px;border-top:1px solid #eee;font-size:10px;color:#aaa;padding-left:8px;line-height:1.8">
-    <span style="color:#0d9488">●</span> FarmaClub: online<br>
+    <span style="color:#3BAA35">●</span> FarmaClub: online<br>
     CNPJ: 12.345.678/0001-90<br>
     CRF-RJ 12345
   </div>
@@ -75,7 +75,7 @@ tr:hover td{background:#fafafa}
   <div id="content"></div>
 </div>
 <script>
-const T="#0d9488",AM="#d97706",RD="#dc2626",GN="#16a34a",BL="#2563eb",PU="#7c3aed";
+const T="#3BAA35",AM="#d97706",RD="#dc2626",GN="#16a34a",BL="#2563eb",PU="#7c3aed";
 const fmt=v=>v.toLocaleString("pt-BR",{style:"currency",currency:"BRL",minimumFractionDigits:2});
 const fmtD=s=>new Date(s+"T12:00").toLocaleDateString("pt-BR");
 const diasP=s=>Math.round((new Date(s+"T12:00")-new Date())/86400000);
@@ -205,28 +205,324 @@ function renderEstoque(){
         </tr>`;}).join(""))}`;
 }
 
+// ══════════════════════════════════════════════
+// TABELA TRIBUTÁRIA — base para precificação real
+// Fonte: Simples Nacional + Convênio CONFAZ RJ
+// ══════════════════════════════════════════════
+const TRIBUTOS = {
+  "generico": {
+    label: "Medicamento Genérico",
+    cor: "#16a34a",
+    icms: 0,        // Isento RJ — Convênio CONFAZ
+    pis: 0,         // Alíquota zero — Lei 10.147/2000
+    cofins: 0,      // Alíquota zero — Lei 10.147/2000
+    ipi: 0,
+    simples: 3.5,   // Simples Nacional Anexo I faixa 1
+    desc: "ICMS isento · PIS/COFINS zero · maior margem real",
+    margem_min: 25, // margem mínima recomendada
+  },
+  "similar": {
+    label: "Medicamento Similar",
+    cor: "#0d9488",
+    icms: 0,        // Isento RJ para similares listados
+    pis: 0,
+    cofins: 0,
+    ipi: 0,
+    simples: 3.5,
+    desc: "ICMS isento · PIS/COFINS zero",
+    margem_min: 28,
+  },
+  "referencia": {
+    label: "Medicamento Referência",
+    cor: "#2563eb",
+    icms: 12,       // ICMS RJ 12% sobre medicamentos de referência
+    pis: 1.65,
+    cofins: 7.6,
+    ipi: 0,
+    simples: 3.5,
+    desc: "ICMS 12% · PIS/COFINS monofásico",
+    margem_min: 35,
+  },
+  "mip": {
+    label: "MIP (Venda Livre)",
+    cor: "#7c3aed",
+    icms: 12,
+    pis: 1.65,
+    cofins: 7.6,
+    ipi: 0,
+    simples: 3.5,
+    desc: "Sem receita · ICMS 12% · margem maior",
+    margem_min: 40,
+  },
+  "dermocosmetico": {
+    label: "Dermocosméticos",
+    cor: "#d97706",
+    icms: 20,       // ICMS RJ 20% cosméticos
+    pis: 1.65,
+    cofins: 7.6,
+    ipi: 5,         // IPI sobre cosméticos
+    simples: 3.5,
+    desc: "ICMS 20% · IPI 5% · maior carga fiscal",
+    margem_min: 55,
+  },
+  "perfumaria": {
+    label: "Perfumaria",
+    cor: "#db2777",
+    icms: 20,
+    pis: 1.65,
+    cofins: 7.6,
+    ipi: 7,
+    simples: 3.5,
+    desc: "ICMS 20% · IPI 7% · carga mais alta",
+    margem_min: 60,
+  },
+  "servico": {
+    label: "Serviços de Saúde",
+    cor: "#0891b2",
+    icms: 0,        // Serviços não têm ICMS
+    pis: 0.65,
+    cofins: 3.0,
+    ipi: 0,
+    simples: 6.0,   // Simples Anexo III serviços
+    desc: "Sem ICMS · ISS municipal · Simples Anexo III",
+    margem_min: 50,
+  },
+};
+
+// Calcular imposto real e preço mínimo
+function calcTributo(custo, categoria, margem_desejada) {
+  const t = TRIBUTOS[categoria] || TRIBUTOS["mip"];
+  // No Simples, o imposto já está incluído no DAS sobre o faturamento
+  // Imposto real embutido no preço = alíquota Simples + carga específica
+  const carga_total = t.simples + (t.icms > 0 ? t.icms * 0.15 : 0); // ICMS parcialmente embutido
+  const preco_sem_margem = custo / (1 - carga_total/100);
+  const preco_com_margem = custo * (1 + margem_desejada/100);
+  const preco_minimo = Math.max(preco_sem_margem, custo * 1.10); // mínimo 10% acima do custo
+  const margem_real = ((preco_com_margem - custo) / preco_com_margem * 100);
+  const imposto_embutido = preco_com_margem * carga_total / 100;
+  const lucro_liquido = preco_com_margem - custo - imposto_embutido;
+  return {
+    preco_sugerido: +preco_com_margem.toFixed(2),
+    preco_minimo: +preco_minimo.toFixed(2),
+    margem_real: +margem_real.toFixed(1),
+    imposto_embutido: +imposto_embutido.toFixed(2),
+    lucro_liquido: +lucro_liquido.toFixed(2),
+    carga_total: +carga_total.toFixed(1),
+  };
+}
+
+let precCat = "generico";
+let precMargem = 30;
+
 function renderPrecificacao(){
+  // Cards de categorias tributárias
+  const catCards = Object.entries(TRIBUTOS).map(([key, t])=>`
+    <div onclick="precCat='${key}';renderContent()"
+      style="border:2px solid ${precCat===key?t.cor:"#e5e5e5"};background:${precCat===key?t.cor+"11":"#fff"};border-radius:10px;padding:12px;cursor:pointer;transition:all .15s">
+      <div style="font-size:10px;font-weight:700;color:${t.cor};margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">${t.label}</div>
+      <div style="font-size:10px;color:#888;line-height:1.5">${t.desc}</div>
+      <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+        <span style="background:${t.icms===0?"#f0fdf4":"#fff7ed"};color:${t.icms===0?"#16a34a":"#d97706"};border-radius:10px;padding:2px 7px;font-size:10px;font-weight:600">
+          ICMS ${t.icms===0?"isento":t.icms+"%"}
+        </span>
+        <span style="background:${t.pis===0?"#f0fdf4":"#fff7ed"};color:${t.pis===0?"#16a34a":"#d97706"};border-radius:10px;padding:2px 7px;font-size:10px;font-weight:600">
+          PIS ${t.pis===0?"zero":t.pis+"%"}
+        </span>
+        ${t.ipi>0?`<span style="background:#fef2f2;color:#dc2626;border-radius:10px;padding:2px 7px;font-size:10px;font-weight:600">IPI ${t.ipi}%</span>`:""}
+      </div>
+    </div>`).join("");
+
+  // Simulador de preço
+  const t = TRIBUTOS[precCat];
+  const simCusto = 10; // base de simulação R$ 10
+  const resultado = calcTributo(simCusto, precCat, precMargem);
+
+  // Tabela de produtos com categoria
+  const produtosComTrib = produtos.map(p=>{
+    const cat = p.categoria_trib || "generico";
+    const tributo = TRIBUTOS[cat] || TRIBUTOS["generico"];
+    const calc = calcTributo(p.custo, cat, precMargem);
+    return {...p, tributo, calc, cat};
+  });
+
   return`
+    <!-- AVISO LEGAL -->
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:12px;color:#166534;line-height:1.7">
+      <strong>✓ Precificação tributária real — 100% legal</strong><br>
+      O sistema calcula o imposto real embutido em cada produto conforme sua categoria fiscal.
+      Genéricos e similares têm <strong>ICMS isento e PIS/COFINS zero no RJ</strong> — isso significa margem real maior para você.
+      Selecione a categoria correta de cada produto para precificar com precisão.
+    </div>
+
+    <!-- CATEGORIAS TRIBUTÁRIAS -->
     <div class="card" style="margin-bottom:16px">
-      <div style="font-size:13px;font-weight:600;margin-bottom:12px">Margem automática por categoria</div>
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
-        ${[["Analgesicos",120],["Antibioticos",140],["Vitaminas",180],["Gastro",160]].map(([cat,m])=>`
-          <div style="border:1px solid #eee;border-radius:8px;padding:12px">
-            <div style="font-size:11px;color:#888;margin-bottom:6px">${cat}</div>
-            <div style="display:flex;align-items:center;gap:8px">
-              <input type="range" min="50" max="250" value="${m}" style="flex:1;accent-color:#0d9488">
-              <span style="font-size:13px;font-weight:700;color:${T}">${m}%</span>
-            </div>
-          </div>`).join("")}
+      <div style="font-size:13px;font-weight:600;margin-bottom:12px">
+        📋 Categoria tributária — selecione para simular
+        <span style="font-size:11px;font-weight:400;color:#888;margin-left:8px">categoria selecionada: <strong style="color:${t.cor}">${t.label}</strong></span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px">
+        ${catCards}
       </div>
     </div>
-    ${tbl(["Produto","Custo","Margem","Preço atual","Preço sugerido","Novo preço"],
-      produtos.map(p=>{const sug=+(p.custo*1.5).toFixed(2);return`<tr>
-        ${td(p.nome)}${td(fmt(p.custo),"text-align:right")}${td(`<strong style="color:${p.margem>=100?GN:AM}">${p.margem}%</strong>`,"text-align:center")}
-        ${td(fmt(p.preco),"text-align:right;font-weight:700")}${td(`<span style="color:${T}">${fmt(sug)}</span>`,"text-align:right")}
-        <td style="padding:6px 8px"><input type="number" value="${p.preco}" min="0" step="0.01" style="width:90px;text-align:right;padding:5px 8px;border:1px solid #ddd;border-radius:6px;font-size:12px"></td>
-      </tr>`}).join(""))}`;
+
+    <!-- SIMULADOR -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+      <div class="card">
+        <div style="font-size:13px;font-weight:600;margin-bottom:14px">🧮 Simulador de preço — ${t.label}</div>
+        <div style="margin-bottom:12px">
+          <label style="font-size:11px;color:#888;display:block;margin-bottom:4px">Custo de compra (R$)</label>
+          <input type="number" id="sim-custo" value="10.00" step="0.01" min="0"
+            style="width:100%;padding:9px;border:1px solid #ddd;border-radius:8px;font-size:13px"
+            oninput="atualizarSim()">
+        </div>
+        <div style="margin-bottom:12px">
+          <label style="font-size:11px;color:#888;display:block;margin-bottom:4px">Margem desejada: <strong style="color:${T}" id="lbl-margem">${precMargem}%</strong></label>
+          <input type="range" id="sim-margem" min="10" max="150" value="${precMargem}"
+            style="width:100%;accent-color:${t.cor}"
+            oninput="precMargem=parseInt(this.value);atualizarSim()">
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:#aaa;margin-top:2px">
+            <span>10% (mínimo)</span><span>Recomendado: ${t.margem_min}%+</span><span>150%</span>
+          </div>
+        </div>
+        <div id="sim-resultado" style="background:#f8f8f8;border-radius:8px;padding:12px">
+          <!-- preenchido pelo JS -->
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="font-size:13px;font-weight:600;margin-bottom:14px">📊 Comparativo por categoria</div>
+        <div style="font-size:11px;color:#888;margin-bottom:10px">Mesmo custo de R$ 10,00 · margem de ${precMargem}%</div>
+        ${Object.entries(TRIBUTOS).map(([key,tx])=>{
+          const r=calcTributo(10,key,precMargem);
+          return`<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <div style="width:8px;height:8px;border-radius:50%;background:${tx.cor};flex-shrink:0"></div>
+            <div style="flex:1;font-size:11px;color:#555">${tx.label}</div>
+            <div style="font-size:12px;font-weight:700;color:${tx.cor}">${fmt(r.preco_sugerido)}</div>
+            <div style="font-size:10px;color:${r.lucro_liquido>0?"#16a34a":"#dc2626"};min-width:52px;text-align:right">
+              lucro ${fmt(r.lucro_liquido)}
+            </div>
+          </div>`;
+        }).join("")}
+        <div style="margin-top:10px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px;font-size:11px;color:#1d4ed8;line-height:1.6">
+          💡 <strong>Diferença real:</strong> um genérico com custo de R$10 gera mais lucro líquido do que um dermocosméticos com o mesmo custo — porque a carga tributária é menor.
+        </div>
+      </div>
+    </div>
+
+    <!-- TABELA DE PRODUTOS COM TRIBUTOS -->
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="font-size:13px;font-weight:600">Produtos — precificação com categoria tributária real</div>
+        <div style="font-size:11px;color:#888">Margem aplicada: <strong style="color:${T}">${precMargem}%</strong></div>
+      </div>
+      <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse">
+        <thead style="background:#f8f8f8"><tr>
+          <th style="padding:9px 10px;text-align:left;font-size:11px;color:#888;font-weight:500;white-space:nowrap">Produto</th>
+          <th style="padding:9px 10px;text-align:left;font-size:11px;color:#888;font-weight:500">Categoria fiscal</th>
+          <th style="padding:9px 10px;text-align:right;font-size:11px;color:#888;font-weight:500">Custo</th>
+          <th style="padding:9px 10px;text-align:right;font-size:11px;color:#888;font-weight:500">Imposto</th>
+          <th style="padding:9px 10px;text-align:right;font-size:11px;color:#888;font-weight:500">Preço sugerido</th>
+          <th style="padding:9px 10px;text-align:right;font-size:11px;color:#888;font-weight:500">Lucro líquido</th>
+          <th style="padding:9px 10px;text-align:center;font-size:11px;color:#888;font-weight:500">Categoria</th>
+          <th style="padding:9px 10px;font-size:11px;color:#888;font-weight:500">Novo preço</th>
+        </tr></thead>
+        <tbody>
+          ${produtosComTrib.map((p,i)=>`
+          <tr style="border-bottom:${i<produtosComTrib.length-1?"1px solid #f5f5f5":"none"}">
+            <td style="padding:8px 10px">
+              <div style="font-weight:500;font-size:12px">${p.nome}</div>
+              <div style="font-size:10px;color:#aaa">${p.fabricante}</div>
+            </td>
+            <td style="padding:8px 10px">
+              <select onchange="produtos[${i}].categoria_trib=this.value;renderContent()"
+                style="font-size:11px;padding:4px 8px;border:1px solid #ddd;border-radius:6px;background:#fff;color:#555;font-family:inherit">
+                ${Object.entries(TRIBUTOS).map(([k,tx])=>`
+                  <option value="${k}" ${p.cat===k?"selected":""}>${tx.label}</option>`).join("")}
+              </select>
+            </td>
+            <td style="padding:8px 10px;text-align:right;font-size:12px">${fmt(p.custo)}</td>
+            <td style="padding:8px 10px;text-align:right">
+              <span style="font-size:11px;font-weight:600;color:${p.tributo.icms===0&&p.tributo.pis===0?"#16a34a":"#d97706"}">
+                ${p.tributo.icms===0&&p.tributo.pis===0?"isento":fmt(p.calc.imposto_embutido)}
+              </span>
+            </td>
+            <td style="padding:8px 10px;text-align:right;font-size:13px;font-weight:700;color:${T}">${fmt(p.calc.preco_sugerido)}</td>
+            <td style="padding:8px 10px;text-align:right">
+              <span style="font-size:12px;font-weight:600;color:${p.calc.lucro_liquido>0?"#16a34a":"#dc2626"}">
+                ${fmt(p.calc.lucro_liquido)}
+              </span>
+              <div style="font-size:10px;color:#aaa">${p.calc.margem_real}%</div>
+            </td>
+            <td style="padding:8px 10px;text-align:center">
+              <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${p.tributo.cor}"></span>
+            </td>
+            <td style="padding:6px 8px">
+              <input type="number" value="${p.calc.preco_sugerido}" min="0" step="0.01"
+                style="width:85px;text-align:right;padding:5px 8px;border:1px solid #ddd;border-radius:6px;font-size:12px">
+            </td>
+          </tr>`).join("")}
+        </tbody>
+      </table>
+      </div>
+
+      <!-- RESUMO DO MIX -->
+      <div style="margin-top:16px;background:#f8f8f8;border-radius:10px;padding:14px">
+        <div style="font-size:12px;font-weight:600;margin-bottom:10px;color:#555">Análise do mix — quanto você paga de imposto por categoria</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px">
+          ${[
+            ["Genéricos / Similares","ICMS isento · PIS/COFINS zero","#16a34a","Maior margem real"],
+            ["Referência / MIP","ICMS 12% embutido","#d97706","Margem média"],
+            ["Dermocosméticos","ICMS 20% + IPI 5%","#dc2626","Margem maior necessária"],
+            ["Serviços saúde","Sem ICMS · ISS municipal","#0891b2","Receita separada"],
+          ].map(([cat,imp,cor,dica])=>`
+            <div style="border-left:3px solid ${cor};padding:8px 10px;background:#fff;border-radius:6px">
+              <div style="font-size:11px;font-weight:600;color:${cor}">${cat}</div>
+              <div style="font-size:10px;color:#888;margin-top:3px">${imp}</div>
+              <div style="font-size:10px;color:#555;margin-top:3px;font-weight:500">${dica}</div>
+            </div>`).join("")}
+        </div>
+      </div>
+    </div>`;
 }
+
+// Atualizar simulador sem re-renderizar tudo
+window.atualizarSim = function(){
+  const custo = parseFloat(document.getElementById("sim-custo")?.value)||10;
+  const margem = parseInt(document.getElementById("sim-margem")?.value)||30;
+  const lbl = document.getElementById("lbl-margem");
+  if(lbl) lbl.textContent = margem+"%";
+  const r = calcTributo(custo, precCat, margem);
+  const t = TRIBUTOS[precCat];
+  const el = document.getElementById("sim-resultado");
+  if(!el) return;
+  el.innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div>
+        <div style="font-size:10px;color:#888">Custo</div>
+        <div style="font-size:16px;font-weight:700">${fmt(custo)}</div>
+      </div>
+      <div>
+        <div style="font-size:10px;color:#888">Preço sugerido</div>
+        <div style="font-size:16px;font-weight:700;color:${t.cor}">${fmt(r.preco_sugerido)}</div>
+      </div>
+      <div>
+        <div style="font-size:10px;color:#888">Imposto embutido</div>
+        <div style="font-size:14px;font-weight:600;color:${t.icms===0&&t.pis===0?"#16a34a":"#d97706"}">
+          ${t.icms===0&&t.pis===0?"Isento / Zero":fmt(r.imposto_embutido)}
+          <span style="font-size:10px;font-weight:400">(${r.carga_total}%)</span>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:10px;color:#888">Lucro líquido real</div>
+        <div style="font-size:14px;font-weight:600;color:${r.lucro_liquido>0?"#16a34a":"#dc2626"}">${fmt(r.lucro_liquido)}</div>
+      </div>
+    </div>
+    <div style="margin-top:10px;border-top:1px solid #e5e5e5;padding-top:8px;font-size:11px;color:#888">
+      Preço mínimo sem prejuízo: <strong style="color:#dc2626">${fmt(r.preco_minimo)}</strong>
+      · Margem real: <strong style="color:${t.cor}">${r.margem_real}%</strong>
+    </div>`;
+};
 
 function renderNFE(){
   return`
@@ -348,7 +644,7 @@ window.addPDV=function(id){
 window.remPDV=function(i){vendaItens.splice(i,1);renderContent();};
 window.selForma=function(btn){
   document.querySelectorAll("#content .qty-ctrl ~ button, .card button[onclick='selForma(this)']").forEach(b=>{b.style.background="transparent";b.style.color="#666";});
-  btn.style.background="#0d9488";btn.style.color="#fff";
+  btn.style.background="#3BAA35";btn.style.color="#fff";
 };
 window.finalizarVenda=function(){
   if(!vendaItens.length){alert("Adicione produtos ao carrinho.");return;}
