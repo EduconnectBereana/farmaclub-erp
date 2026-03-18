@@ -10,12 +10,12 @@ body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#f4f4f2;
 button,input,select{font-family:inherit;cursor:pointer}
 input,select{background:#fff;color:#1a1a1a;border:1px solid #ddd;border-radius:7px;padding:7px 10px;font-size:12px}
 #sidebar{width:190px;background:#fff;border-right:1px solid #e8e8e8;padding:18px 10px;display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
-.logo{font-size:16px;font-weight:700;color:#0d9488;padding:0 8px}
+.logo{font-size:16px;font-weight:700;color:#3BAA35;padding:0 8px}
 .logo-sub{font-size:10px;color:#aaa;padding:2px 8px 18px;line-height:1.5}
 .nav-sec{font-size:10px;color:#bbb;font-weight:600;letter-spacing:.6px;padding:10px 10px 4px;text-transform:uppercase}
 .nav-btn{display:flex;align-items:center;gap:8px;width:100%;padding:8px 10px;border-radius:8px;border:none;border-left:3px solid transparent;background:transparent;color:#666;font-size:12px;text-align:left;cursor:pointer;margin-bottom:2px;transition:all .15s}
 .nav-btn:hover{background:#f5f5f5;color:#1a1a1a}
-.nav-btn.ativo{background:#0d9488;color:#fff;border-left-color:#0d9488}
+.nav-btn.ativo{background:#3BAA35;color:#fff;border-left-color:#3BAA35}
 #main{flex:1;display:flex;flex-direction:column;min-width:0}
 #topbar{padding:13px 24px;background:#fff;border-bottom:1px solid #e8e8e8;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
 #content{padding:22px 24px;flex:1;overflow-y:auto}
@@ -33,8 +33,8 @@ tr:hover td{background:#fafafa}
 tfoot td{font-weight:700;font-size:12px;padding:10px 12px;background:#f8f8f8;border-top:1px solid #e0e0e0}
 .badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:600}
 .alert{border-radius:10px;padding:12px 16px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:12px}
-.btn-pri{padding:7px 14px;background:#0d9488;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer}
-.btn-pri:hover{background:#0f766e}
+.btn-pri{padding:7px 14px;background:#3BAA35;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer}
+.btn-pri:hover{background:#2E8A2A}
 .prog{height:4px;background:#eee;border-radius:2px;overflow:hidden;margin-top:4px}
 .prog-bar{height:100%;border-radius:2px}
 .chart-wrap{display:flex;align-items:flex-end;gap:5px;padding:4px 0}
@@ -48,7 +48,9 @@ tfoot td{font-weight:700;font-size:12px;padding:10px 12px;background:#f8f8f8;bor
 </head>
 <body>
 <div id="sidebar">
-  <div class="logo">FarmaClub</div>
+  <div class="logo">
+    <img src="farmaclub_logo.png" style="height:52px;width:auto;display:block;margin:0 auto 6px" alt="FarmaClub" onerror="this.style.display=\'none\'">
+  </div>
   <div class="logo-sub">ERP Central · Itaperuna/RJ<br>Painel do Gestor</div>
   <div class="nav-sec">Visão Geral</div>
   <button class="nav-btn ativo" data-tab="dashboard" onclick="setTab('dashboard')">◼ Dashboard</button>
@@ -62,7 +64,7 @@ tfoot td{font-weight:700;font-size:12px;padding:10px 12px;background:#f8f8f8;bor
   <button class="nav-btn" data-tab="insights" onclick="setTab('insights')">★ IA & Insights</button>
   <button class="nav-btn" data-tab="relatorios" onclick="setTab('relatorios')">📊 Relatórios</button>
   <div style="margin-top:auto;padding-top:14px;border-top:1px solid #eee;font-size:10px;color:#888;padding-left:8px;line-height:1.9">
-    <div><span class="live" style="color:#0d9488">●</span> <span style="color:#0d9488;font-weight:600">6 farmácias</span> online</div>
+    <div><span class="live" style="color:#3BAA35">●</span> <span style="color:#3BAA35;font-weight:600">6 farmácias</span> online</div>
     <div>4 motoboys em campo</div>
     <div style="color:#aaa;margin-top:4px">FarmaClub · v1.0 · 2026</div>
   </div>
@@ -75,7 +77,7 @@ tfoot td{font-weight:700;font-size:12px;padding:10px 12px;background:#f8f8f8;bor
       <div id="tab-sub" style="font-size:11px;color:#aaa;margin-top:2px">Visão consolidada · 16 de março de 2026</div>
     </div>
     <div style="display:flex;align-items:center;gap:12px">
-      <div style="background:#e6faf8;color:#0d9488;border:1px solid #b2ece7;border-radius:20px;padding:5px 14px;font-size:11px;font-weight:600">
+      <div style="background:#e6faf8;color:#3BAA35;border:1px solid #b2ece7;border-radius:20px;padding:5px 14px;font-size:11px;font-weight:600">
         <span class="live">●</span> Sistema operacional
       </div>
       <select style="font-size:12px;padding:6px 10px;width:auto">
@@ -87,7 +89,7 @@ tfoot td{font-weight:700;font-size:12px;padding:10px 12px;background:#f8f8f8;bor
 </div>
 
 <script>
-const T="#0d9488",AM="#d97706",RD="#dc2626",GN="#16a34a",BL="#2563eb",PU="#7c3aed";
+const T="#3BAA35",AM="#d97706",RD="#dc2626",GN="#16a34a",BL="#2563eb",PU="#7c3aed";
 const fmt=v=>v.toLocaleString("pt-BR",{style:"currency",currency:"BRL",minimumFractionDigits:2});
 const fmtK=v=>"R$"+(v/1000).toFixed(0)+"k";
 
