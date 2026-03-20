@@ -483,18 +483,53 @@ function renderDRE(){
     </div>`;
 }
 
-// ═══ VISÃO POR CNPJ ═══
-// ═══ CADASTRO DE FARMÁCIAS (novo módulo completo) ═══
-let cadFarms = (typeof FARMACLUB !== "undefined" && FARMACLUB.farmacias)
-  ? JSON.parse(JSON.stringify(FARMACLUB.farmacias))
-  : [
-    {id:1,ativo:true,aberto:true,nome:"Farmácia São João",razao_social:"São João Farmácia Ltda",cnpj:"12.345.678/0001-90",ie:"123.456.78-9",crf:"CRF-RJ 12345",responsavel:"João Carlos Oliveira",telefone:"(22) 3822-1234",email:"saojao@email.com",endereco:"Rua Getúlio Vargas, 342",bairro:"Centro",cep:"28300-000",lat:-21.2062,lng:-41.8878,horario:"Seg–Sex 8h–20h · Sáb 8h–18h",regime:"Simples Nacional",abertura:"01/03/2024",contador:"Oliveira & Associados",faturamento:87600,comissao_pct:10,situacao:"regular",obs:"Farmácia âncora — ponto de consolidação da compra coletiva"},
-    {id:2,ativo:true,aberto:true,nome:"Vida & Saúde",razao_social:"Vida e Saúde Farmácia Ltda",cnpj:"23.456.789/0001-01",ie:"234.567.89-0",crf:"CRF-RJ 23456",responsavel:"Maria Aparecida Santos",telefone:"(22) 3822-5678",email:"vidasaude@email.com",endereco:"Av. Amaro Soares, 88",bairro:"Parque Noel",cep:"28300-000",lat:-21.1980,lng:-41.8820,horario:"Seg–Sáb 7h–22h",regime:"Simples Nacional",abertura:"15/06/2023",contador:"Oliveira & Associados",faturamento:52000,comissao_pct:10,situacao:"regular",obs:""},
-    {id:3,ativo:true,aberto:false,nome:"Farmácia Popular",razao_social:"Popular Farmácia Ltda",cnpj:"34.567.890/0001-12",ie:"345.678.90-1",crf:"CRF-RJ 34567",responsavel:"Carlos Eduardo Lima",telefone:"(22) 3822-9012",email:"popular@email.com",endereco:"Rua 7 de Setembro, 201",bairro:"São Cristóvão",cep:"28300-000",lat:-21.2120,lng:-41.8950,horario:"Seg–Sex 8h–19h",regime:"Simples Nacional",abertura:"10/01/2024",contador:"Oliveira & Associados",faturamento:41200,comissao_pct:10,situacao:"pendente",obs:"Pendência cadastral CNPJ — verificar antes da DEFIS"},
-    {id:4,ativo:true,aberto:true,nome:"Drogaria Esperança",razao_social:"Esperança Drogaria Ltda",cnpj:"45.678.901/0001-23",ie:"456.789.01-2",crf:"CRF-RJ 45678",responsavel:"Ana Paula Ferreira",telefone:"(22) 3822-3456",email:"esperanca@email.com",endereco:"Av. Principal, 10",bairro:"Morro do Crica",cep:"28300-000",lat:-21.2150,lng:-41.8820,horario:"Seg–Sex 8h–20h",regime:"Simples Nacional",abertura:"20/08/2023",contador:"Oliveira & Associados",faturamento:63400,comissao_pct:10,situacao:"regular",obs:""},
-    {id:5,ativo:true,aberto:true,nome:"Farmácia Boa Saúde",razao_social:"Boa Saúde Farmácia Ltda",cnpj:"56.789.012/0001-34",ie:"567.890.12-3",crf:"CRF-RJ 56789",responsavel:"Roberto Alves",telefone:"(22) 3822-7890",email:"boasaude@email.com",endereco:"Rua das Flores, 55",bairro:"Meudon",cep:"28300-000",lat:-21.1950,lng:-41.8780,horario:"Seg–Sex 8h–20h",regime:"Simples Nacional",abertura:"05/11/2023",contador:"Oliveira & Associados",faturamento:29800,comissao_pct:10,situacao:"regular",obs:""},
-    {id:6,ativo:true,aberto:false,nome:"Drogaria Central",razao_social:"Central Drogaria Ltda",cnpj:"67.890.123/0001-45",ie:"678.901.23-4",crf:"CRF-RJ 67890",responsavel:"Fernanda Lima",telefone:"(22) 3822-2345",email:"central@email.com",endereco:"Rua Central, 120",bairro:"Boa Sorte",cep:"28300-000",lat:-21.2200,lng:-41.8900,horario:"Seg–Sex 8h–19h",regime:"Simples Nacional",abertura:"12/04/2024",contador:"Oliveira & Associados",faturamento:44700,comissao_pct:10,situacao:"regular",obs:""},
-  ];
+// ═══════════════════════════════════════════════════════════
+// PERSISTÊNCIA LOCAL — localStorage
+// Os dados ficam salvos no navegador deste computador.
+// Quando o Supabase for integrado, esta seção é substituída
+// por chamadas ao banco e os dados ficam em qualquer lugar.
+// ═══════════════════════════════════════════════════════════
+const FC_STORAGE_KEY = "farmaclub_cadastro_farmacias_v1";
+
+const FARMS_DEMO = [
+    {id:1,ativo:true,aberto:true,nome:"Farmácia São João",razao_social:"São João Farmácia Ltda",cnpj:"12.345.678/0001-90",ie:"123.456.78-9",crf:"CRF-RJ 12345",responsavel:"João Carlos Oliveira",telefone:"(22) 3822-1234",email:"saojao@email.com",endereco:"Rua Getúlio Vargas, 342",bairro:"Centro",cep:"28300-000",lat:-21.2062,lng:-41.8878,horario:"Seg–Sex 8h–20h · Sáb 8h–18h",regime:"Simples Nacional",abertura:"01/03/2024",contador:"Oliveira & Associados",faturamento:87600,comissao_pct:10,situacao:"regular",nota:5.0,cor:"#3BAA35",obs:"Farmácia âncora — ponto de consolidação da compra coletiva"},
+    {id:2,ativo:true,aberto:true,nome:"Vida & Saúde",razao_social:"Vida e Saúde Farmácia Ltda",cnpj:"23.456.789/0001-01",ie:"234.567.89-0",crf:"CRF-RJ 23456",responsavel:"Maria Aparecida Santos",telefone:"(22) 3822-5678",email:"vidasaude@email.com",endereco:"Av. Amaro Soares, 88",bairro:"Parque Noel",cep:"28300-000",lat:-21.1980,lng:-41.8820,horario:"Seg–Sáb 7h–22h",regime:"Simples Nacional",abertura:"15/06/2023",contador:"Oliveira & Associados",faturamento:52000,comissao_pct:10,situacao:"regular",nota:5.0,cor:"#2563eb",obs:""},
+    {id:3,ativo:true,aberto:false,nome:"Farmácia Popular",razao_social:"Popular Farmácia Ltda",cnpj:"34.567.890/0001-12",ie:"345.678.90-1",crf:"CRF-RJ 34567",responsavel:"Carlos Eduardo Lima",telefone:"(22) 3822-9012",email:"popular@email.com",endereco:"Rua 7 de Setembro, 201",bairro:"São Cristóvão",cep:"28300-000",lat:-21.2120,lng:-41.8950,horario:"Seg–Sex 8h–19h",regime:"Simples Nacional",abertura:"10/01/2024",contador:"Oliveira & Associados",faturamento:41200,comissao_pct:10,situacao:"pendente",nota:5.0,cor:"#dc2626",obs:"Pendência cadastral CNPJ — verificar antes da DEFIS"},
+    {id:4,ativo:true,aberto:true,nome:"Drogaria Esperança",razao_social:"Esperança Drogaria Ltda",cnpj:"45.678.901/0001-23",ie:"456.789.01-2",crf:"CRF-RJ 45678",responsavel:"Ana Paula Ferreira",telefone:"(22) 3822-3456",email:"esperanca@email.com",endereco:"Av. Principal, 10",bairro:"Morro do Crica",cep:"28300-000",lat:-21.2150,lng:-41.8820,horario:"Seg–Sex 8h–20h",regime:"Simples Nacional",abertura:"20/08/2023",contador:"Oliveira & Associados",faturamento:63400,comissao_pct:10,situacao:"regular",nota:5.0,cor:"#d97706",obs:""},
+    {id:5,ativo:true,aberto:true,nome:"Farmácia Boa Saúde",razao_social:"Boa Saúde Farmácia Ltda",cnpj:"56.789.012/0001-34",ie:"567.890.12-3",crf:"CRF-RJ 56789",responsavel:"Roberto Alves",telefone:"(22) 3822-7890",email:"boasaude@email.com",endereco:"Rua das Flores, 55",bairro:"Meudon",cep:"28300-000",lat:-21.1950,lng:-41.8780,horario:"Seg–Sex 8h–20h",regime:"Simples Nacional",abertura:"05/11/2023",contador:"Oliveira & Associados",faturamento:29800,comissao_pct:10,situacao:"regular",nota:5.0,cor:"#7c3aed",obs:""},
+    {id:6,ativo:true,aberto:false,nome:"Drogaria Central",razao_social:"Central Drogaria Ltda",cnpj:"67.890.123/0001-45",ie:"678.901.23-4",crf:"CRF-RJ 67890",responsavel:"Fernanda Lima",telefone:"(22) 3822-2345",email:"central@email.com",endereco:"Rua Central, 120",bairro:"Boa Sorte",cep:"28300-000",lat:-21.2200,lng:-41.8900,horario:"Seg–Sex 8h–19h",regime:"Simples Nacional",abertura:"12/04/2024",contador:"Oliveira & Associados",faturamento:44700,comissao_pct:10,situacao:"regular",nota:5.0,cor:"#0891b2",obs:""},
+];
+
+function carregarFarmacias() {
+  // 1. Prioridade: dados salvos pelo usuário no localStorage
+  try {
+    const salvo = localStorage.getItem(FC_STORAGE_KEY);
+    if (salvo) {
+      const dados = JSON.parse(salvo);
+      if (Array.isArray(dados) && dados.length > 0) return dados;
+    }
+  } catch(e) {}
+  // 2. Dados do farmaclub_dados.js se disponível
+  if (typeof FARMACLUB !== "undefined" && FARMACLUB.farmacias) {
+    return JSON.parse(JSON.stringify(FARMACLUB.farmacias));
+  }
+  // 3. Dados de demonstração
+  return JSON.parse(JSON.stringify(FARMS_DEMO));
+}
+
+function persistirFarmacias(farms) {
+  try {
+    localStorage.setItem(FC_STORAGE_KEY, JSON.stringify(farms));
+    if (typeof FARMACLUB !== "undefined") FARMACLUB.farmacias = farms;
+    return true;
+  } catch(e) {
+    alert("Erro ao salvar dados. Verifique se o navegador permite armazenamento local.");
+    return false;
+  }
+}
+
+// Carrega os dados ao iniciar — persiste entre sessões
+let cadFarms = carregarFarmacias();
 
 let editandoId = null;
 
@@ -502,6 +537,16 @@ function renderCadastro(){
   const reg = cadFarms.find(f=>f.id===editandoId);
   const isNovo = !reg;
   const f = reg || {id:0,ativo:true,aberto:true,nome:"",razao_social:"",cnpj:"",ie:"",crf:"",responsavel:"",telefone:"",email:"",endereco:"",bairro:"",cep:"",lat:"",lng:"",horario:"",regime:"Simples Nacional",abertura:"",contador:"Oliveira & Associados",faturamento:0,comissao_pct:10,situacao:"regular",obs:""};
+
+  // Status do armazenamento
+  const totalSalvas = cadFarms.length;
+  const statusArmazenamento = `
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:11px;color:#166534;display:flex;align-items:center;gap:8px">
+      <span>💾</span>
+      <span><strong>${totalSalvas} farmácia(s) salva(s)</strong> neste computador · 
+      <span style="color:#888">Quando o Supabase for integrado, ficará disponível em qualquer lugar</span></span>
+      <button onclick="exportarFarmacias()" style="margin-left:auto;font-size:10px;padding:3px 8px;background:#16a34a;color:#fff;border:none;border-radius:5px;cursor:pointer;font-family:inherit">Exportar JSON</button>
+    </div>`;
 
   const listaHTML = cadFarms.map(x=>`
     <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f5f5f5;cursor:pointer" onclick="editarFarm(${x.id})">
@@ -530,7 +575,7 @@ function renderCadastro(){
 
       <!-- FORMULÁRIO -->
       <div class="card">
-        <div style="font-weight:600;font-size:14px;margin-bottom:16px;display:flex;align-items:center;gap:10px">
+        <div style="font-weight:600;font-size:14px;margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
           ${isNovo?"➕ Nova farmácia":"✏️ Editando: <span style='color:"+T+"'>"+f.nome+"</span>"}
           ${!isNovo?`<button class="btn-sm" style="background:#f5f5f5;color:#555;margin-left:auto" onclick="cancelarEdicao()">Cancelar</button>`:""}
         </div>
@@ -692,6 +737,7 @@ window.excluirFarm = function(id){
   if(!f) return;
   if(!confirm(`Excluir "${f.nome}" do cadastro?\n\nEssa ação remove a farmácia de todos os módulos.`)) return;
   cadFarms = cadFarms.filter(x=>x.id!==id);
+  persistirFarmacias(cadFarms); // salvar exclusão
   editandoId = null;
   renderContent();
 };
@@ -749,12 +795,15 @@ window.salvarFarm = function(){
     cadFarms.push(dados);
   }
 
-  // Atualizar FARMACLUB global se disponível
-  if(typeof FARMACLUB !== "undefined") FARMACLUB.farmacias = cadFarms;
+  // SALVAR NO LOCALSTORAGE — persiste entre sessões
+  const salvou = persistirFarmacias(cadFarms);
 
   editandoId = dados.id;
   renderContent();
-  document.getElementById("msg-cad").innerHTML=`<span style="color:${GN}">✓ ${editandoId?"Alterações salvas":"Farmácia cadastrada"} com sucesso!</span>`;
+  const msgEl = document.getElementById("msg-cad");
+  if(msgEl) msgEl.innerHTML = salvou
+    ? `<span style="color:${GN}">✓ ${dados.nome} salva com sucesso! Os dados estão gravados neste computador.</span>`
+    : `<span style="color:${AM}">⚠ Dados salvos na sessão, mas houve erro ao gravar permanentemente.</span>`;
 };
 
 // ═══ VISÃO POR CNPJ (tabela simplificada) ═══

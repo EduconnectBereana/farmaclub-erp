@@ -10,15 +10,15 @@
 body{font-family:system-ui,-apple-system,sans-serif;background:#f4f4f2;color:#1a1a1a;font-size:14px;display:flex;min-height:100vh}
 button,input,select,textarea{font-family:inherit}
 input,select,textarea{background:#fff;color:#1a1a1a;border:1px solid #ddd;border-radius:7px;padding:7px 10px;font-size:12px;width:100%}
-input:focus,select:focus,textarea:focus{outline:none;border-color:#0d9488}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#3BAA35}
 
 #sidebar{width:200px;background:#fff;border-right:1px solid #e8e8e8;padding:18px 10px;display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
-.logo-title{font-size:14px;font-weight:700;color:#0d9488;padding:0 8px}
+.logo-title{font-size:14px;font-weight:700;color:#3BAA35;padding:0 8px}
 .logo-sub{font-size:10px;color:#aaa;padding:0 8px;margin-top:2px;margin-bottom:20px;line-height:1.4}
 .nav-sec{font-size:10px;color:#bbb;font-weight:600;letter-spacing:.6px;padding:10px 10px 4px;text-transform:uppercase}
 .nav-btn{display:flex;align-items:center;gap:8px;width:100%;padding:8px 10px;border-radius:8px;border:none;border-left:3px solid transparent;background:transparent;color:#666;font-size:12px;text-align:left;cursor:pointer;margin-bottom:2px;transition:all .12s}
 .nav-btn:hover{background:#f5f5f5;color:#1a1a1a}
-.nav-btn.ativo{background:#0d9488;color:#fff;border-left-color:#0d9488}
+.nav-btn.ativo{background:#3BAA35;color:#fff;border-left-color:#3BAA35}
 .nav-sym{font-size:11px;width:14px;flex-shrink:0;opacity:.7}
 
 #main{flex:1;display:flex;flex-direction:column;min-width:0}
@@ -44,18 +44,18 @@ tr:hover td{background:#fafafa}
 
 .badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:600}
 .alert{border-radius:10px;padding:12px 16px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:12px}
-.btn-pri{padding:8px 18px;background:#0d9488;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer}
+.btn-pri{padding:8px 18px;background:#3BAA35;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer}
 .btn-sec{padding:8px 14px;background:#fff;border:1px solid #ddd;border-radius:8px;font-size:12px;color:#555;cursor:pointer}
 .btn-sm{padding:5px 11px;font-size:11px;border-radius:6px;border:none;cursor:pointer;font-weight:500}
 .tab-group{display:flex;gap:4px;margin-bottom:14px;background:#f3f3f3;border-radius:8px;padding:3px}
 .tab-btn{padding:6px 14px;border:none;background:transparent;border-radius:6px;font-size:12px;color:#666;cursor:pointer;font-weight:500}
-.tab-btn.ativo{background:#fff;color:#0d9488;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.tab-btn.ativo{background:#fff;color:#3BAA35;box-shadow:0 1px 3px rgba(0,0,0,.1)}
 .prog-wrap{height:5px;background:#eee;border-radius:3px;overflow:hidden}
 .prog-bar{height:100%;border-radius:3px}
 
 .fornecedor-card{border:1px solid #e8e8e8;border-radius:10px;padding:14px;cursor:pointer;transition:border-color .15s}
-.fornecedor-card:hover{border-color:#0d9488}
-.fornecedor-card.melhor{border-color:#0d9488;border-width:2px;background:#f0fdf8}
+.fornecedor-card:hover{border-color:#3BAA35}
+.fornecedor-card.melhor{border-color:#3BAA35;border-width:2px;background:#f0fdf8}
 .economia-badge{background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:5px}
 .step{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:8px;margin-bottom:6px}
 .step-num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
@@ -63,7 +63,7 @@ tr:hover td{background:#fafafa}
 .qty-btn{width:24px;height:24px;border:1px solid #ddd;border-radius:5px;background:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:600;line-height:1}
 .qty-inp{width:52px;text-align:center;padding:3px 4px;height:24px}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.live{animation:pulse 1.8s ease-in-out infinite;color:#0d9488}
+.live{animation:pulse 1.8s ease-in-out infinite;color:#3BAA35}
 </style>
 </head>
 <body>
@@ -98,7 +98,7 @@ tr:hover td{background:#fafafa}
       <div id="tab-sub" style="font-size:11px;color:#aaa">Central de compras coletivas · FarmaClub Itaperuna</div>
     </div>
     <div style="display:flex;align-items:center;gap:10px">
-      <div style="font-size:11px;background:#e6faf8;color:#0d9488;border:1px solid #b2ece7;border-radius:20px;padding:4px 12px;display:flex;align-items:center;gap:5px">
+      <div style="font-size:11px;background:#e6faf8;color:#3BAA35;border:1px solid #b2ece7;border-radius:20px;padding:4px 12px;display:flex;align-items:center;gap:5px">
         <span class="live">●</span> Estoque das farmácias: sincronizado
       </div>
       <button class="btn-pri" onclick="setTab('cotacao')">🛒 Nova cotação</button>
@@ -108,7 +108,7 @@ tr:hover td{background:#fafafa}
 </div>
 
 <script>
-const T="#0d9488",AM="#d97706",RD="#dc2626",GN="#16a34a",BL="#2563eb",PU="#7c3aed";
+const T="#3BAA35",AM="#d97706",RD="#dc2626",GN="#16a34a",BL="#2563eb",PU="#7c3aed";
 const fmt=v=>v.toLocaleString("pt-BR",{style:"currency",currency:"BRL",minimumFractionDigits:2});
 const fmtD=s=>new Date(s+"T12:00").toLocaleDateString("pt-BR");
 const pct=(a,b)=>b===0?0:+((a/b)*100).toFixed(1);
@@ -276,7 +276,7 @@ function renderNecessidades(){
       </td>
       <td>
         <label style="display:flex;align-items:center;gap:5px;cursor:pointer">
-          <input type="checkbox" id="chk-${p.id}" ${nec>0?"checked":""} style="width:14px;height:14px;accent-color:#0d9488">
+          <input type="checkbox" id="chk-${p.id}" ${nec>0?"checked":""} style="width:14px;height:14px;accent-color:#3BAA35">
           <span style="font-size:11px;color:#666">incluir</span>
         </label>
       </td>
@@ -374,10 +374,10 @@ function renderCotacao(){
     return`<div class="fornecedor-card ${isMelhor?"melhor":""}" onclick="selForn('${f.id}')">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
         <div>
-          <div style="font-weight:600;font-size:13px">${f.nome} ${isMelhor?`<span style="font-size:10px;background:#0d948822;color:#0d9488;border-radius:4px;padding:1px 6px">✓ menor preço</span>`:""}</div>
+          <div style="font-weight:600;font-size:13px">${f.nome} ${isMelhor?`<span style="font-size:10px;background:#3BAA3522;color:#3BAA35;border-radius:4px;padding:1px 6px">✓ menor preço</span>`:""}</div>
           <div style="font-size:11px;color:#aaa;margin-top:2px">${f.cidade} · ★ ${f.avaliacao}</div>
         </div>
-        <input type="radio" name="forn" ${isSel?"checked":""} style="width:16px;height:16px;accent-color:#0d9488;cursor:pointer">
+        <input type="radio" name="forn" ${isSel?"checked":""} style="width:16px;height:16px;accent-color:#3BAA35;cursor:pointer">
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
         <div style="background:#f8f8f8;border-radius:7px;padding:8px">
