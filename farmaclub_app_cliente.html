@@ -3,122 +3,439 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
-<title>FarmaClub — Comprar Medicamentos</title>
+<title>FarmaClub — Medicamentos em Itaperuna/RJ</title>
+<link rel="manifest" href="manifest-cliente.json">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<meta name="theme-color" content="#3BAA35">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="FarmaClub">
+<link rel="apple-touch-icon" href="icons/cliente-192.png">
+<meta name="description" content="Compre medicamentos nas farmácias parceiras FarmaClub em Itaperuna/RJ com entrega rápida.">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{font-family:system-ui,-apple-system,sans-serif;background:#f4f4f2;color:#1a1a2e;font-size:14px;min-height:100vh;display:flex;flex-direction:column;max-width:480px;margin:0 auto}
-button,input{font-family:inherit;cursor:pointer;border:none;outline:none}
-.topbar{background:linear-gradient(135deg,#3BAA35,#2E8A2A);padding:0 16px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 10px rgba(0,0,0,.15)}
-.top-logo{display:flex;align-items:center;gap:8px}
-.top-logo img{height:32px;filter:drop-shadow(0 1px 4px rgba(0,0,0,.2))}
+button,input,select,textarea{font-family:inherit;cursor:pointer;border:none;outline:none}
+a{text-decoration:none;color:inherit}
+
+/* TOPBAR */
+.topbar{background:linear-gradient(135deg,#3BAA35,#2E8A2A);padding:0 16px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;box-shadow:0 2px 10px rgba(0,0,0,.15)}
+.top-logo{display:flex;align-items:center;gap:8px;cursor:pointer}
+.top-logo img{height:30px;filter:drop-shadow(0 1px 4px rgba(0,0,0,.2))}
 .top-nome{font-size:16px;font-weight:700;color:#fff}
+.top-right{display:flex;align-items:center;gap:8px}
 .top-cart{position:relative;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:5px 12px;color:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;gap:5px}
 .cbadge{position:absolute;top:-6px;right:-6px;background:#E03A3A;color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff}
+.top-user{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:5px 10px;color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;gap:4px}
+
+/* NAV */
 #content{flex:1;overflow-y:auto;padding-bottom:64px}
 .bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-top:1px solid #e8eaf4;display:flex;z-index:100}
 .bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px 0;background:transparent;font-size:10px;font-weight:600;color:#9a9eb8}
 .bnav-btn.ativo{color:#3BAA35}
 .bnav-ico{font-size:20px;line-height:1}
+
+/* COMPONENTES */
 .card{background:#fff;border-radius:12px;border:1px solid #e8eaf4;margin:0 12px 10px;padding:14px}
 .card-flat{background:#fff;border-bottom:1px solid #f0f0f0;padding:12px 16px}
-.hero{background:linear-gradient(135deg,#3BAA35,#2E8A2A);padding:16px;color:#fff}
+.hero{background:linear-gradient(135deg,#3BAA35,#2E8A2A);padding:16px 16px 20px;color:#fff}
 .cats{display:flex;gap:7px;padding:10px 12px;overflow-x:auto;scrollbar-width:none}
 .cats::-webkit-scrollbar{display:none}
 .cat-btn{padding:6px 14px;border-radius:20px;border:1.5px solid #e0e0e0;background:#fff;font-size:12px;font-weight:600;color:#5a5e7a;white-space:nowrap;flex-shrink:0}
 .cat-btn.ativo{background:#3BAA35;border-color:#3BAA35;color:#fff}
-.farm-card{display:flex;align-items:center;gap:10px;padding:12px;background:#fff;border-radius:10px;border:1.5px solid #e8eaf4;margin:0 12px 8px;cursor:pointer}
-.farm-card.sel{border-color:#3BAA35;background:#f0fdf4}
-.qty-btn{width:26px;height:26px;border-radius:6px;background:#f0f0f0;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer}
-.empty{text-align:center;padding:40px 20px;color:#9a9eb8}
+.swrap{position:relative;padding:10px 12px 6px;background:#fff;border-bottom:1px solid #f0f0f0;position:sticky;top:52px;z-index:90}
 .sinput{width:100%;padding:10px 14px 10px 36px;border:1.5px solid #e0e0e0;border-radius:24px;font-size:14px;background:#f8f8f8}
 .sinput:focus{border-color:#3BAA35;background:#fff}
-.swrap{position:relative;padding:10px 12px 6px;background:#fff;border-bottom:1px solid #f0f0f0}
 .sico{position:absolute;left:22px;top:50%;transform:translateY(-50%);font-size:16px;color:#9a9eb8}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-.live{animation:pulse 1.6s infinite}
-</style>
+.qty-btn{width:28px;height:28px;border-radius:7px;background:#f0f0f0;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.empty{text-align:center;padding:40px 20px;color:#9a9eb8}
+.farm-card{display:flex;align-items:center;gap:10px;padding:12px;background:#fff;border-radius:10px;border:1.5px solid #e8eaf4;margin:0 12px 8px;cursor:pointer}
 
-  <!-- PWA — FarmaClub App Cliente -->
-  <link rel="manifest" href="manifest-cliente.json">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="FarmaClub">
-  <meta name="theme-color" content="#3BAA35">
-  <meta name="description" content="Compre medicamentos nas farmácias parceiras FarmaClub em Itaperuna/RJ. Entrega rápida.">
-  <!-- Ícones Apple (iOS não lê manifest) -->
-  <link rel="apple-touch-icon" href="icons/cliente-192.png">
-  <link rel="apple-touch-icon" sizes="152x152" href="icons/cliente-152.png">
-  <link rel="apple-touch-icon" sizes="144x144" href="icons/cliente-144.png">
-  <!-- Splash screen iOS -->
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+/* AUTH MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:flex;align-items:flex-end;justify-content:center}
+.modal-sheet{background:#fff;border-radius:20px 20px 0 0;padding:24px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;animation:slideup .25s ease}
+@keyframes slideup{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:40px;height:4px;background:#e0e0e0;border-radius:2px;margin:0 auto 20px}
+.inp-wrap{margin-bottom:12px}
+.inp-lbl{font-size:11px;color:#9a9eb8;display:block;margin-bottom:4px;font-weight:500}
+.inp-field{width:100%;padding:11px 14px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:14px;transition:border-color .15s}
+.inp-field:focus{border-color:#3BAA35}
+.btn-verde{width:100%;padding:13px;background:#3BAA35;color:#fff;border-radius:10px;font-size:15px;font-weight:700;transition:background .15s}
+.btn-verde:active{background:#2E8A2A;transform:scale(.98)}
+.btn-outline{width:100%;padding:11px;background:#fff;border:1.5px solid #e0e0e0;color:#5a5e7a;border-radius:10px;font-size:13px;font-weight:600}
+.msg-auth{padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:12px;display:none}
+.divider{display:flex;align-items:center;gap:10px;margin:14px 0;color:#9a9eb8;font-size:12px}
+.divider::before,.divider::after{content:"";flex:1;height:1px;background:#e8eaf4}
+
+/* PAGAMENTO */
+.pag-card{border:2px solid #e0e0e0;border-radius:12px;padding:14px;cursor:pointer;transition:all .15s;margin-bottom:8px}
+.pag-card.sel{border-color:#3BAA35;background:#f0fdf4}
+.pag-card.sel-deb{border-color:#1A5FA8;background:#eff6ff}
+.pag-card.sel-cred{border-color:#7c3aed;background:#f5f3ff}
+.pag-preco{font-size:18px;font-weight:800}
+.pag-tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700}
+.pix-box{background:#f0fdf4;border:2px solid #3BAA35;border-radius:14px;padding:20px;text-align:center}
+.qr-wrap{background:#fff;border-radius:10px;padding:16px;display:inline-block;margin:16px 0;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+.pix-copy{width:100%;padding:13px;background:#3BAA35;color:#fff;border-radius:10px;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px}
+.pix-copy.copiado{background:#16a34a}
+
+/* RASTREAMENTO */
+#mapa-track{height:260px}
+.confirm-box{background:linear-gradient(135deg,#3BAA35,#2E8A2A);border-radius:12px;padding:20px;margin:0 12px 12px;color:#fff;text-align:center}
+
+
+/* CAMPANHAS */
+.tag-novidade{display:inline-block;background:#E8650A;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;letter-spacing:.3px;margin-bottom:3px}
+.tag-kit{display:inline-block;background:#1A5FA8;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;letter-spacing:.3px;margin-bottom:3px}
+.tag-prog{display:inline-block;background:#3BAA35;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;letter-spacing:.3px;margin-bottom:3px}
+.kit-card{background:#fff;border:2px solid #1A5FA8;border-radius:14px;padding:14px;margin:0 12px 10px}
+.pickup-btn{flex:1;padding:11px;border-radius:10px;font-size:13px;font-weight:700;text-align:center;cursor:pointer;transition:all .15s}
+/* CÓDIGO RECUPERAÇÃO */
+.code-inputs{display:flex;gap:8px;justify-content:center;margin:14px 0}
+.code-inp{width:44px;height:52px;text-align:center;font-size:22px;font-weight:700;border:1.5px solid #e0e0e0;border-radius:10px}
+.code-inp:focus{border-color:#3BAA35}
+
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.live{animation:blink 1.6s infinite}
+@keyframes fadeup{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+</style>
 </head>
 <body>
+
 <div class="topbar">
-  <div class="top-logo">
+  <div class="top-logo" onclick="navTo('inicio')">
     <img src="farmaclub_logo.png" alt="" onerror="this.style.display='none'">
     <span class="top-nome">FarmaClub</span>
   </div>
-  <button class="top-cart" onclick="navTo('carrinho')">
-    🛒 <span id="cnt">0</span>
-    <span class="cbadge" id="cbadge" style="display:none">0</span>
-  </button>
+  <div class="top-right">
+    <button class="top-cart" onclick="navTo('carrinho')">
+      🛒 <span id="cnt">0</span>
+      <span class="cbadge" id="cbadge" style="display:none">0</span>
+    </button>
+    <button class="top-user" id="top-user-btn" onclick="usuarioLogado?navTo('conta'):abrirAuth('login')">
+      <span id="top-user-ico">👤</span>
+      <span id="top-user-nome">Entrar</span>
+    </button>
+  </div>
 </div>
+
 <div id="content"></div>
+<div id="modal-auth" style="display:none"></div>
+
 <nav class="bnav">
   <button class="bnav-btn ativo" id="bn-inicio" onclick="navTo('inicio')"><span class="bnav-ico">🏠</span>Início</button>
   <button class="bnav-btn" id="bn-busca" onclick="navTo('busca')"><span class="bnav-ico">🔍</span>Buscar</button>
   <button class="bnav-btn" id="bn-pedidos" onclick="navTo('pedidos')"><span class="bnav-ico">📦</span>Pedidos</button>
   <button class="bnav-btn" id="bn-carrinho" onclick="navTo('carrinho')"><span class="bnav-ico">🛒</span>Carrinho</button>
 </nav>
+
 <script>
-// ── DADOS (integrado com farmaclub_dados.js e catalogoProdutos do ERP) ──
+// ══════════════════════════════════════════
+// DADOS
+// ══════════════════════════════════════════
 const farms=(typeof FARMACLUB!=="undefined"&&FARMACLUB.farmacias)
   ?FARMACLUB.farmacias.filter(f=>f.ativo)
   :[
-    {id:1,nome:"Farmácia São João",bairro:"Centro",endereco:"Rua Getúlio Vargas, 342",aberto:true,nota:4.9,horario:"8h–20h",cor:"#3BAA35"},
-    {id:2,nome:"Vida & Saúde",bairro:"Parque Noel",endereco:"Av. Amaro Soares, 88",aberto:true,nota:4.7,horario:"7h–22h",cor:"#1A5FA8"},
-    {id:4,nome:"Drogaria Esperança",bairro:"Morro do Crica",endereco:"Av. Principal, 10",aberto:true,nota:4.7,horario:"8h–20h",cor:"#d97706"},
-    {id:5,nome:"Farmácia Boa Saúde",bairro:"Meudon",endereco:"Rua das Flores, 55",aberto:true,nota:4.6,horario:"8h–20h",cor:"#7c3aed"},
+    {id:1,nome:"Farmácia São João",bairro:"Centro",endereco:"Rua Getúlio Vargas, 342",lat:-21.2062,lng:-41.8878,aberto:true,nota:4.9,horario:"8h–20h",cor:"#3BAA35"},
+    {id:2,nome:"Vida & Saúde",bairro:"Parque Noel",endereco:"Av. Amaro Soares, 88",lat:-21.1980,lng:-41.8820,aberto:true,nota:4.7,horario:"7h–22h",cor:"#1A5FA8"},
+    {id:4,nome:"Drogaria Esperança",bairro:"Morro do Crica",endereco:"Av. Principal, 10",lat:-21.2150,lng:-41.8820,aberto:true,nota:4.7,horario:"8h–20h",cor:"#d97706"},
+    {id:5,nome:"Farmácia Boa Saúde",bairro:"Meudon",endereco:"Rua das Flores, 55",lat:-21.1950,lng:-41.8780,aberto:true,nota:4.6,horario:"8h–20h",cor:"#7c3aed"},
   ];
 
-// Mesmo catálogo do ERP Central
 const catalogo=[
-  {id:1,ean:"7896004004532",ico:"💊",nome:"Dipirona Sódica 500mg 20cp",lab:"EMS",cat:"analgesicos",preco:8.90,precoAnt:11.50,est:{1:84,2:42,4:60,5:25},desc:"Analgésico e antitérmico.",receita:false},
+  {id:1,ean:"7896004004532",ico:"💊",nome:"Dipirona Sódica 500mg 20cp",lab:"EMS",cat:"analgesicos",preco:8.90,precoAnt:11.50,est:{1:84,2:42,4:60,5:25},desc:"Analgésico e antitérmico. Alívio de dores e febre.",receita:false},
   {id:2,ean:"7896714240118",ico:"🔬",nome:"Amoxicilina 500mg 21cp",lab:"Medley",cat:"antibioticos",preco:22.50,est:{1:31,2:15,4:25,5:10},desc:"Antibiótico de amplo espectro.",receita:true},
-  {id:3,ean:"7896523240065",ico:"🫀",nome:"Omeprazol 20mg 28cp",lab:"Aché",cat:"gastro",preco:14.90,precoAnt:18.00,est:{1:55,2:28,4:40,5:18},desc:"Protetor gástrico.",receita:false},
+  {id:3,ean:"7896523240065",ico:"🫀",nome:"Omeprazol 20mg 28cp",lab:"Aché",cat:"gastro",preco:14.90,precoAnt:18.00,est:{1:55,2:28,4:40,5:18},desc:"Protetor gástrico e antiácido.",receita:false},
   {id:4,ean:"7891058006824",ico:"⚡",nome:"Vitamina C 1g 10cp",lab:"EMS",cat:"vitaminas",preco:5.90,est:{1:102,2:65,4:80,5:40},desc:"Fortalece a imunidade.",receita:false},
-  {id:5,ean:"7896658010077",ico:"❤️",nome:"Losartana 50mg 30cp",lab:"EMS",cat:"cardiovasc",preco:18.50,est:{1:12,2:30,4:22,5:8},desc:"Controle da pressão.",receita:true},
+  {id:5,ean:"7896658010077",ico:"❤️",nome:"Losartana 50mg 30cp",lab:"EMS",cat:"cardiovasc",preco:18.50,est:{1:12,2:30,4:22,5:8},desc:"Controle da pressão arterial.",receita:true},
   {id:6,ean:"7891047944513",ico:"🩺",nome:"Metformina 850mg 30cp",lab:"Merck",cat:"diabetes",preco:9.90,est:{1:44,2:22,4:30,5:14},desc:"Antidiabético oral.",receita:true},
-  {id:7,ean:"7896714270048",ico:"💊",nome:"Ibuprofeno 600mg 20cp",lab:"Medley",cat:"analgesicos",preco:15.90,est:{1:67,2:35,4:50,5:22},desc:"Anti-inflamatório.",receita:false},
-  {id:8,ean:"7896523405055",ico:"🫧",nome:"Simeticona 40mg 50cp",lab:"Aché",cat:"gastro",preco:11.50,est:{1:29,2:18,4:22,5:10},desc:"Alivia gases.",receita:false},
-  {id:9,ean:"7896658020076",ico:"💙",nome:"Atenolol 25mg 30cp",lab:"EMS",cat:"cardiovasc",preco:8.00,est:{1:45,2:12,4:35,5:15},desc:"Controle cardíaco.",receita:true},
-  {id:10,ean:"7896181916749",ico:"💊",nome:"Paracetamol 750mg 20cp",lab:"Farmoquímica",cat:"analgesicos",preco:7.90,precoAnt:9.50,est:{1:88,2:50,4:70,5:35},desc:"Analgésico.",receita:false},
-  {id:13,ean:"7891058001234",ico:"🌿",nome:"Loratadina 10mg 12cp",lab:"EMS",cat:"outros",preco:7.50,est:{1:30,2:20,4:25,5:12},desc:"Antialérgico.",receita:false},
-  {id:16,ean:"7891058007711",ico:"🎯",nome:"Dorflex 36cp",lab:"EMS",cat:"analgesicos",preco:22.00,est:{1:40,2:25,4:30,5:18},desc:"Relaxante muscular.",receita:false},
+  {id:7,ean:"7896714270048",ico:"💊",nome:"Ibuprofeno 600mg 20cp",lab:"Medley",cat:"analgesicos",preco:15.90,est:{1:67,2:35,4:50,5:22},desc:"Anti-inflamatório e analgésico.",receita:false},
+  {id:8,ean:"7896523405055",ico:"🫧",nome:"Simeticona 40mg 50cp",lab:"Aché",cat:"gastro",preco:11.50,est:{1:29,2:18,4:22,5:10},desc:"Alivia gases e desconforto.",receita:false},
+  {id:9,ean:"7896658020076",ico:"💙",nome:"Atenolol 25mg 30cp",lab:"EMS",cat:"cardiovasc",preco:8.00,est:{1:45,2:12,4:35,5:15},desc:"Controle da pressão e frequência cardíaca.",receita:true},
+  {id:10,ean:"7896181916749",ico:"💊",nome:"Paracetamol 750mg 20cp",lab:"Farmoquímica",cat:"analgesicos",preco:7.90,precoAnt:9.50,est:{1:88,2:50,4:70,5:35},desc:"Analgésico e antitérmico.",receita:false},
+  {id:13,ean:"7891058001234",ico:"🌿",nome:"Loratadina 10mg 12cp",lab:"EMS",cat:"outros",preco:7.50,est:{1:30,2:20,4:25,5:12},desc:"Antialérgico não sedativo.",receita:false},
+  {id:16,ean:"7891058007711",ico:"🎯",nome:"Dorflex 36cp",lab:"EMS",cat:"analgesicos",preco:22.00,est:{1:40,2:25,4:30,5:18},desc:"Relaxante muscular e analgésico.",receita:false},
   {id:17,ean:"7896714880055",ico:"👃",nome:"Neosoro 30ml",lab:"EMS",cat:"outros",preco:12.50,precoAnt:15.00,est:{1:55,2:30,4:45,5:20},desc:"Descongestionante nasal.",receita:false},
-  {id:18,ean:"7896523440088",ico:"🌀",nome:"Buscopan Composto 30cp",lab:"Aché",cat:"gastro",preco:32.00,est:{1:22,2:12,4:18,5:8},desc:"Antiespasmódico.",receita:false},
+  {id:18,ean:"7896523440088",ico:"🌀",nome:"Buscopan Composto 30cp",lab:"Aché",cat:"gastro",preco:32.00,est:{1:22,2:12,4:18,5:8},desc:"Antiespasmódico e analgésico.",receita:false},
 ];
 
-const CATS=[{id:"todos",n:"Todos"},{id:"analgesicos",n:"Analgésicos"},{id:"antibioticos",n:"Antibióticos"},{id:"gastro",n:"Gastro"},{id:"cardiovasc",n:"Coração"},{id:"diabetes",n:"Diabetes"},{id:"vitaminas",n:"Vitaminas"},{id:"outros",n:"Outros"}];
+const CATS=[
+  {id:"todos",n:"Todos"},{id:"analgesicos",n:"Analgésicos"},
+  {id:"antibioticos",n:"Antibióticos"},{id:"gastro",n:"Gastro"},
+  {id:"cardiovasc",n:"Coração"},{id:"diabetes",n:"Diabetes"},
+  {id:"vitaminas",n:"Vitaminas"},{id:"outros",n:"Outros"}
+];
 
-const fmt=v=>"R$ "+v.toFixed(2).replace(".",",");
+// ── PRECIFICAÇÃO POR FORMA DE PAGAMENTO ──
+const PAGAMENTO = {
+  pix:    {label:"PIX",      icone:"📱", mult:1.00, cor:"#3BAA35", tag:"Melhor preço",     tagBg:"#f0fdf4", tagCor:"#3BAA35"},
+  din:    {label:"Dinheiro", icone:"💵", mult:1.00, cor:"#3BAA35", tag:"Mesmo do PIX",     tagBg:"#f0fdf4", tagCor:"#3BAA35"},
+  deb:    {label:"Débito",   icone:"💳", mult:1.02, cor:"#1A5FA8", tag:"+2%",              tagBg:"#eff6ff", tagCor:"#1A5FA8"},
+  cred1:  {label:"Crédito à vista",icone:"💳",mult:1.05,cor:"#7c3aed",tag:"+5%",          tagBg:"#f5f3ff", tagCor:"#7c3aed"},
+  cred3:  {label:"3x no crédito",  icone:"💳",mult:1.05,cor:"#7c3aed",tag:"3x sem juros", tagBg:"#f5f3ff", tagCor:"#7c3aed"},
+};
 
-// ── ESTADO ──
-let tela="inicio",catAtiva="todos",buscaTxt="",farmSel=null,carrinho=[],pedidoAtual=null,prodAtivoId=null,pagSel="Pix";
+const fmt = v => "R$ "+v.toFixed(2).replace(".",",");
+const precoPag = (v, tipo) => +(v * (PAGAMENTO[tipo]?.mult||1)).toFixed(2);
+const calcFrete = v => v>=150?0:+(3+1.5*2).toFixed(2);
 
-// ── CARRINHO ──
+// ══════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════
+let usuarioLogado = JSON.parse(localStorage.getItem("fc_user_logado")||"null");
+
+function getUsuarios(){return JSON.parse(localStorage.getItem("fc_usuarios")||"{}");}
+function setUsuarios(u){localStorage.setItem("fc_usuarios",JSON.stringify(u));}
+
+function login(email,senha){
+  const u=getUsuarios()[email.toLowerCase()];
+  if(!u) return {ok:false,msg:"E-mail não encontrado. Crie sua conta."};
+  if(u.senha!==btoa(senha)) return {ok:false,msg:"Senha incorreta. Tente novamente."};
+  usuarioLogado={nome:u.nome,email:u.email,tel:u.tel};
+  localStorage.setItem("fc_user_logado",JSON.stringify(usuarioLogado));
+  return {ok:true};
+}
+
+function cadastrar(nome,email,tel,senha){
+  if(!nome||!email||!senha) return {ok:false,msg:"Preencha todos os campos obrigatórios."};
+  if(senha.length<6) return {ok:false,msg:"Senha precisa ter pelo menos 6 caracteres."};
+  const us=getUsuarios();
+  if(us[email.toLowerCase()]) return {ok:false,msg:"E-mail já cadastrado. Faça login."};
+  us[email.toLowerCase()]={nome,email:email.toLowerCase(),tel,senha:btoa(senha)};
+  setUsuarios(us);
+  usuarioLogado={nome,email:email.toLowerCase(),tel};
+  localStorage.setItem("fc_user_logado",JSON.stringify(usuarioLogado));
+  return {ok:true};
+}
+
+function logout(){
+  usuarioLogado=null;
+  localStorage.removeItem("fc_user_logado");
+  atualizarTopUser();
+  navTo("inicio");
+}
+
+function atualizarTopUser(){
+  const btn=document.getElementById("top-user-btn");
+  const nome=document.getElementById("top-user-nome");
+  const ico=document.getElementById("top-user-ico");
+  if(!btn||!nome||!ico) return;
+  if(usuarioLogado){
+    nome.textContent=usuarioLogado.nome.split(" ")[0];
+    ico.textContent="✅";
+  } else {
+    nome.textContent="Entrar";
+    ico.textContent="👤";
+  }
+}
+
+// ── MODAL DE AUTH ──
+let authTela="login", authCallback=null, resetEmail="";
+
+function abrirAuth(tela, callback){
+  authTela=tela||"login";
+  authCallback=callback||null;
+  renderAuth();
+}
+
+function fecharAuth(){
+  document.getElementById("modal-auth").style.display="none";
+  document.getElementById("modal-auth").innerHTML="";
+}
+
+function renderAuth(){
+  const modal=document.getElementById("modal-auth");
+  const telas={login:authLogin,cadastro:authCadastro,esqueci:authEsqueci,codigo:authCodigo,nova:authNova};
+  modal.innerHTML=`<div class="modal-bg" onclick="if(event.target===this)fecharAuth()">${(telas[authTela]||authLogin)()}</div>`;
+  modal.style.display="block";
+}
+
+function authLogin(){return `
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="font-size:32px;margin-bottom:8px">👋</div>
+      <div style="font-size:18px;font-weight:700">Bem-vindo ao FarmaClub</div>
+      <div style="font-size:13px;color:#9a9eb8;margin-top:4px">Entre para finalizar sua compra</div>
+    </div>
+    <div id="auth-msg" class="msg-auth"></div>
+    <div class="inp-wrap">
+      <label class="inp-lbl">E-mail</label>
+      <input class="inp-field" id="a-em" type="email" placeholder="seu@email.com" autocomplete="email">
+    </div>
+    <div class="inp-wrap">
+      <label class="inp-lbl">Senha</label>
+      <div style="position:relative">
+        <input class="inp-field" id="a-pw" type="password" placeholder="••••••••" style="padding-right:44px">
+        <button onclick="tgSenha('a-pw',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:transparent;color:#9a9eb8;font-size:18px;padding:0">👁</button>
+      </div>
+    </div>
+    <button class="btn-verde" style="margin-top:4px" onclick="doLogin()">Entrar</button>
+    <div style="text-align:center;margin-top:10px">
+      <span onclick="authTela='esqueci';renderAuth()" style="font-size:12px;color:#3BAA35;font-weight:600;cursor:pointer">Esqueci minha senha</span>
+    </div>
+    <div class="divider">ou</div>
+    <button class="btn-outline" onclick="authTela='cadastro';renderAuth()">Criar conta grátis</button>
+  </div>`;}
+
+function authCadastro(){return `
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="font-size:32px;margin-bottom:8px">🌱</div>
+      <div style="font-size:18px;font-weight:700">Criar conta</div>
+      <div style="font-size:13px;color:#9a9eb8;margin-top:4px">Rápido e grátis — leva 30 segundos</div>
+    </div>
+    <div id="auth-msg" class="msg-auth"></div>
+    <div class="inp-wrap"><label class="inp-lbl">Nome completo *</label>
+      <input class="inp-field" id="c-nm" type="text" placeholder="Seu nome" autocomplete="name"></div>
+    <div class="inp-wrap"><label class="inp-lbl">E-mail *</label>
+      <input class="inp-field" id="c-em" type="email" placeholder="seu@email.com" autocomplete="email"></div>
+    <div class="inp-wrap"><label class="inp-lbl">WhatsApp</label>
+      <input class="inp-field" id="c-tel" type="tel" placeholder="(22) 99999-9999" autocomplete="tel"></div>
+    <div class="inp-wrap"><label class="inp-lbl">Senha * (mín. 6 caracteres)</label>
+      <div style="position:relative">
+        <input class="inp-field" id="c-pw" type="password" placeholder="••••••••" style="padding-right:44px">
+        <button onclick="tgSenha('c-pw',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:transparent;color:#9a9eb8;font-size:18px;padding:0">👁</button>
+      </div>
+    </div>
+    <button class="btn-verde" style="margin-top:4px" onclick="doCadastro()">Criar conta e continuar</button>
+    <div class="divider">ou</div>
+    <button class="btn-outline" onclick="authTela='login';renderAuth()">Já tenho conta — entrar</button>
+  </div>`;}
+
+function authEsqueci(){return `
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="font-size:32px;margin-bottom:8px">🔑</div>
+      <div style="font-size:18px;font-weight:700">Recuperar senha</div>
+      <div style="font-size:13px;color:#9a9eb8;margin-top:4px">Enviaremos um código de verificação</div>
+    </div>
+    <div id="auth-msg" class="msg-auth"></div>
+    <div class="inp-wrap"><label class="inp-lbl">Seu e-mail cadastrado</label>
+      <input class="inp-field" id="r-em" type="email" placeholder="seu@email.com"></div>
+    <button class="btn-verde" style="margin-top:4px" onclick="doEnviarCodigo()">Enviar código</button>
+    <div class="divider"></div>
+    <button class="btn-outline" onclick="authTela='login';renderAuth()">← Voltar ao login</button>
+  </div>`;}
+
+function authCodigo(){return `
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="font-size:32px;margin-bottom:8px">📲</div>
+      <div style="font-size:18px;font-weight:700">Código de verificação</div>
+      <div style="font-size:13px;color:#9a9eb8;margin-top:4px">Enviado para <strong>${resetEmail}</strong></div>
+    </div>
+    <div id="auth-msg" class="msg-auth"></div>
+    <div class="code-inputs">
+      ${[0,1,2,3,4,5].map(i=>`<input class="code-inp" id="cd-${i}" type="text" maxlength="1" inputmode="numeric" oninput="avCd(this,${i})" onkeydown="vlCd(event,${i})">`).join("")}
+    </div>
+    <button class="btn-verde" onclick="doVerificarCodigo()">Verificar</button>
+    <div style="text-align:center;margin-top:10px">
+      <span onclick="doEnviarCodigo()" style="font-size:12px;color:#3BAA35;font-weight:600;cursor:pointer">Reenviar código</span>
+    </div>
+  </div>`;}
+
+function authNova(){return `
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="font-size:32px;margin-bottom:8px">🔒</div>
+      <div style="font-size:18px;font-weight:700">Nova senha</div>
+    </div>
+    <div id="auth-msg" class="msg-auth"></div>
+    <div class="inp-wrap"><label class="inp-lbl">Nova senha (mín. 6 caracteres)</label>
+      <input class="inp-field" id="ns-pw" type="password" placeholder="••••••••"></div>
+    <div class="inp-wrap"><label class="inp-lbl">Confirmar nova senha</label>
+      <input class="inp-field" id="ns-cf" type="password" placeholder="••••••••"></div>
+    <button class="btn-verde" onclick="doNovaSenha()">Salvar nova senha</button>
+  </div>`;}
+
+// ── HELPERS AUTH ──
+function tgSenha(id,btn){const el=document.getElementById(id);if(!el)return;el.type=el.type==="password"?"text":"password";btn.textContent=el.type==="password"?"👁":"🙈";}
+function showAuthMsg(msg,ok){const el=document.getElementById("auth-msg");if(!el)return;el.textContent=msg;el.style.display="block";el.style.background=ok?"#f0fdf4":"#fef2f2";el.style.color=ok?"#16a34a":"#dc2626";el.style.border=`1px solid ${ok?"#bbf7d0":"#fecaca"}`;}
+window.avCd=function(el,i){if(el.value.length===1&&i<5)document.getElementById("cd-"+(i+1))?.focus();};
+window.vlCd=function(e,i){if(e.key==="Backspace"&&!e.target.value&&i>0)document.getElementById("cd-"+(i-1))?.focus();};
+function getCd(){return [0,1,2,3,4,5].map(i=>document.getElementById("cd-"+i)?.value||"").join("");}
+
+function doLogin(){
+  const em=document.getElementById("a-em")?.value.trim();
+  const pw=document.getElementById("a-pw")?.value;
+  if(!em||!pw){showAuthMsg("Preencha e-mail e senha.","err");return;}
+  const r=login(em,pw);
+  if(r.ok){fecharAuth();atualizarTopUser();if(authCallback)authCallback();else navTo("checkout");}
+  else showAuthMsg(r.msg);
+}
+window.doLogin=doLogin;
+
+function doCadastro(){
+  const nm=document.getElementById("c-nm")?.value.trim();
+  const em=document.getElementById("c-em")?.value.trim();
+  const tel=document.getElementById("c-tel")?.value.trim();
+  const pw=document.getElementById("c-pw")?.value;
+  const r=cadastrar(nm,em,tel,pw);
+  if(r.ok){fecharAuth();atualizarTopUser();if(authCallback)authCallback();else navTo("checkout");}
+  else showAuthMsg(r.msg);
+}
+window.doCadastro=doCadastro;
+
+function doEnviarCodigo(){
+  const em=(document.getElementById("r-em")?.value.trim()||resetEmail).toLowerCase();
+  if(!em){showAuthMsg("Digite seu e-mail.");return;}
+  const us=getUsuarios();
+  if(!us[em]){showAuthMsg("E-mail não encontrado.");return;}
+  resetEmail=em;
+  const cod=String(Math.floor(100000+Math.random()*900000));
+  localStorage.setItem("fc_rst_"+em,JSON.stringify({cod,ts:Date.now()}));
+  authTela="codigo";renderAuth();
+  setTimeout(()=>showAuthMsg("Código de demonstração: "+cod+" (em produção chega no WhatsApp)",true),200);
+}
+window.doEnviarCodigo=doEnviarCodigo;
+
+function doVerificarCodigo(){
+  const cd=getCd();
+  if(cd.length!==6){showAuthMsg("Digite os 6 dígitos.");return;}
+  const data=JSON.parse(localStorage.getItem("fc_rst_"+resetEmail)||"null");
+  if(!data||Date.now()-data.ts>10*60*1000||data.cod!==cd){showAuthMsg("Código incorreto ou expirado.");return;}
+  authTela="nova";renderAuth();
+}
+window.doVerificarCodigo=doVerificarCodigo;
+
+function doNovaSenha(){
+  const pw=document.getElementById("ns-pw")?.value;
+  const cf=document.getElementById("ns-cf")?.value;
+  if(!pw||pw.length<6){showAuthMsg("Mínimo 6 caracteres.");return;}
+  if(pw!==cf){showAuthMsg("Senhas não coincidem.");return;}
+  const us=getUsuarios();
+  if(!us[resetEmail]){showAuthMsg("Erro. Tente novamente.");return;}
+  us[resetEmail].senha=btoa(pw);
+  setUsuarios(us);
+  localStorage.removeItem("fc_rst_"+resetEmail);
+  showAuthMsg("Senha alterada! Faça login.",true);
+  setTimeout(()=>{authTela="login";renderAuth();},1500);
+}
+window.doNovaSenha=doNovaSenha;
+
+// ══════════════════════════════════════════
+// CARRINHO
+// ══════════════════════════════════════════
+let carrinho=[], tela="inicio", catAtiva="todos", buscaTxt="", farmSel=null, prodAtivoId=null;
+let pagSel="pix", parcelaSel=1;
+let pedidoAtual=null, mapaTrack=null, marcadorMotoboy=null, simTimer=null;
+
 function addCart(pid,fid){
   const p=catalogo.find(x=>x.id===pid),f=farms.find(x=>x.id===fid);
-  if(!p||!f||(p.est[fid]||0)===0) return;
+  if(!p||!f||(p.est[fid]||0)===0)return;
   const ex=carrinho.find(x=>x.pid===pid&&x.fid===fid);
-  if(ex) ex.qtd++; else carrinho.push({pid,fid,nome:p.nome,farm:f.nome,preco:p.preco,qtd:1,ico:p.ico,receita:p.receita});
-  updBadge();toast(p.ico+" Adicionado!");
+  if(ex)ex.qtd++;else carrinho.push({pid,fid,nome:p.nome,farm:f.nome,farmLat:f.lat,farmLng:f.lng,preco:p.preco,qtd:1,ico:p.ico,receita:p.receita});
+  updBadge();toast(p.ico+" Adicionado ao carrinho!");
 }
 function remCart(pid,fid){
-  const idx=carrinho.findIndex(x=>x.pid===pid&&x.fid===fid);
-  if(idx<0)return;
-  if(carrinho[idx].qtd>1)carrinho[idx].qtd--;else carrinho.splice(idx,1);
+  const i=carrinho.findIndex(x=>x.pid===pid&&x.fid===fid);
+  if(i<0)return;
+  if(carrinho[i].qtd>1)carrinho[i].qtd--;else carrinho.splice(i,1);
   updBadge();rc();
 }
 function updBadge(){
@@ -126,185 +443,276 @@ function updBadge(){
   document.getElementById("cnt").textContent=n;
   const b=document.getElementById("cbadge");b.textContent=n;b.style.display=n>0?"flex":"none";
 }
-function totalCart(){return carrinho.reduce((s,i)=>s+i.preco*i.qtd,0);}
-function calcFrete(v){
-  if(v>=150)return 0;
-  const cfg=(typeof FARMACLUB!=="undefined"&&FARMACLUB.frete)?FARMACLUB.frete:{taxa_base:3,valor_por_km:1.5};
-  return+(cfg.taxa_base+cfg.valor_por_km*2).toFixed(2);
-}
+function totalBase(){return carrinho.reduce((s,i)=>s+i.preco*i.qtd,0);}
+function totalComPag(tipo){return +(totalBase()*(PAGAMENTO[tipo]?.mult||1)).toFixed(2);}
 
-// ── TOAST ──
 function toast(msg){
   let t=document.getElementById("_toast");
-  if(!t){t=document.createElement("div");t.id="_toast";t.style.cssText="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;padding:10px 18px;border-radius:20px;font-size:12px;font-weight:600;z-index:999;opacity:0;transition:opacity .3s;white-space:nowrap;pointer-events:none";document.body.appendChild(t);}
-  t.textContent=msg;t.style.opacity=1;clearTimeout(t._t);t._t=setTimeout(()=>t.style.opacity=0,2000);
+  if(!t){t=document.createElement("div");t.id="_toast";t.style.cssText="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;padding:10px 18px;border-radius:20px;font-size:12px;font-weight:600;z-index:9999;opacity:0;transition:opacity .3s;white-space:nowrap;pointer-events:none";document.body.appendChild(t);}
+  t.textContent=msg;t.style.opacity=1;clearTimeout(t._t);t._t=setTimeout(()=>t.style.opacity=0,2200);
 }
 
-// ── NAVEGAÇÃO ──
+// ══════════════════════════════════════════
+// NAVEGAÇÃO
+// ══════════════════════════════════════════
 function navTo(t){
+  // Se tentar ir para checkout sem login → abre auth primeiro
+  if(t==="checkout"&&!usuarioLogado){
+    abrirAuth("login",()=>navTo("checkout"));
+    return;
+  }
   tela=t;
-  ["inicio","busca","pedidos","carrinho"].forEach(x=>{const e=document.getElementById("bn-"+x);if(e)e.className="bnav-btn"+(x===t?" ativo":"");});
+  ["inicio","busca","pedidos","carrinho"].forEach(x=>{
+    const e=document.getElementById("bn-"+x);
+    if(e)e.className="bnav-btn"+(x===t?" ativo":"");
+  });
+  if(simTimer){clearInterval(simTimer);simTimer=null;}
   rc();
 }
 window.navTo=navTo;
+window.fecharAuth=fecharAuth;
+window.renderAuth=renderAuth;
+window.tgSenha=tgSenha;
 
-// ── RENDER ──
+// ══════════════════════════════════════════
+// RENDERS
+// ══════════════════════════════════════════
 function rc(){
-  const r={inicio:rInicio,busca:rBusca,pedidos:rPedidos,carrinho:rCarrinho,farmacia:rFarmacia,produto:rProduto,checkout:rCheckout,rastreamento:rRastreamento};
+  const r={inicio:rInicio,busca:rBusca,pedidos:rPedidos,carrinho:rCarrinho,farmacia:rFarmacia,produto:rProduto,checkout:rCheckout,pagamento:rPagamento,pix:rPix,rastreamento:rRastreamento,conta:rConta};
   document.getElementById("content").innerHTML=(r[tela]||rInicio)();
+  if(tela==="rastreamento") setTimeout(initMapaRastreamento,100);
 }
 
 // INÍCIO
+function getCampanhasAtivas(){
+  const hoje = new Date();
+  return JSON.parse(localStorage.getItem("fc_campanhas")||"[]")
+    .filter(c=>c.ativa && new Date(c.dataFim)>=hoje);
+}
+
+function tagCampanha(nomeProd){
+  const camps = getCampanhasAtivas();
+  const camp = camps.find(c=>c.produto===nomeProd||
+    (c.itens&&c.itens.includes(nomeProd)));
+  if(!camp) return "";
+  if(camp.tipo==="novidade") return `<div class="tag-novidade">🟠 NOVIDADE</div>`;
+  if(camp.tipo==="progressivo") return `<div class="tag-prog">📦 Leve ${camp.qtdMin}, ${camp.desconto}% off</div>`;
+  if(camp.tipo==="kit") return `<div class="tag-kit">🎁 KIT ESPECIAL</div>`;
+  return "";
+}
+
+function farmMaisProxima(){
+  // Usa farmácia mais próxima baseada nos dados cadastrados
+  // Em produção: usa geolocalização do cliente vs endereço da farmácia
+  // Por ora: primeira farmácia aberta (ordenada por ID)
+  return farms.filter(f=>f.aberto).sort((a,b)=>a.id-b.id)[0]||farms[0];
+}
+
+function farmFechandoEm10min(f){
+  if(!f||!f.horario) return false;
+  const m=f.horario.match(/(\d+)h.*?(\d+)?h/);
+  if(!m) return false;
+  const fechaH=parseInt(m[2]||m[1])+12;
+  const agora=new Date();
+  const mins=(fechaH*60)-(agora.getHours()*60+agora.getMinutes());
+  return mins>=0&&mins<=10;
+}
+
 function rInicio(){
-  const ab=farms.filter(f=>f.aberto);
+  const pedAtivo=getPedidosUser().find(p=>["aguardando","coletando","entregando"].includes(p.status));
+  const camps = getCampanhasAtivas();
+  const kits  = camps.filter(c=>c.tipo==="kit");
+  const novs  = camps.filter(c=>c.tipo==="novidade");
+
   return`
     <div class="hero">
-      <div style="font-size:18px;font-weight:700;margin-bottom:4px">Medicamentos em Itaperuna</div>
-      <div style="font-size:12px;opacity:.85">${ab.length} farmácias abertas · Entrega rápida</div>
+      <div style="font-size:18px;font-weight:700;margin-bottom:4px">${usuarioLogado?`Olá, ${usuarioLogado.nome.split(" ")[0]}! 👋`:"Medicamentos em Itaperuna/RJ"}</div>
+      <div style="font-size:12px;opacity:.85;margin-bottom:12px">Entrega rápida · Melhores preços no PIX · Sem cadastro para ver preços</div>
+      <div style="position:relative">
+        <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px">🔍</span>
+        <input style="width:100%;padding:11px 14px 11px 40px;border-radius:24px;border:none;font-size:14px;font-family:inherit" placeholder="Buscar medicamento..." onclick="navTo('busca')" readonly>
+      </div>
     </div>
-    <div style="padding:12px 12px 4px;font-size:11px;font-weight:700;color:#9a9eb8;letter-spacing:.5px;text-transform:uppercase">Farmácias parceiras</div>
-    ${farms.map(f=>`
-      <div class="farm-card ${farmSel===f.id?"sel":""}" onclick="farmSel=${f.id};navTo('farmacia')">
-        <div style="width:42px;height:42px;border-radius:10px;background:${f.cor||"#3BAA35"}22;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🏥</div>
-        <div style="flex:1">
-          <div style="font-weight:600;font-size:13px">${f.nome}</div>
-          <div style="font-size:11px;color:#9a9eb8;margin-top:2px">${f.bairro} · ${f.horario||""}</div>
-          <div style="font-size:11px;margin-top:2px"><span style="color:#d97706">★</span> ${f.nota||4.8} · <span style="color:${f.aberto?"#3BAA35":"#E03A3A"}">${f.aberto?"Aberta":"Fechada"}</span></div>
+
+    ${pedAtivo?`
+    <div onclick="pedidoAtual=getPedidos().find(x=>x.id==='${pedAtivo.id}')||pedAtivo;tela='rastreamento';rc()" style="background:linear-gradient(135deg,#1A5FA8,#1450a0);margin:10px 12px 0;border-radius:12px;padding:14px;color:#fff;cursor:pointer;display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-size:11px;opacity:.8;font-weight:600;margin-bottom:3px"><span class="live">●</span> PEDIDO EM ANDAMENTO</div>
+        <div style="font-size:14px;font-weight:700">${pedAtivo.id} · ${pedAtivo.farmacia}</div>
+        <div style="font-size:12px;opacity:.85;margin-top:2px">${{aguardando:"Aguardando motoboy",coletando:"🏥 Coletando na farmácia",entregando:"🛵 A caminho — toque para rastrear"}[pedAtivo.status]||""}</div>
+      </div>
+      <div style="font-size:22px">›</div>
+    </div>`:""}
+
+    ${kits.length>0?`
+    <div style="padding:12px 12px 4px;font-size:11px;font-weight:700;color:#1A5FA8;letter-spacing:.5px;text-transform:uppercase;margin-top:10px">🎁 Kits em promoção</div>
+    ${kits.map(k=>`
+      <div class="kit-card">
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px">${k.nome}</div>
+        ${k.descricao?`<div style="font-size:12px;color:#666;margin-bottom:8px">${k.descricao}</div>`:""}
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+          <div style="font-size:11px;color:#9a9eb8">${(k.itens||[]).join(" + ")}</div>
+          <div style="font-size:18px;font-weight:800;color:#1A5FA8">${fmt(k.precoKit||0)}</div>
         </div>
-        <div style="font-size:20px;color:#9a9eb8">›</div>
-      </div>`).join("")}
-    <div style="padding:12px 12px 4px;font-size:11px;font-weight:700;color:#9a9eb8;letter-spacing:.5px;text-transform:uppercase">Mais buscados</div>
+        <div style="font-size:11px;color:#9a9eb8;margin-top:4px">📱 Preço no PIX · Válido até ${new Date(k.dataFim).toLocaleDateString("pt-BR")}</div>
+      </div>`).join("")}`:""}
+
+    ${novs.length>0?`
+    <div style="padding:12px 12px 4px;font-size:11px;font-weight:700;color:#E8650A;letter-spacing:.5px;text-transform:uppercase;${kits.length===0?"margin-top:10px":""}">🟠 Novidades na rede</div>
     <div style="display:grid;grid-template-columns:1fr 1fr">
-      ${catalogo.slice(0,6).map(p=>{
-        const disp=farms.filter(f=>(p.est[f.id]||0)>0).length;
+      ${novs.slice(0,4).map(n=>{
+        const p=catalogo.find(x=>x.nome===n.produto)||catalogo[0];
         return`<div style="background:#fff;border-right:1px solid #f0f0f0;border-bottom:1px solid #f0f0f0;padding:12px;cursor:pointer" onclick="prodAtivoId=${p.id};tela='produto';rc()">
-          <div style="font-size:30px;text-align:center;height:44px;display:flex;align-items:center;justify-content:center;margin-bottom:6px">${p.ico}</div>
-          <div style="font-size:12px;font-weight:600;line-height:1.3;margin-bottom:3px">${p.nome.split(" ").slice(0,4).join(" ")}</div>
-          <div style="font-size:11px;color:#9a9eb8">${p.lab}</div>
-          <div style="font-size:14px;font-weight:700;color:#3BAA35;margin-top:5px">${fmt(p.preco)}</div>
+          <div class="tag-novidade">🟠 NOVIDADE</div>
+          <div style="font-size:28px;text-align:center;height:38px;display:flex;align-items:center;justify-content:center;margin-bottom:5px">${p.ico}</div>
+          <div style="font-size:12px;font-weight:600;line-height:1.3;margin-bottom:2px">${p.nome.split(" ").slice(0,4).join(" ")}</div>
+          <div style="font-size:14px;font-weight:700;color:#3BAA35;margin-top:4px">${fmt(p.preco)}</div>
+        </div>`;}).join("")}
+    </div>`:""}
+
+    <div style="padding:12px 12px 4px;font-size:11px;font-weight:700;color:#9a9eb8;letter-spacing:.5px;text-transform:uppercase;${kits.length+novs.length===0?"margin-top:8px":""}">
+      Mais buscados
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr">
+      ${catalogo.slice(0,8).map(p=>{
+        const disp=farms.filter(f=>(p.est[f.id]||0)>0).length;
+        const tag=tagCampanha(p.nome);
+        return`<div style="background:#fff;border-right:1px solid #f0f0f0;border-bottom:1px solid #f0f0f0;padding:12px;cursor:pointer" onclick="prodAtivoId=${p.id};tela='produto';rc()">
+          ${tag}
+          <div style="font-size:26px;text-align:center;height:38px;display:flex;align-items:center;justify-content:center;margin-bottom:5px">${p.ico}</div>
+          <div style="font-size:12px;font-weight:600;line-height:1.3;margin-bottom:2px">${p.nome.split(" ").slice(0,4).join(" ")}</div>
+          <div style="font-size:11px;color:#9a9eb8;margin-bottom:4px">${p.lab}</div>
+          <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
+            <span style="font-size:14px;font-weight:700;color:#3BAA35">${fmt(p.preco)}</span>
+            <span style="font-size:10px;background:#f0fdf4;color:#3BAA35;padding:1px 6px;border-radius:8px;font-weight:600">📱 PIX</span>
+          </div>
+          ${p.precoAnt?`<div style="font-size:10px;color:#9a9eb8;text-decoration:line-through">${fmt(p.precoAnt)}</div>`:""}
           <div style="font-size:10px;color:${disp>0?"#3BAA35":"#E03A3A"};margin-top:3px">${disp>0?disp+" farmácia(s)":"Sem estoque"}</div>
         </div>`;}).join("")}
     </div>
-    <div style="margin:10px 12px;background:linear-gradient(135deg,#1A5FA8,#1450a0);border-radius:12px;padding:14px;color:#fff">
-      <div style="font-size:13px;font-weight:700;margin-bottom:4px">⚖ Medicamento judicial?</div>
-      <div style="font-size:12px;opacity:.85;line-height:1.5">Orçamento para ação judicial disponível em todas as farmácias parceiras FarmaClub.</div>
+    <div style="margin:10px 12px 16px;background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:12px 14px;font-size:12px;color:#92400e">
+      💡 <strong>PIX = melhor preço.</strong> Compare, adicione ao carrinho e faça login só na hora de finalizar.
     </div>`;
 }
 
 // FARMÁCIA
 function rFarmacia(){
-  const f=farms.find(x=>x.id===farmSel);
-  if(!f)return rInicio();
-  const prods=catalogo.filter(p=>
-    (p.est[f.id]||0)>0&&
-    (catAtiva==="todos"||p.cat===catAtiva)&&
-    (buscaTxt===""||p.nome.toLowerCase().includes(buscaTxt.toLowerCase())));
+  const f=farms.find(x=>x.id===farmSel);if(!f)return rInicio();
+  const prods=catalogo.filter(p=>(p.est[f.id]||0)>0&&(catAtiva==="todos"||p.cat===catAtiva)&&(buscaTxt===""||p.nome.toLowerCase().includes(buscaTxt.toLowerCase())));
   return`
     <div style="background:#fff;padding:12px 16px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:10px;position:sticky;top:52px;z-index:90">
       <button onclick="navTo('inicio')" style="background:transparent;color:#5a5e7a;font-size:20px;padding:0">←</button>
-      <div><div style="font-weight:600">${f.nome}</div><div style="font-size:11px;color:#9a9eb8">${f.bairro} · <span style="color:${f.aberto?"#3BAA35":"#E03A3A"}">${f.aberto?"Aberta":"Fechada"}</span></div></div>
+      <div style="flex:1"><div style="font-weight:600">${f.nome}</div><div style="font-size:11px;color:#9a9eb8">${f.bairro} · <span style="color:#3BAA35">Aberta</span></div></div>
+      <div style="font-size:11px;color:#9a9eb8">★ ${f.nota}</div>
     </div>
-    <div class="swrap"><span class="sico">🔍</span>
+    <div class="swrap" style="top:100px"><span class="sico">🔍</span>
       <input class="sinput" type="text" placeholder="Buscar medicamento..." value="${buscaTxt}" oninput="buscaTxt=this.value;rc()">
     </div>
     <div class="cats">${CATS.map(c=>`<button class="cat-btn ${catAtiva===c.id?"ativo":""}" onclick="catAtiva='${c.id}';rc()">${c.n}</button>`).join("")}</div>
-    ${prods.length===0
-      ?`<div class="empty"><div style="font-size:40px;margin-bottom:12px">🔍</div>Nenhum produto<br><button onclick="catAtiva='todos';buscaTxt='';rc()" style="margin-top:12px;padding:10px 20px;background:#3BAA35;color:#fff;border-radius:8px;font-size:13px;font-weight:600">Ver todos</button></div>`
-      :`<div style="display:grid;grid-template-columns:1fr 1fr">${prods.map(p=>{
-        const noCarr=carrinho.filter(x=>x.pid===p.id&&x.fid===f.id).reduce((s,i)=>s+i.qtd,0);
-        const est=p.est[f.id]||0;
-        return`<div style="background:#fff;border-right:1px solid #f0f0f0;border-bottom:1px solid #f0f0f0;padding:12px;cursor:pointer" onclick="prodAtivoId=${p.id};tela='produto';rc()">
-          <div style="font-size:28px;text-align:center;height:40px;display:flex;align-items:center;justify-content:center;margin-bottom:6px">${p.ico}</div>
-          <div style="font-size:12px;font-weight:600;line-height:1.3;margin-bottom:2px">${p.nome.split(" ").slice(0,4).join(" ")}</div>
-          <div style="font-size:10px;color:#9a9eb8">${p.lab}</div>
-          ${p.precoAnt?`<div style="font-size:10px;color:#9a9eb8;text-decoration:line-through">${fmt(p.precoAnt)}</div>`:""}
-          <div style="font-size:14px;font-weight:700;color:#3BAA35;margin-top:4px">${fmt(p.preco)}</div>
-          ${p.receita?`<div style="font-size:9px;background:#fef2f2;color:#E03A3A;padding:2px 6px;border-radius:8px;margin-top:3px;display:inline-block">Receita</div>`:""}
-          <div style="font-size:10px;color:#9a9eb8;margin-top:3px">${est} un</div>
-          ${noCarr>0
-            ?`<div style="display:flex;align-items:center;gap:4px;margin-top:7px">
-                <button onclick="event.stopPropagation();remCart(${p.id},${f.id})" class="qty-btn" style="background:#fef2f2;color:#E03A3A">−</button>
-                <span style="font-weight:700;font-size:13px;min-width:20px;text-align:center">${noCarr}</span>
-                <button onclick="event.stopPropagation();addCart(${p.id},${f.id})" class="qty-btn" style="background:#3BAA35;color:#fff">+</button>
-              </div>`
-            :`<button onclick="event.stopPropagation();addCart(${p.id},${f.id})" style="margin-top:7px;width:100%;padding:7px;background:#3BAA35;color:#fff;border-radius:7px;font-size:12px;font-weight:700">+ Adicionar</button>`}
-        </div>`;}).join("")}</div>`}`;
+    ${prods.length===0?`<div class="empty"><div style="font-size:40px;margin-bottom:12px">🔍</div>Nenhum produto<br><button onclick="catAtiva='todos';buscaTxt='';rc()" style="margin-top:12px;padding:10px 20px;background:#3BAA35;color:#fff;border-radius:8px;font-size:13px;font-weight:600">Ver todos</button></div>`
+    :`<div style="display:grid;grid-template-columns:1fr 1fr">${prods.map(p=>{
+      const noCarr=carrinho.filter(x=>x.pid===p.id&&x.fid===f.id).reduce((s,i)=>s+i.qtd,0);
+      return`<div style="background:#fff;border-right:1px solid #f0f0f0;border-bottom:1px solid #f0f0f0;padding:12px;cursor:pointer" onclick="prodAtivoId=${p.id};tela='produto';rc()">
+        <div style="font-size:26px;text-align:center;height:38px;display:flex;align-items:center;justify-content:center;margin-bottom:5px">${p.ico}</div>
+        <div style="font-size:12px;font-weight:600;line-height:1.3;margin-bottom:2px">${p.nome.split(" ").slice(0,4).join(" ")}</div>
+        <div style="font-size:10px;color:#9a9eb8;margin-bottom:3px">${p.lab}</div>
+        ${p.precoAnt?`<div style="font-size:10px;color:#9a9eb8;text-decoration:line-through">${fmt(p.precoAnt)}</div>`:""}
+        <div style="display:flex;align-items:center;gap:3px;flex-wrap:wrap">
+          <span style="font-size:14px;font-weight:700;color:#3BAA35">${fmt(p.preco)}</span>
+          <span style="font-size:9px;background:#f0fdf4;color:#3BAA35;padding:1px 5px;border-radius:6px;font-weight:600">PIX</span>
+        </div>
+        ${p.receita?`<div style="font-size:9px;background:#fef2f2;color:#E03A3A;padding:2px 6px;border-radius:8px;margin-top:3px;display:inline-block">Receita</div>`:""}
+        ${noCarr>0
+          ?`<div style="display:flex;align-items:center;gap:4px;margin-top:7px">
+              <button onclick="event.stopPropagation();remCart(${p.id},${f.id})" class="qty-btn" style="background:#fef2f2;color:#E03A3A;width:26px;height:26px">−</button>
+              <span style="font-weight:700;font-size:13px;min-width:20px;text-align:center">${noCarr}</span>
+              <button onclick="event.stopPropagation();addCart(${p.id},${f.id})" class="qty-btn" style="background:#3BAA35;color:#fff;width:26px;height:26px">+</button>
+            </div>`
+          :`<button onclick="event.stopPropagation();addCart(${p.id},${f.id})" style="margin-top:7px;width:100%;padding:7px;background:#3BAA35;color:#fff;border-radius:7px;font-size:12px;font-weight:700">+ Adicionar</button>`}
+      </div>`;}).join("")}</div>`}`;
 }
 
 // BUSCA
 function rBusca(){
-  const prods=catalogo.filter(p=>
-    (buscaTxt===""&&catAtiva==="todos")||
-    (p.nome.toLowerCase().includes(buscaTxt.toLowerCase())||p.lab.toLowerCase().includes(buscaTxt.toLowerCase()))&&
-    (catAtiva==="todos"||p.cat===catAtiva));
+  const prods=catalogo.filter(p=>(catAtiva==="todos"||p.cat===catAtiva)&&(buscaTxt===""||p.nome.toLowerCase().includes(buscaTxt.toLowerCase())||p.lab.toLowerCase().includes(buscaTxt.toLowerCase())));
   return`
     <div class="swrap"><span class="sico">🔍</span>
-      <input class="sinput" type="text" placeholder="Medicamento, laboratório ou EAN..." value="${buscaTxt}" autofocus oninput="buscaTxt=this.value;rc()">
+      <input class="sinput" type="text" placeholder="Medicamento, laboratório..." value="${buscaTxt}" autofocus oninput="buscaTxt=this.value;rc()">
     </div>
     <div class="cats">${CATS.map(c=>`<button class="cat-btn ${catAtiva===c.id?"ativo":""}" onclick="catAtiva='${c.id}';buscaTxt='';rc()">${c.n}</button>`).join("")}</div>
-    ${buscaTxt===""&&catAtiva==="todos"
-      ?`<div class="empty"><div style="font-size:40px;margin-bottom:12px">🔍</div>Digite para buscar<br>ou selecione uma categoria</div>`
-      :prods.map(p=>{
-        const disp=farms.filter(f=>(p.est[f.id]||0)>0);
-        return`<div class="card-flat" style="display:flex;gap:12px;cursor:pointer" onclick="prodAtivoId=${p.id};tela='produto';rc()">
-          <div style="font-size:28px;flex-shrink:0;width:44px;height:44px;background:#f0fdf4;border-radius:8px;display:flex;align-items:center;justify-content:center">${p.ico}</div>
-          <div style="flex:1">
-            <div style="font-weight:600;font-size:13px">${p.nome}</div>
-            <div style="font-size:11px;color:#9a9eb8;margin-top:2px">${p.lab} · ${p.receita?'<span style="color:#E03A3A">Receita</span>':'Venda livre'}</div>
-            <div style="font-size:14px;font-weight:700;color:#3BAA35;margin-top:4px">${fmt(p.preco)}</div>
-            <div style="font-size:11px;color:${disp.length>0?"#3BAA35":"#E03A3A"}">${disp.length>0?disp.length+" farmácia(s) com estoque":"Sem estoque"}</div>
+    ${buscaTxt===""&&catAtiva==="todos"?`<div class="empty"><div style="font-size:40px;margin-bottom:12px">🔍</div>Digite para buscar<br><small style="font-size:11px;margin-top:6px;display:block">ou selecione uma categoria</small></div>`
+    :prods.map(p=>{
+      const disp=farms.filter(f=>(p.est[f.id]||0)>0);
+      return`<div class="card-flat" style="display:flex;gap:12px;cursor:pointer" onclick="prodAtivoId=${p.id};tela='produto';rc()">
+        <div style="font-size:26px;flex-shrink:0;width:44px;height:44px;background:#f0fdf4;border-radius:8px;display:flex;align-items:center;justify-content:center">${p.ico}</div>
+        <div style="flex:1">
+          <div style="font-weight:600;font-size:13px">${p.nome}</div>
+          <div style="font-size:11px;color:#9a9eb8;margin-top:2px">${p.lab} · ${p.receita?'<span style="color:#E03A3A">Receita</span>':'Venda livre'}</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap">
+            <span style="font-size:14px;font-weight:700;color:#3BAA35">${fmt(p.preco)}</span>
+            <span style="font-size:10px;background:#f0fdf4;color:#3BAA35;padding:1px 7px;border-radius:8px;font-weight:600">📱 PIX</span>
+            ${p.precoAnt?`<span style="font-size:11px;color:#9a9eb8;text-decoration:line-through">${fmt(p.precoAnt)}</span>`:""}
           </div>
-        </div>`;}).join("")}`;
+          <div style="font-size:11px;color:${disp.length>0?"#3BAA35":"#E03A3A"};margin-top:3px">${disp.length>0?disp.length+" farmácia(s) com estoque":"Sem estoque"}</div>
+        </div>
+      </div>`;}).join("")}`;
 }
 
 // PRODUTO
 function rProduto(){
-  const p=catalogo.find(x=>x.id===prodAtivoId);
-  if(!p)return rBusca();
+  const p=catalogo.find(x=>x.id===prodAtivoId);if(!p)return rBusca();
   const disp=farms.filter(f=>(p.est[f.id]||0)>0);
   return`
-    <div style="background:#fff;padding:12px 16px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:10px">
+    <div style="background:#fff;padding:12px 16px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:10px;position:sticky;top:52px;z-index:90">
       <button onclick="rc()" style="background:transparent;color:#5a5e7a;font-size:20px;padding:0">←</button>
-      <div style="font-weight:600;font-size:14px">${p.nome.split(" ").slice(0,3).join(" ")}</div>
+      <div style="font-weight:600;font-size:14px;flex:1">${p.nome.split(" ").slice(0,4).join(" ")}</div>
     </div>
     <div style="font-size:52px;text-align:center;padding:24px;background:#fff;border-bottom:1px solid #f0f0f0">${p.ico}</div>
     <div class="card" style="margin-top:10px">
       <div style="font-size:16px;font-weight:700;margin-bottom:4px">${p.nome}</div>
-      <div style="font-size:12px;color:#9a9eb8;margin-bottom:8px">${p.lab}</div>
-      <div style="font-size:11px;color:#5a5e7a;line-height:1.6;margin-bottom:10px">${p.desc}</div>
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        <div style="font-size:22px;font-weight:700;color:#3BAA35">${fmt(p.preco)}</div>
-        ${p.precoAnt?`<div style="font-size:13px;color:#9a9eb8;text-decoration:line-through">${fmt(p.precoAnt)}</div>`:""}
-        ${p.receita?`<span style="background:#fef2f2;color:#E03A3A;padding:3px 9px;border-radius:10px;font-size:11px;font-weight:600">Receita obrigatória</span>`:`<span style="background:#f0fdf4;color:#3BAA35;padding:3px 9px;border-radius:10px;font-size:11px;font-weight:600">Venda livre</span>`}
+      <div style="font-size:12px;color:#9a9eb8;margin-bottom:10px">${p.lab}</div>
+      <div style="font-size:12px;color:#5a5e7a;line-height:1.6;margin-bottom:12px">${p.desc}</div>
+      <!-- PREÇOS POR FORMA DE PAGAMENTO -->
+      <div style="font-size:12px;font-weight:700;color:#9a9eb8;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">Preços por forma de pagamento</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        ${Object.entries(PAGAMENTO).filter(([k])=>k!=="cred1").map(([k,pg])=>{
+          const preco=precoPag(p.preco,k);
+          return`<div style="border:1.5px solid ${k==="pix"||k==="din"?"#3BAA35":k==="deb"?"#1A5FA8":"#7c3aed"}22;border-radius:8px;padding:8px;${k==="pix"?"background:#f0fdf4":""}">
+            <div style="font-size:11px;color:#9a9eb8;margin-bottom:2px">${pg.icone} ${pg.label}</div>
+            <div style="font-size:15px;font-weight:700;color:${pg.cor}">${fmt(preco)}</div>
+            <div style="font-size:10px;font-weight:600;color:${pg.tagCor};margin-top:2px">${pg.tag}</div>
+          </div>`;}).join("")}
       </div>
+      ${p.precoAnt?`<div style="font-size:12px;color:#9a9eb8;margin-top:8px">Preço anterior: <span style="text-decoration:line-through">${fmt(p.precoAnt)}</span></div>`:""}
+      ${p.receita?`<div style="margin-top:10px;background:#fff8f0;border:1px solid #fed7aa;border-radius:8px;padding:8px 10px;font-size:12px;color:#c2410c">⚠️ Produto com <strong>receita obrigatória</strong> — apresente na retirada.</div>`:""}
     </div>
     <div class="card">
       <div style="font-size:13px;font-weight:600;margin-bottom:10px">Disponível em ${disp.length} farmácia(s)</div>
-      ${disp.length===0?`<div style="color:#9a9eb8;font-size:13px">Sem estoque em nenhuma farmácia parceira.</div>`
-        :disp.map(f=>{
-          const est=p.est[f.id]||0;
-          const noCarr=carrinho.filter(x=>x.pid===p.id&&x.fid===f.id).reduce((s,i)=>s+i.qtd,0);
-          return`<div style="border:1.5px solid #e8eaf4;border-radius:10px;padding:11px;margin-bottom:8px">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-              <div><div style="font-weight:600;font-size:13px">${f.nome}</div><div style="font-size:11px;color:#9a9eb8">${f.bairro} · ${est} un</div></div>
-              <span style="color:#d97706;font-size:12px">★ ${f.nota}</span>
-            </div>
-            ${noCarr>0
-              ?`<div style="display:flex;align-items:center;gap:8px">
-                  <button onclick="remCart(${p.id},${f.id});rc()" class="qty-btn" style="background:#fef2f2;color:#E03A3A;width:30px;height:30px">−</button>
-                  <span style="font-weight:700;font-size:14px;min-width:24px;text-align:center">${noCarr}</span>
-                  <button onclick="addCart(${p.id},${f.id});rc()" class="qty-btn" style="background:#3BAA35;color:#fff;width:30px;height:30px">+</button>
-                  <span style="font-size:12px;color:#9a9eb8">${fmt(p.preco*noCarr)}</span>
-                </div>`
-              :`<button onclick="addCart(${p.id},${f.id});rc()" style="width:100%;padding:9px;background:#3BAA35;color:#fff;border-radius:8px;font-size:13px;font-weight:700;border:none;cursor:pointer">+ Adicionar da ${f.nome.split(" ")[0]}</button>`}
-          </div>`;}).join("")}
+      ${disp.length===0?`<div style="color:#9a9eb8">Sem estoque nas farmácias parceiras no momento.</div>`
+      :disp.map(f=>{
+        const est=p.est[f.id]||0;
+        const noCarr=carrinho.filter(x=>x.pid===p.id&&x.fid===f.id).reduce((s,i)=>s+i.qtd,0);
+        return`<div style="border:1.5px solid #e8eaf4;border-radius:10px;padding:11px;margin-bottom:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <div><div style="font-weight:600;font-size:13px">${f.nome}</div><div style="font-size:11px;color:#9a9eb8">${f.bairro} · ${est} unidades</div></div>
+            <span style="color:#d97706;font-size:12px">★ ${f.nota}</span>
+          </div>
+          ${noCarr>0
+            ?`<div style="display:flex;align-items:center;gap:8px">
+                <button onclick="remCart(${p.id},${f.id});rc()" class="qty-btn" style="background:#fef2f2;color:#E03A3A;width:30px;height:30px">−</button>
+                <span style="font-weight:700;font-size:14px;min-width:24px;text-align:center">${noCarr}</span>
+                <button onclick="addCart(${p.id},${f.id});rc()" class="qty-btn" style="background:#3BAA35;color:#fff;width:30px;height:30px">+</button>
+                <span style="font-size:12px;color:#9a9eb8;margin-left:4px">${fmt(p.preco*noCarr)}</span>
+              </div>`
+            :`<button onclick="addCart(${p.id},${f.id});rc()" style="width:100%;padding:9px;background:#3BAA35;color:#fff;border-radius:8px;font-size:13px;font-weight:700;border:none;cursor:pointer">+ Adicionar — ${fmt(p.preco)} 📱 PIX</button>`}
+        </div>`;}).join("")}
     </div>`;
 }
 
 // CARRINHO
 function rCarrinho(){
-  if(!carrinho.length)return`<div class="empty" style="padding-top:60px"><div style="font-size:48px;margin-bottom:12px">🛒</div><div style="font-size:14px;margin-bottom:16px">Carrinho vazio</div><button onclick="navTo('inicio')" style="padding:12px 24px;background:#3BAA35;color:#fff;border-radius:10px;font-size:14px;font-weight:600">Ver farmácias</button></div>`;
-  const total=totalCart(),frete=calcFrete(total);
+  if(!carrinho.length)return`<div class="empty" style="padding-top:60px"><div style="font-size:48px;margin-bottom:12px">🛒</div><div style="font-size:14px;margin-bottom:16px">Seu carrinho está vazio</div><button onclick="navTo('inicio')" style="padding:12px 24px;background:#3BAA35;color:#fff;border-radius:10px;font-size:14px;font-weight:600">Ver produtos</button></div>`;
+  const base=totalBase(),frete=calcFrete(base);
   const farmIds=[...new Set(carrinho.map(i=>i.fid))];
   return`
     <div style="padding:14px 16px;background:#fff;border-bottom:1px solid #f0f0f0;font-size:13px;font-weight:600">Carrinho — ${carrinho.reduce((s,i)=>s+i.qtd,0)} item(ns)</div>
@@ -312,9 +720,14 @@ function rCarrinho(){
       const f=farms.find(x=>x.id===fid);
       return`<div style="padding:10px 12px 4px;font-size:11px;font-weight:700;color:#9a9eb8;text-transform:uppercase">📍 ${f?f.nome:"Farmácia"}</div>
       ${carrinho.filter(i=>i.fid===fid).map(it=>`
-        <div style="display:flex;align-items:center;gap:10px;padding:12px 12px;background:#fff;border-bottom:1px solid #f5f5f5">
-          <div style="font-size:28px;width:44px;height:44px;background:#f0fdf4;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">${it.ico}</div>
-          <div style="flex:1"><div style="font-size:12px;font-weight:600;line-height:1.3">${it.nome}</div><div style="font-size:11px;color:#9a9eb8">${fmt(it.preco)}</div></div>
+        <div style="display:flex;align-items:center;gap:10px;padding:12px;background:#fff;border-bottom:1px solid #f5f5f5">
+          <div style="font-size:26px;width:44px;height:44px;background:#f0fdf4;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">${it.ico}</div>
+          <div style="flex:1"><div style="font-size:12px;font-weight:600;line-height:1.3">${it.nome}</div>
+            <div style="display:flex;align-items:center;gap:4px;margin-top:2px">
+              <span style="font-size:11px;color:#9a9eb8">${fmt(it.preco)}</span>
+              <span style="font-size:10px;background:#f0fdf4;color:#3BAA35;padding:1px 5px;border-radius:6px;font-weight:600">PIX</span>
+            </div>
+          </div>
           <div style="display:flex;align-items:center;gap:6px">
             <button class="qty-btn" onclick="remCart(${it.pid},${it.fid})">−</button>
             <span style="font-weight:700;min-width:20px;text-align:center">${it.qtd}</span>
@@ -323,204 +736,537 @@ function rCarrinho(){
           <div style="font-weight:700;font-size:13px;min-width:54px;text-align:right">${fmt(it.preco*it.qtd)}</div>
         </div>`).join("")}`;}).join("")}
     <div class="card" style="margin-top:8px">
-      <div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid #f5f5f5"><span>Subtotal</span><span style="font-weight:600">${fmt(total)}</span></div>
-      <div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid #f5f5f5"><span>Entrega</span><span style="font-weight:600;color:${frete===0?"#3BAA35":"inherit"}">${frete===0?"Grátis":fmt(frete)}</span></div>
-      <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:700;padding:8px 0 0"><span>Total</span><span style="color:#3BAA35">${fmt(total+frete)}</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid #f5f5f5"><span>Subtotal (PIX)</span><span style="font-weight:600;color:#3BAA35">${fmt(base)}</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid #f5f5f5"><span>Frete estimado</span><span style="font-weight:600;color:${frete===0?"#3BAA35":"inherit"}">${frete===0?"Grátis acima de R$150":fmt(frete)}</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:700;padding:8px 0 0"><span>Total</span><span style="color:#3BAA35">${fmt(base+frete)}</span></div>
     </div>
-    ${carrinho.some(i=>i.receita)?`<div style="margin:0 12px 10px;background:#fff8f0;border:1px solid #fed7aa;border-radius:10px;padding:10px 14px;font-size:12px;color:#c2410c">⚠️ Produto(s) com receita obrigatória — apresente na retirada.</div>`:""}
+    <div style="margin:0 12px 10px;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:10px 14px;font-size:12px;color:#92400e">
+      💡 O preço final depende da forma de pagamento — você escolhe na próxima tela. <strong>PIX tem o melhor preço.</strong>
+    </div>
+    ${carrinho.some(i=>i.receita)?`<div style="margin:0 12px 10px;background:#fff8f0;border:1px solid #fed7aa;border-radius:10px;padding:10px 14px;font-size:12px;color:#c2410c">⚠️ Produto(s) com receita — apresente na farmácia.</div>`:""}
     <div style="padding:0 12px 12px">
-      <button onclick="navTo('checkout')" style="width:100%;padding:14px;background:#3BAA35;color:#fff;border-radius:12px;font-size:15px;font-weight:700">Finalizar — ${fmt(total+frete)}</button>
+      <button onclick="navTo('checkout')" style="width:100%;padding:14px;background:#3BAA35;color:#fff;border-radius:12px;font-size:15px;font-weight:700">Escolher pagamento →</button>
+      ${!usuarioLogado?`<div style="text-align:center;margin-top:8px;font-size:12px;color:#9a9eb8">Você vai fazer login na próxima etapa</div>`:""}
     </div>`;
 }
 
-// CHECKOUT
+// CHECKOUT — endereço + escolha de pagamento com preços dinâmicos
 function rCheckout(){
-  const total=totalCart(),frete=calcFrete(total);
+  const base=totalBase(),frete=calcFrete(base);
+  const totalFinal=+(totalComPag(pagSel)+frete).toFixed(2);
   return`
-    <div style="background:#fff;padding:12px 16px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:10px">
+    <div style="background:#fff;padding:12px 16px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:10px;position:sticky;top:52px;z-index:90">
       <button onclick="navTo('carrinho')" style="background:transparent;color:#5a5e7a;font-size:20px;padding:0">←</button>
       <div style="font-weight:600">Finalizar pedido</div>
     </div>
+
     <div class="card" style="margin-top:10px">
-      <div style="font-size:13px;font-weight:600;margin-bottom:12px">📍 Dados de entrega</div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:12px">📍 Endereço de entrega</div>
       <div style="display:grid;gap:8px">
-        ${[["ck-nome","text","Nome completo"],["ck-tel","tel","Telefone / WhatsApp"],["ck-end","text","Rua e número"],["ck-bairro","text","Bairro"]].map(([id,t,ph])=>`
-          <input type="${t}" id="${id}" placeholder="${ph}" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:13px">`).join("")}
+        <div><label style="font-size:11px;color:#9a9eb8;display:block;margin-bottom:3px">Nome para entrega</label>
+          <input type="text" id="ck-nm" value="${usuarioLogado?.nome||""}" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:13px"></div>
+        <div><label style="font-size:11px;color:#9a9eb8;display:block;margin-bottom:3px">WhatsApp para contato</label>
+          <input type="tel" id="ck-tel" value="${usuarioLogado?.tel||""}" placeholder="(22) 99999-9999" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:13px"></div>
+        <div><label style="font-size:11px;color:#9a9eb8;display:block;margin-bottom:3px">Rua e número *</label>
+          <input type="text" id="ck-end" placeholder="Ex: Rua das Flores, 150" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:13px"></div>
+        <div><label style="font-size:11px;color:#9a9eb8;display:block;margin-bottom:3px">Bairro *</label>
+          <input type="text" id="ck-bairro" placeholder="Ex: Centro" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:13px"></div>
       </div>
     </div>
+
+    <!-- FORMAS DE PAGAMENTO COM PREÇOS DINÂMICOS -->
     <div class="card">
-      <div style="font-size:13px;font-weight:600;margin-bottom:10px">💳 Pagamento na entrega</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="pag-btns">
-        ${["💵 Dinheiro","💳 Débito","💳 Crédito","📱 Pix"].map(f=>`
-          <button onclick="selPag(this,'${f}')" style="padding:10px;border:1.5px solid ${pagSel===f?"#3BAA35":"#e0e0e0"};border-radius:8px;background:${pagSel===f?"#f0fdf4":"#fff"};font-size:12px;font-weight:600;color:${pagSel===f?"#3BAA35":"#5a5e7a"};cursor:pointer">${f}</button>`).join("")}
+      <div style="font-size:13px;font-weight:600;margin-bottom:4px">💳 Forma de pagamento</div>
+      <div style="font-size:12px;color:#9a9eb8;margin-bottom:14px">O preço muda conforme você seleciona</div>
+
+      ${Object.entries(PAGAMENTO).map(([k,pg])=>{
+        const tot=+(totalComPag(k)+frete).toFixed(2);
+        const sel=pagSel===k;
+        const isMelhor=k==="pix"||k==="din";
+        return`<div class="pag-card ${sel?("sel"+(k==="deb"?"-deb":k.startsWith("cred")?"-cred":"")):" "}"
+          onclick="pagSel='${k}';rc()" style="${sel?"":`opacity:.7`}">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="width:36px;height:36px;border-radius:8px;background:${pg.cor}18;display:flex;align-items:center;justify-content:center;font-size:18px">${pg.icone}</div>
+              <div>
+                <div style="font-weight:600;font-size:13px">${pg.label}</div>
+                <span class="pag-tag" style="background:${pg.tagBg};color:${pg.tagCor}">${pg.tag}</span>
+              </div>
+            </div>
+            <div style="text-align:right">
+              <div class="pag-preco" style="color:${pg.cor}">${fmt(tot)}</div>
+              ${k==="cred3"?`<div style="font-size:11px;color:#9a9eb8">3x de ${fmt(tot/3)}</div>`:""}
+            </div>
+          </div>
+          ${sel?`<div style="margin-top:10px;border-top:1px solid ${pg.cor}33;padding-top:8px;font-size:12px;color:${pg.cor};font-weight:600">✓ Selecionado</div>`:""}
+        </div>`;}).join("")}
+    </div>
+
+    <!-- RESUMO FINAL -->
+    <div class="card" style="background:#f8f8f8;border:1px solid #e8eaf4">
+      <div style="font-size:12px;font-weight:700;color:#9a9eb8;margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px">Resumo</div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0"><span>${catalogo.length>0?"Produtos":""} (${pagSel.startsWith("cred")?"crédito":pagSel==="deb"?"débito":"PIX/dinheiro"})</span><span>${fmt(totalComPag(pagSel))}</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid #eee"><span>Frete</span><span>${frete===0?"Grátis":fmt(frete)}</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:800;padding-top:8px">
+        <span>Total</span><span style="color:${PAGAMENTO[pagSel]?.cor||"#3BAA35"}">${fmt(totalFinal)}</span>
       </div>
+      ${pagSel==="cred3"?`<div style="font-size:12px;color:#7c3aed;margin-top:4px">3x de ${fmt(totalFinal/3)} sem juros</div>`:""}
     </div>
-    <div class="card" style="background:#f0fdf4;border:1px solid #bbf7d0">
-      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>Produtos</span><span>${fmt(total)}</span></div>
-      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px"><span>Frete</span><span>${frete===0?"Grátis":fmt(frete)}</span></div>
-      <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:700"><span>Total</span><span style="color:#3BAA35">${fmt(total+frete)}</span></div>
-    </div>
-    <div style="padding:0 12px 12px">
-      <button onclick="confirmarPedido()" style="width:100%;padding:14px;background:#3BAA35;color:#fff;border-radius:12px;font-size:15px;font-weight:700">✅ Confirmar pedido</button>
+
+    <div style="padding:0 12px 16px">
+      <button onclick="irParaPagamento()" style="width:100%;padding:14px;background:${PAGAMENTO[pagSel]?.cor||"#3BAA35"};color:#fff;border-radius:12px;font-size:15px;font-weight:700">
+        ${pagSel==="pix"?"Gerar PIX — "+fmt(totalFinal):pagSel==="din"?"Confirmar pedido — "+fmt(totalFinal):"Confirmar pedido — "+fmt(totalFinal)}
+      </button>
     </div>`;
 }
 
-function selPag(btn,f){pagSel=f;rc();}
-window.selPag=selPag;
-
-function confirmarPedido(){
-  const nome=document.getElementById("ck-nome")?.value.trim();
+function irParaPagamento(){
+  const nm=document.getElementById("ck-nm")?.value.trim();
   const tel=document.getElementById("ck-tel")?.value.trim();
   const end=document.getElementById("ck-end")?.value.trim();
   const bairro=document.getElementById("ck-bairro")?.value.trim();
-  if(!nome||!tel||!end||!bairro){alert("Preencha todos os campos.");return;}
-  const total=totalCart(),frete=calcFrete(total);
+  if(!end||!bairro){alert("Preencha o endereço completo.");return;}
+  if(pagSel==="pix"||pagSel==="din"){
+    tela="pagamento";rc();
+  } else {
+    confirmarPedido(nm,tel,end,bairro);
+  }
+}
+window.irParaPagamento=irParaPagamento;
+
+// TELA DE PAGAMENTO PIX / DINHEIRO / CARTÃO
+function rPagamento(){
+  const base=totalBase(),frete=calcFrete(base);
+  const total=+(totalComPag(pagSel)+frete).toFixed(2);
+  if(pagSel==="pix") return rPix(total);
+  return rPagDinheiro(total);
+}
+
+// PIX — QR Code + copia e cola
+function rPix(total){
+  const chave="11.111.111/0001-11"; // CNPJ FarmaClub
+  const txId="FARMACLUB"+Date.now().toString().slice(-8);
+  // Payload PIX simplificado (simulado — em produção usa API de pagamento)
+  const payload=`00020126580014BR.GOV.BCB.PIX0136${chave}520400005303986540${total.toFixed(2).replace(".","").padStart(7,"0")}5802BR5913FarmaClub6009Itaperuna62070503***6304`;
+  const copiaECola=`00020126580014BR.GOV.BCB.PIX0136${chave}52040000530398654${total.toFixed(2).replace(".","").padStart(7,"0")}5802BR5913FarmaClub6009Itaperuna62070503***6304ABCD`;
+
+  return`
+    <div style="background:#fff;padding:12px 16px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:10px;position:sticky;top:52px;z-index:90">
+      <button onclick="tela='checkout';rc()" style="background:transparent;color:#5a5e7a;font-size:20px;padding:0">←</button>
+      <div style="font-weight:600">Pagamento via PIX</div>
+    </div>
+
+    <div style="padding:16px 12px 0">
+      <div class="pix-box">
+        <div style="font-size:14px;font-weight:700;color:#16a34a;margin-bottom:4px">📱 Pague com PIX</div>
+        <div style="font-size:28px;font-weight:800;color:#16a34a;margin-bottom:4px">${fmt(total)}</div>
+        <div style="font-size:12px;color:#16a34a;opacity:.8;margin-bottom:16px">Melhor preço · Aprovação instantânea</div>
+
+        <!-- QR CODE SVG SIMULADO -->
+        <div class="qr-wrap">
+          <svg width="200" height="200" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+            <rect width="21" height="21" fill="white"/>
+            <!-- Padrão QR simulado -->
+            ${[...Array(21)].map((_,r)=>[...Array(21)].map((_,c)=>{
+              const isCorner=(r<7&&c<7)||(r<7&&c>13)||(r>13&&c<7);
+              const isInnerCorner=(r>=1&&r<=5&&c>=1&&c<=5)||(r>=1&&r<=5&&c>=15&&c<=19)||(r>=15&&r<=19&&c>=1&&c<=5);
+              const isCenterDot=(r===3&&c===3)||(r===3&&c===17)||(r===17&&c===3);
+              const isRand=((r*17+c*13)%7<3)&&!isCorner;
+              const fill=isInnerCorner||isCenterDot||(isCorner&&!isInnerCorner)||isRand?"#000":"none";
+              return fill!=="none"?`<rect x="${c}" y="${r}" width="1" height="1" fill="${fill}"/>`:"";
+            }).join("")).join("")}
+          </svg>
+        </div>
+
+        <div style="font-size:12px;color:#16a34a;margin-bottom:12px;font-weight:500">Aponte a câmera do seu banco para o QR Code</div>
+
+        <!-- COPIA E COLA -->
+        <div style="background:#fff;border-radius:10px;padding:10px;margin-bottom:12px;text-align:left;border:1px solid #bbf7d0">
+          <div style="font-size:11px;color:#9a9eb8;margin-bottom:4px;font-weight:600">CÓDIGO PIX — COPIA E COLA</div>
+          <div style="font-size:10px;color:#1a1a2e;word-break:break-all;line-height:1.5;font-family:monospace">${copiaECola.substring(0,60)}...</div>
+        </div>
+
+        <button class="pix-copy" id="btn-copiar" onclick="copiarPix('${copiaECola}')">
+          <span>📋</span> Copiar código PIX
+        </button>
+
+        <div style="margin-top:12px;font-size:11px;color:#16a34a;opacity:.8;line-height:1.6">
+          Válido por <strong>30 minutos</strong> · Após o pagamento, confirme abaixo
+        </div>
+      </div>
+
+      <div style="margin:12px 0;text-align:center;font-size:13px;color:#9a9eb8">Já pagou? Confirme para acompanhar sua entrega</div>
+
+      <button onclick="confirmarPagamentoPix()" style="width:100%;padding:14px;background:#3BAA35;color:#fff;border-radius:12px;font-size:15px;font-weight:700;border:none;cursor:pointer">
+        ✅ Já paguei — confirmar pedido
+      </button>
+      <button onclick="tela='checkout';rc()" style="width:100%;padding:11px;background:transparent;border:1.5px solid #e0e0e0;color:#9a9eb8;border-radius:10px;font-size:13px;font-weight:600;margin-top:8px;cursor:pointer">
+        Voltar e trocar pagamento
+      </button>
+    </div>`;
+}
+
+function rPagDinheiro(total){
+  return`
+    <div style="background:#fff;padding:12px 16px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:10px">
+      <button onclick="tela='checkout';rc()" style="background:transparent;color:#5a5e7a;font-size:20px;padding:0">←</button>
+      <div style="font-weight:600">Pagamento no recebimento</div>
+    </div>
+    <div style="padding:16px 12px">
+      <div style="background:#fff;border-radius:14px;border:2px solid #3BAA35;padding:24px;text-align:center;margin-bottom:16px">
+        <div style="font-size:40px;margin-bottom:10px">💵</div>
+        <div style="font-size:22px;font-weight:800;color:#3BAA35">${fmt(total)}</div>
+        <div style="font-size:13px;color:#9a9eb8;margin-top:6px">Pague ao motoboy na entrega</div>
+      </div>
+      <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px;font-size:12px;color:#92400e;line-height:1.6;margin-bottom:14px">
+        💡 Separe o dinheiro trocado se possível. O motoboy pode não ter troco para valores altos.
+      </div>
+      <button onclick="confirmarPagamentoPix()" style="width:100%;padding:14px;background:#3BAA35;color:#fff;border-radius:12px;font-size:15px;font-weight:700;border:none;cursor:pointer">
+        ✅ Confirmar pedido
+      </button>
+    </div>`;
+}
+
+window.copiarPix=function(texto){
+  navigator.clipboard?.writeText(texto).then(()=>{
+    const btn=document.getElementById("btn-copiar");
+    if(btn){btn.innerHTML='<span>✅</span> Copiado!';btn.className="pix-copy copiado";}
+    toast("✅ Código PIX copiado!");
+    setTimeout(()=>{if(btn){btn.innerHTML='<span>📋</span> Copiar código PIX';btn.className="pix-copy";}},3000);
+  }).catch(()=>toast("Use o botão longo no código acima"));
+};
+
+window.confirmarPagamentoPix=function(){
+  const nm=document.getElementById("ck-nm")?.value||usuarioLogado?.nome||"Cliente";
+  const tel=document.getElementById("ck-tel")?.value||usuarioLogado?.tel||"";
+  const end=document.getElementById("ck-end")?.value||"";
+  const bairro=document.getElementById("ck-bairro")?.value||"";
+  confirmarPedido(nm,tel,end,bairro);
+};
+
+function confirmarPedido(nm,tel,end,bairro){
+  const base=totalBase(),frete=calcFrete(base);
+  const total=+(totalComPag(pagSel)+frete).toFixed(2);
   const fid=carrinho[0]?.fid;
   const f=farms.find(x=>x.id===fid);
   const ped={
     id:"#"+String(Date.now()).slice(-4),
-    cliente:nome,tel,
-    endereco:end+" — "+bairro+" — Itaperuna/RJ",
+    cliente:nm||usuarioLogado?.nome||"Cliente",
+    tel:tel||usuarioLogado?.tel||"",
+    email:usuarioLogado?.email||"",
+    endereco:(end||"Endereço não informado")+(bairro?" — "+bairro:"")+" — Itaperuna/RJ",
+    clienteLat:-21.2100+(Math.random()-.5)*.015,
+    clienteLng:-41.8900+(Math.random()-.5)*.015,
     itens:[...carrinho],
-    total:total+frete,frete,
-    pagamento:pagSel,
+    totalBase:base,
+    total,frete,
+    pagamento:PAGAMENTO[pagSel]?.label||"PIX",
+    pagSel,
     status:"aguardando",
     farmacia:f?f.nome:"FarmaClub",
     farmId:fid,
+    farmLat:f?.lat||(-21.2062),
+    farmLng:f?.lng||(-41.8878),
+    motoboyLat:f?.lat||(-21.2062),
+    motoboyLng:f?.lng||(-41.8878),
+    motoboy:null,
+    confirmadoCliente:false,
     bairro,
     data:new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}),
     ts:Date.now()
   };
-  // ── PONTE COM ERP CENTRAL E APP MOTOBOY ──
-  const peds=JSON.parse(localStorage.getItem("fc_pedidos_live")||"[]");
-  peds.push(ped);
-  localStorage.setItem("fc_pedidos_live",JSON.stringify(peds));
-
+  // Ajuste para retirada (sem frete)
+  if(modoEntrega==="retirada"){ped.frete=0;ped.total=totalComPag(pagSel);ped.modoEntrega="retirada";}
+  const peds=getPedidos();peds.push(ped);salvarPedidos(peds);
+  // Notificar motoboys ordenados por distância (só se entrega em casa)
+  if(modoEntrega==="entrega") notificarMotoboysPorDistancia(ped);
   pedidoAtual=ped;carrinho=[];updBadge();
   tela="rastreamento";rc();
+  toast("🎉 Pedido realizado com sucesso!");
 }
-window.confirmarPedido=confirmarPedido;
 
 // RASTREAMENTO
 function rRastreamento(){
-  if(!pedidoAtual)return rPedidos();
-  // Buscar status atualizado do localStorage (motoboy pode ter atualizado)
-  const peds=JSON.parse(localStorage.getItem("fc_pedidos_live")||"[]");
-  const pedAtual=peds.find(p=>p.id===pedidoAtual.id)||pedidoAtual;
+  const ped=getPedAtu();if(!ped)return rPedidos();
   const steps=[
-    {ico:"✅",txt:"Pedido confirmado",det:"Farmácia recebeu seu pedido"},
-    {ico:"🏥",txt:"Coletando na farmácia",det:"Motoboy está separando os produtos"},
-    {ico:"🛵",txt:"A caminho",det:"Saiu para entrega · "+pedAtual.endereco},
-    {ico:"🎉",txt:"Entregue!",det:"Pedido entregue com sucesso"},
+    {ico:"✅",txt:"Pedido confirmado",det:"Farmácia recebeu seu pedido",cor:"#3BAA35"},
+    {ico:"🏥",txt:"Motoboy coletando",det:"Separando seus produtos na farmácia",cor:"#1A5FA8"},
+    {ico:"🛵",txt:"A caminho",det:"Seu pedido saiu para entrega",cor:"#d97706"},
+    {ico:"🎉",txt:"Entregue",det:"Confirme o recebimento abaixo",cor:"#3BAA35"},
   ];
-  const idx={aguardando:0,coletando:1,entregando:2,entregue:3}[pedAtual.status]||0;
+  const idx={aguardando:0,coletando:1,entregando:2,entregue:3}[ped.status]||0;
+  const et=steps[idx];
   return`
-    <div style="background:#fff;padding:12px 16px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:10px">
-      <button onclick="navTo('pedidos')" style="background:transparent;color:#5a5e7a;font-size:20px;padding:0">←</button>
-      <div style="font-weight:600">Pedido ${pedAtual.id}</div>
+    <div style="background:linear-gradient(135deg,${et.cor},${et.cor}cc);padding:14px 16px;color:#fff;display:flex;align-items:center;gap:12px;position:sticky;top:52px;z-index:90">
+      <div style="font-size:26px">${et.ico}</div>
+      <div><div style="font-size:15px;font-weight:700">${et.txt}</div><div style="font-size:12px;opacity:.85">${et.det}</div></div>
     </div>
-    <div style="background:linear-gradient(135deg,#3BAA35,#2E8A2A);padding:20px 16px;color:#fff;text-align:center">
-      <div style="font-size:36px;margin-bottom:8px">${steps[idx].ico}</div>
-      <div style="font-size:17px;font-weight:700">${steps[idx].txt}</div>
-      <div style="font-size:12px;opacity:.85;margin-top:5px">${steps[idx].det}</div>
-    </div>
+
+    <!-- MAPA -->
+    <div id="mapa-track" style="height:260px;background:#e8eaf4"></div>
+    ${ped.status==="entregando"?`<div style="background:#fff7ed;border-bottom:1px solid #fed7aa;padding:10px 16px;font-size:12px;color:#c2410c;font-weight:600"><span class="live">●</span> Motoboy a caminho — acompanhe no mapa</div>`:""}
+
+    <!-- PROGRESSO -->
     <div class="card" style="margin-top:10px">
-      <div style="font-size:13px;font-weight:600;margin-bottom:14px">Acompanhe seu pedido</div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center">
+        <span>Pedido ${ped.id}</span>
+        <span style="font-size:12px;color:#9a9eb8">${ped.farmacia}</span>
+      </div>
       ${steps.map((s,i)=>`
-        <div style="display:flex;gap:12px;margin-bottom:${i<steps.length-1?"16":"0"}px;opacity:${i<=idx?1:.3}">
-          <div style="width:36px;height:36px;border-radius:50%;background:${i<=idx?"#3BAA35":"#f0f0f0"};display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">${i<=idx?s.ico:"○"}</div>
-          <div><div style="font-weight:600;font-size:13px;color:${i<=idx?"#1a1a2e":"#9a9eb8"}">${s.txt}</div><div style="font-size:11px;color:#9a9eb8;margin-top:2px">${s.det}</div></div>
+        <div style="display:flex;gap:12px;margin-bottom:${i<3?"14":"0"}px;opacity:${i<=idx?1:.3}">
+          <div style="width:36px;height:36px;border-radius:50%;background:${i<=idx?s.cor:"#f0f0f0"};display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">${i<=idx?s.ico:"○"}</div>
+          <div style="padding-top:6px"><div style="font-weight:600;font-size:13px;color:${i<=idx?"#1a1a2e":"#9a9eb8"}">${s.txt}</div><div style="font-size:11px;color:#9a9eb8;margin-top:2px">${s.det}</div></div>
         </div>`).join("")}
     </div>
+
+    <!-- CONFIRMAR RECEBIMENTO -->
+    ${ped.status==="entregue"&&!ped.confirmadoCliente?`
+    <div class="confirm-box">
+      <div style="font-size:36px;margin-bottom:8px">📦</div>
+      <h3 style="font-size:18px;font-weight:700;margin-bottom:6px">Seu pedido chegou!</h3>
+      <p style="font-size:13px;opacity:.9;margin-bottom:14px;line-height:1.5">Confirme que você recebeu todos os produtos para fechar o pedido.</p>
+      <button onclick="confirmarRecebimento('${ped.id}')" style="width:100%;padding:13px;background:#fff;color:#3BAA35;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer">✅ Confirmar recebimento</button>
+      <button onclick="reportarProblema('${ped.id}')" style="width:100%;padding:11px;background:transparent;border:1.5px solid rgba(255,255,255,.5);color:#fff;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;margin-top:8px">⚠️ Tive um problema</button>
+    </div>`:""}
+
+    ${ped.confirmadoCliente?`
+    <div style="margin:0 12px 12px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:16px;text-align:center">
+      <div style="font-size:32px;margin-bottom:6px">⭐</div>
+      <div style="font-weight:700;font-size:15px;color:#16a34a;margin-bottom:4px">Entrega confirmada!</div>
+      <div style="font-size:12px;color:#9a9eb8">Obrigado por comprar no FarmaClub!</div>
+    </div>`:""}
+
+    <!-- RESUMO -->
     <div class="card">
-      <div style="font-size:13px;font-weight:600;margin-bottom:8px">Resumo</div>
-      ${pedAtual.itens.map(it=>`<div style="display:flex;justify-content:space-between;font-size:12px;padding:5px 0;border-bottom:1px solid #f5f5f5"><span>${it.ico} ${it.nome.split(" ").slice(0,3).join(" ")} ×${it.qtd}</span><span style="font-weight:600">${fmt(it.preco*it.qtd)}</span></div>`).join("")}
-      <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:700;padding-top:8px"><span>Total</span><span style="color:#3BAA35">${fmt(pedAtual.total)}</span></div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px">Resumo do pedido</div>
+      ${ped.itens.map(it=>`<div style="display:flex;justify-content:space-between;font-size:12px;padding:5px 0;border-bottom:1px solid #f5f5f5"><span>${it.ico} ${it.nome.split(" ").slice(0,3).join(" ")} ×${it.qtd}</span><span style="font-weight:600">${fmt(it.preco*it.qtd)}</span></div>`).join("")}
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid #f5f5f5"><span>Forma de pagamento</span><span style="font-weight:600">${ped.pagamento}</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:700;padding-top:8px"><span>Total pago</span><span style="color:#3BAA35">${fmt(ped.total)}</span></div>
+    </div>
+
+    <div style="padding:0 12px 12px">
+      <button onclick="navTo('pedidos')" style="width:100%;padding:12px;background:#fff;border:1.5px solid #e0e0e0;border-radius:10px;font-size:13px;font-weight:600;color:#5a5e7a;cursor:pointer">← Ver todos os pedidos</button>
     </div>`;
 }
 
+function initMapaRastreamento(){
+  const ped=getPedAtu();if(!ped)return;
+  const el=document.getElementById("mapa-track");
+  if(!el||typeof L==="undefined")return;
+  if(mapaTrack){mapaTrack.remove();mapaTrack=null;marcadorMotoboy=null;}
+  mapaTrack=L.map("mapa-track",{center:[ped.farmLat,ped.farmLng],zoom:14,zoomControl:false,scrollWheelZoom:false});
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"© OpenStreetMap",maxZoom:19}).addTo(mapaTrack);
+  const mkFarm=L.divIcon({html:`<div style="background:#1A5FA8;width:32px;height:32px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3)"></div>`,iconSize:[32,32],iconAnchor:[16,32],className:""});
+  const mkCli=L.divIcon({html:`<div style="background:#3BAA35;width:32px;height:32px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3)"></div>`,iconSize:[32,32],iconAnchor:[16,32],className:""});
+  L.marker([ped.farmLat,ped.farmLng],{icon:mkFarm}).addTo(mapaTrack).bindPopup(`<strong>${ped.farmacia}</strong><br>Origem`);
+  L.marker([ped.clienteLat,ped.clienteLng],{icon:mkCli}).addTo(mapaTrack).bindPopup(`<strong>${ped.cliente}</strong><br>${ped.endereco}`);
+  L.polyline([[ped.farmLat,ped.farmLng],[ped.clienteLat,ped.clienteLng]],{color:"#d97706",weight:3,dashArray:"8 4",opacity:.6}).addTo(mapaTrack);
+  if(ped.status==="entregando"||ped.status==="entregue"){
+    const mkMoto=L.divIcon({html:`<div style="background:#d97706;width:40px;height:40px;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-size:20px">🛵</div>`,iconSize:[40,40],iconAnchor:[20,20],className:""});
+    marcadorMotoboy=L.marker([ped.motoboyLat||ped.farmLat,ped.motoboyLng||ped.farmLng],{icon:mkMoto,zIndexOffset:1000}).addTo(mapaTrack).bindPopup(`<strong>${ped.motoboy||"Motoboy FarmaClub"}</strong><br>A caminho`);
+    if(ped.status==="entregando"&&!ped.confirmadoCliente) simularMovimento(ped);
+  }
+  mapaTrack.fitBounds([[ped.farmLat,ped.farmLng],[ped.clienteLat,ped.clienteLng]],{padding:[30,30]});
+}
+
+function simularMovimento(ped){
+  if(simTimer)clearInterval(simTimer);
+  let p=0,tot=30;
+  const dLat=(ped.clienteLat-ped.farmLat)/tot,dLng=(ped.clienteLng-ped.farmLng)/tot;
+  let lat=ped.motoboyLat||ped.farmLat,lng=ped.motoboyLng||ped.farmLng;
+  simTimer=setInterval(()=>{
+    p++;lat+=dLat+(Math.random()-.5)*.0002;lng+=dLng+(Math.random()-.5)*.0002;
+    if(marcadorMotoboy)marcadorMotoboy.setLatLng([lat,lng]);
+    const peds=getPedidos(),i=peds.findIndex(x=>x.id===ped.id);
+    if(i>=0){peds[i].motoboyLat=lat;peds[i].motoboyLng=lng;salvarPedidos(peds);}
+    if(p>=tot){clearInterval(simTimer);simTimer=null;}
+  },2000);
+}
+
+window.confirmarRecebimento=function(pedId){
+  if(!confirm("Confirmar que você recebeu o pedido?"))return;
+  const peds=getPedidos(),i=peds.findIndex(p=>p.id===pedId);
+  if(i>=0){peds[i].confirmadoCliente=true;peds[i].status="entregue";salvarPedidos(peds);}
+  if(simTimer){clearInterval(simTimer);simTimer=null;}
+  toast("✅ Entrega confirmada! Obrigado!");rc();
+};
+window.reportarProblema=function(pedId){
+  const m=prompt("Descreva o problema:");if(!m)return;
+  const peds=getPedidos(),i=peds.findIndex(p=>p.id===pedId);
+  if(i>=0){peds[i].problema=m;salvarPedidos(peds);}
+  alert("⚠️ Problema registrado! Entraremos em contato pelo WhatsApp em até 2 horas.\n\n(22) 9XXXX-XXXX");
+};
+
 // PEDIDOS
 function rPedidos(){
-  const hist=JSON.parse(localStorage.getItem("fc_pedidos_live")||"[]").reverse();
-  if(!hist.length)return`<div class="empty" style="padding-top:60px"><div style="font-size:48px;margin-bottom:12px">📦</div><div style="font-size:14px;margin-bottom:16px">Nenhum pedido ainda</div><button onclick="navTo('inicio')" style="padding:12px 24px;background:#3BAA35;color:#fff;border-radius:10px;font-size:14px;font-weight:600">Fazer primeiro pedido</button></div>`;
+  if(!usuarioLogado)return`<div class="empty" style="padding-top:60px"><div style="font-size:48px;margin-bottom:12px">📦</div><div style="font-size:14px;margin-bottom:4px">Faça login para ver seus pedidos</div><div style="font-size:12px;color:#9a9eb8;margin-bottom:16px">Seus pedidos ficam salvos com sua conta</div><button onclick="abrirAuth('login',()=>navTo('pedidos'))" style="padding:12px 24px;background:#3BAA35;color:#fff;border-radius:10px;font-size:14px;font-weight:600">Entrar</button></div>`;
+  const meus=getPedidosUser().reverse();
+  if(!meus.length)return`<div class="empty" style="padding-top:60px"><div style="font-size:48px;margin-bottom:12px">📦</div><div style="font-size:14px;margin-bottom:16px">Nenhum pedido ainda</div><button onclick="navTo('inicio')" style="padding:12px 24px;background:#3BAA35;color:#fff;border-radius:10px;font-size:14px;font-weight:600">Comprar agora</button></div>`;
   return`
     <div style="padding:14px 16px;background:#fff;border-bottom:1px solid #f0f0f0;font-size:13px;font-weight:600">Meus pedidos</div>
-    ${hist.map(p=>`
-      <div class="card-flat" style="cursor:pointer" onclick="pedidoAtual=JSON.parse(localStorage.getItem('fc_pedidos_live')||'[]').find(x=>x.id==='${p.id}')||null;tela='rastreamento';rc()">
+    ${meus.map(p=>`
+      <div class="card-flat" style="cursor:pointer" onclick="pedidoAtual=getPedidos().find(x=>x.id==='${p.id}')||null;tela='rastreamento';rc()">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
           <div style="font-weight:600;font-size:13px">${p.id} · ${p.farmacia}</div>
-          <span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;background:${p.status==="entregue"?"#f0fdf4":p.status==="entregando"?"#eff6ff":"#fffbeb"};color:${p.status==="entregue"?"#3BAA35":p.status==="entregando"?"#1A5FA8":"#d97706"}">
-            ${p.status==="entregue"?"✓ Entregue":p.status==="entregando"?"🛵 A caminho":"⏳ Aguardando"}
+          <span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;background:${p.confirmadoCliente?"#f0fdf4":p.status==="entregando"?"#eff6ff":p.status==="entregue"?"#fffbeb":"#fffbeb"};color:${p.confirmadoCliente?"#3BAA35":p.status==="entregando"?"#1A5FA8":"#d97706"}">
+            ${p.confirmadoCliente?"✓ Concluído":p.status==="entregue"?"📦 Confirmar":p.status==="entregando"?"🛵 A caminho":"⏳ Aguardando"}
           </span>
         </div>
-        <div style="font-size:11px;color:#9a9eb8">${p.itens.length} item(ns) · ${p.data}</div>
+        <div style="font-size:11px;color:#9a9eb8">${p.itens.length} item(ns) · ${p.pagamento} · ${p.data}</div>
         <div style="font-size:13px;font-weight:700;color:#3BAA35;margin-top:4px">${fmt(p.total)}</div>
       </div>`).join("")}`;
 }
 
-// INIT
-rc();
-</script>
-
-<script>
-// Registrar Service Worker para PWA
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then(reg => console.log('[FarmaClub] SW registrado:', reg.scope))
-      .catch(err => console.log('[FarmaClub] SW falhou:', err));
-  });
-
-  // Detectar quando o app pode ser instalado
-  let deferredPrompt;
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    // Mostrar botão de instalação após 3 segundos
-    setTimeout(() => mostrarBannerInstalar(deferredPrompt), 3000);
-  });
+// CONTA
+function rConta(){
+  if(!usuarioLogado)return`<div class="empty" style="padding-top:60px"><div style="font-size:48px;margin-bottom:12px">👤</div><div style="font-size:14px;margin-bottom:16px">Faça login ou crie sua conta</div><button onclick="abrirAuth('login')" style="padding:12px 24px;background:#3BAA35;color:#fff;border-radius:10px;font-size:14px;font-weight:600;display:block;margin:0 auto">Entrar ou cadastrar</button></div>`;
+  return`
+    <div style="padding:20px 16px 14px;background:#fff;border-bottom:1px solid #f0f0f0">
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="width:52px;height:52px;border-radius:50%;background:#e8f5e6;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">👤</div>
+        <div><div style="font-weight:700;font-size:16px">${usuarioLogado.nome}</div><div style="font-size:12px;color:#9a9eb8;margin-top:2px">${usuarioLogado.email}</div></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:10px">
+      ${[["📦","Meus pedidos","pedidos"],["🔑","Alterar senha","senha"]].map(([ico,txt,acao])=>`
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #f5f5f5;cursor:pointer" onclick="navTo('${acao}')">
+          <div style="font-size:22px;width:38px;height:38px;background:#f0fdf4;border-radius:8px;display:flex;align-items:center;justify-content:center">${ico}</div>
+          <div style="flex:1;font-weight:600;font-size:13px">${txt}</div>
+          <div style="color:#9a9eb8;font-size:18px">›</div>
+        </div>`).join("")}
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 0;cursor:pointer" onclick="logout()">
+        <div style="font-size:22px;width:38px;height:38px;background:#fef2f2;border-radius:8px;display:flex;align-items:center;justify-content:center">🚪</div>
+        <div style="flex:1;font-weight:600;font-size:13px;color:#E03A3A">Sair da conta</div>
+      </div>
+    </div>`;
 }
 
-function mostrarBannerInstalar(prompt) {
-  // Não mostrar se já está instalado
-  if (window.matchMedia('(display-mode: standalone)').matches) return;
-  if (localStorage.getItem('fc_pwa_instalado')) return;
+// STORAGE
+function getPedidos(){return JSON.parse(localStorage.getItem("fc_pedidos_live")||"[]");}
+function salvarPedidos(p){localStorage.setItem("fc_pedidos_live",JSON.stringify(p));}
+function getPedidosUser(){if(!usuarioLogado)return[];return getPedidos().filter(p=>p.email===usuarioLogado.email);}
+function getPedAtu(){if(!pedidoAtual)return null;return getPedidos().find(p=>p.id===pedidoAtual.id)||pedidoAtual;}
 
-  const banner = document.createElement('div');
-  banner.style.cssText = `
-    position:fixed;bottom:72px;left:12px;right:12px;
-    background:#fff;border-radius:14px;padding:14px;
-    box-shadow:0 8px 30px rgba(0,0,0,.2);z-index:9999;
-    border:1.5px solid #3BAA35;display:flex;align-items:center;gap:12px;
-  `;
-  banner.innerHTML = `
-    <img src="icons/cliente-72.png" style="width:48px;height:48px;border-radius:10px;flex-shrink:0">
-    <div style="flex:1">
-      <div style="font-weight:700;font-size:13px;color:#1a1a2e">Instalar FarmaClub</div>
-      <div style="font-size:11px;color:#666;margin-top:2px">Adicione à tela inicial para acesso rápido</div>
-    </div>
-    <div style="display:flex;gap:6px;flex-shrink:0">
-      <button onclick="this.closest('div[style]').remove();localStorage.setItem('fc_pwa_instalado','sim')"
-        style="padding:7px 12px;background:#f5f5f5;border:none;border-radius:8px;font-size:12px;cursor:pointer;color:#666">Não</button>
-      <button id="btn-instalar"
-        style="padding:7px 12px;background:#3BAA35;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;color:#fff">Instalar</button>
-    </div>
-  `;
-  document.body.appendChild(banner);
 
-  document.getElementById('btn-instalar').addEventListener('click', async () => {
-    if (!prompt) return;
-    prompt.prompt();
-    const { outcome } = await prompt.userChoice;
-    if (outcome === 'accepted') {
-      localStorage.setItem('fc_pwa_instalado', 'sim');
-      console.log('[FarmaClub] PWA instalado!');
-    }
-    banner.remove();
+// ── OPÇÃO: ENTREGA vs RETIRADA ──
+let modoEntrega = "entrega"; // "entrega" | "retirada"
+
+function farmaciaDoCarrinho(){
+  const fid = carrinho[0]?.fid;
+  return farms.find(x=>x.id===fid)||farms[0];
+}
+
+function farmFechandoBreve(f){
+  if(!f||!f.horario) return false;
+  const m=f.horario.match(/(\d+)h/g);
+  if(!m||m.length<2) return false;
+  const fechaH=parseInt(m[m.length-1]);
+  const agora=new Date();
+  const minRestantes=fechaH*60-(agora.getHours()*60+agora.getMinutes());
+  return minRestantes>=0&&minRestantes<=10;
+}
+
+function renderOpcaoEntrega(){
+  const f = farmaciaDoCarrinho();
+  if(!f) return "";
+  const fechandoBreve = farmFechandoBreve(f);
+  const aberta = f.aberto && !fechandoBreve;
+
+  if(fechandoBreve){
+    return`<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:12px 14px;margin:10px 12px;font-size:12px;color:#dc2626;line-height:1.6">
+      ⚠️ A <strong>${f.nome}</strong> fecha em menos de 10 minutos.<br>
+      Seu pedido será agendado para <strong>amanhã</strong> — tanto entrega quanto retirada.
+    </div>`;
+  }
+
+  if(!aberta){
+    return`<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:12px 14px;margin:10px 12px;font-size:12px;color:#dc2626">
+      ⚠️ A <strong>${f.nome}</strong> está fechada. Agendamento para próxima abertura.
+    </div>`;
+  }
+
+  return`<div style="padding:10px 12px">
+    <div style="font-size:12px;font-weight:700;color:#9a9eb8;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">Como quer receber?</div>
+    <div style="display:flex;gap:8px">
+      <div class="pickup-btn ${modoEntrega==="entrega"?"":"" }"
+        onclick="modoEntrega='entrega';rc()"
+        style="flex:1;padding:11px;border-radius:10px;border:2px solid ${modoEntrega==="entrega"?"#3BAA35":"#e0e0e0"};background:${modoEntrega==="entrega"?"#f0fdf4":"#fff"};text-align:center;cursor:pointer">
+        <div style="font-size:18px;margin-bottom:4px">🏠</div>
+        <div style="font-size:12px;font-weight:700;color:${modoEntrega==="entrega"?"#3BAA35":"#555"}">Receber em casa</div>
+        <div style="font-size:10px;color:#9a9eb8;margin-top:2px">Motoboy entrega</div>
+      </div>
+      <div onclick="modoEntrega='retirada';rc()"
+        style="flex:1;padding:11px;border-radius:10px;border:2px solid ${modoEntrega==="retirada"?"#1A5FA8":"#e0e0e0"};background:${modoEntrega==="retirada"?"#eff6ff":"#fff"};text-align:center;cursor:pointer">
+        <div style="font-size:18px;margin-bottom:4px">🏥</div>
+        <div style="font-size:12px;font-weight:700;color:${modoEntrega==="retirada"?"#1A5FA8":"#555"}">Retirar na farmácia</div>
+        <div style="font-size:10px;color:#9a9eb8;margin-top:2px">${f.nome}</div>
+      </div>
+    </div>
+    ${modoEntrega==="retirada"?`<div style="margin-top:8px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px;font-size:12px;color:#1d4ed8">
+      📍 Retire em: <strong>${f.endereco}</strong><br>Horário: ${f.horario}
+    </div>`:""}
+  </div>`;
+}
+
+// ── ALARME MOTOBOYS POR DISTÂNCIA ──
+function calcDistancia(lat1,lng1,lat2,lng2){
+  const R=6371;
+  const dLat=(lat2-lat1)*Math.PI/180;
+  const dLng=(lng2-lng1)*Math.PI/180;
+  const a=Math.sin(dLat/2)*Math.sin(dLat/2)+
+    Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*
+    Math.sin(dLng/2)*Math.sin(dLng/2);
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+function notificarMotoboysPorDistancia(pedido){
+  // Em produção: API push notification ordenada por distância
+  // Aqui: salva no localStorage com timestamp para o app motoboy ler
+  const farmLat = pedido.farmLat||(-21.2062);
+  const farmLng = pedido.farmLng||(-41.8878);
+
+  // Motoboys simulados com posição aproximada
+  const motoboys = [
+    {id:1,nome:"Carlos Mendes",lat:-21.2050,lng:-41.8870},
+    {id:2,nome:"Rafael Silva",lat:-21.2100,lng:-41.8920},
+    {id:3,nome:"André Costa",lat:-21.1980,lng:-41.8800},
+  ];
+
+  const ordenados = motoboys
+    .map(m=>({...m,dist:calcDistancia(farmLat,farmLng,m.lat,m.lng)}))
+    .sort((a,b)=>a.dist-b.dist);
+
+  // Salvar alerta com ordem de prioridade
+  const alertas = JSON.parse(localStorage.getItem("fc_alertas_motoboy")||"[]");
+  alertas.push({
+    pedidoId: pedido.id,
+    farmacia: pedido.farmacia,
+    endereco: pedido.endereco,
+    total: pedido.total,
+    motoboysFila: ordenados.map(m=>({id:m.id,nome:m.nome,dist:+(m.dist*1000).toFixed(0)})),
+    ts: Date.now(),
+    status: "aguardando"
   });
+  localStorage.setItem("fc_alertas_motoboy", JSON.stringify(alertas));
+}
 
-  // Auto-fechar após 8 segundos
-  setTimeout(() => { if (banner.parentNode) banner.remove(); }, 8000);
+// INIT
+atualizarTopUser();
+rc();
+
+// PWA
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
+  let dp;
+  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e;setTimeout(()=>{
+    if(window.matchMedia('(display-mode: standalone)').matches||localStorage.getItem('fc_pwa'))return;
+    const b=document.createElement('div');
+    b.style.cssText='position:fixed;bottom:72px;left:12px;right:12px;background:#fff;border-radius:14px;padding:14px;box-shadow:0 8px 30px rgba(0,0,0,.2);z-index:9999;border:1.5px solid #3BAA35;display:flex;align-items:center;gap:12px';
+    b.innerHTML=`<img src="icons/cliente-72.png" style="width:44px;height:44px;border-radius:10px;flex-shrink:0"><div style="flex:1"><div style="font-weight:700;font-size:13px">Instalar FarmaClub</div><div style="font-size:11px;color:#666">Acesso rápido na tela inicial</div></div><div style="display:flex;gap:6px"><button onclick="this.closest('div').remove();localStorage.setItem('fc_pwa','1')" style="padding:6px 10px;background:#f5f5f5;border:none;border-radius:7px;font-size:12px;cursor:pointer">Não</button><button id="_binst" style="padding:6px 10px;background:#3BAA35;border:none;border-radius:7px;font-size:12px;font-weight:700;color:#fff;cursor:pointer">Instalar</button></div>`;
+    document.body.appendChild(b);
+    document.getElementById('_binst').addEventListener('click',async()=>{if(dp){dp.prompt();const{outcome}=await dp.userChoice;if(outcome==='accepted')localStorage.setItem('fc_pwa','1');}b.remove();});
+    setTimeout(()=>{if(b.parentNode)b.remove();},8000);
+  },5000);});
 }
 </script>
 </body>

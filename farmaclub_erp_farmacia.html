@@ -60,6 +60,8 @@ tr:hover td{background:#fafafa}
   <button class="nav-btn" data-tab="relatorios" onclick="setTab('relatorios')"><span style="font-size:10px">★</span> Relatórios</button>
   <div class="nav-sec" style="color:#1A5FA8;margin-top:4px">⚖ Judicial</div>
   <button class="nav-btn" data-tab="judicial" onclick="setTab('judicial')" style="border-left-color:#1A5FA8"><span style="font-size:10px">📋</span> Orçamento Judicial</button>
+  <div class="nav-sec" style="color:#E03A3A;margin-top:4px">🎯 Campanhas</div>
+  <button class="nav-btn" data-tab="campanhas" onclick="setTab('campanhas')" style="border-left-color:#E03A3A;color:#E03A3A;font-weight:600"><span style="font-size:10px">📢</span> Campanhas</button>
   <div class="nav-sec" style="color:#d97706;margin-top:4px">🛒 Reposição</div>
   <button class="nav-btn" data-tab="pedido_reposicao" onclick="setTab('pedido_reposicao')" style="border-left-color:#d97706;color:#d97706;font-weight:600"><span style="font-size:10px">📤</span> Pedir à Central</button>
   <div style="margin-top:auto;padding-top:12px;border-top:1px solid #eee;font-size:10px;color:#aaa;padding-left:8px;line-height:1.8">
@@ -1687,7 +1689,424 @@ window.enviarPedido = function(){
   renderContent();
 };
 
-const renders={dashboard:renderDashboard,pdv:renderPDV,estoque:renderEstoque,precificacao:renderPrecificacao,nfe:renderNFE,financeiro:renderFinanceiro,clientes:renderClientes,relatorios:renderRelatorios,judicial:renderJudicial,pedido_reposicao:renderPedidoReposicao};
+
+// ══════════════════════════════════════════════════════════
+// MÓDULO CAMPANHAS — ERP FARMÁCIA
+// ══════════════════════════════════════════════════════════
+
+const TIPOS_CAMPANHA = {
+  novidade:    {label:"Novidade",        cor:"#E8650A", bg:"#fff3e8"},
+  kit:         {label:"Kit",             cor:"#1A5FA8", bg:"#eff6ff"},
+  progressivo: {label:"Leve Mais",       cor:"#3BAA35", bg:"#f0fdf4"},
+};
+
+let campEtapa = "lista";
+let campTipo  = "novidade";
+let campForm  = {};
+
+function getCampanhas(){
+  return JSON.parse(localStorage.getItem("fc_campanhas")||"[]");
+}
+function salvarCampanhas(c){
+  localStorage.setItem("fc_campanhas",JSON.stringify(c));
+}
+
+function validarPrecoAcimaCusto(custo, precoFinal){
+  return parseFloat(precoFinal) >= parseFloat(custo);
+}
+
+function diasRestantes(dataFim){
+  const diff = new Date(dataFim) - new Date();
+  return Math.max(0, Math.ceil(diff/(1000*60*60*24)));
+}
+
+function dataMaxNovidade(){
+  const d = new Date();
+  d.setMonth(d.getMonth()+6);
+  return d.toISOString().split("T")[0];
+}
+
+function renderCampanhas(){
+  if(campEtapa==="nova"||campEtapa==="editar") return renderCampNova();
+  const camps = getCampanhas();
+  const ativas = camps.filter(c=>c.ativa && new Date(c.dataFim)>=new Date());
+  const enc    = camps.filter(c=>!c.ativa || new Date(c.dataFim)<new Date());
+
+  const cardsAtivas = ativas.length===0
+    ? `<div style="text-align:center;padding:28px;color:#aaa;font-size:13px">
+         Nenhuma campanha ativa.<br>
+         <button onclick="campEtapa='nova';campForm={};campTipo='novidade';renderContent()"
+           style="margin-top:12px;padding:10px 20px;background:#E03A3A;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">
+           + Criar primeira campanha
+         </button>
+       </div>`
+    : ativas.map((c,i)=>`
+        <div style="background:#fff;border-radius:12px;border:1.5px solid ${TIPOS_CAMPANHA[c.tipo]?.cor||"#E03A3A"}44;padding:14px;margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+            <div>
+              <span style="background:${TIPOS_CAMPANHA[c.tipo]?.bg||"#fff3e8"};color:${TIPOS_CAMPANHA[c.tipo]?.cor||"#E03A3A"};padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700">${TIPOS_CAMPANHA[c.tipo]?.label||c.tipo}</span>
+              <div style="font-weight:600;font-size:14px;margin-top:6px">${c.nome}</div>
+              ${c.descricao?`<div style="font-size:12px;color:#888;margin-top:2px">${c.descricao}</div>`:""}
+            </div>
+            <div style="text-align:right;flex-shrink:0">
+              <div style="font-size:11px;color:${diasRestantes(c.dataFim)<=7?"#E03A3A":"#3BAA35"};font-weight:600">
+                ${diasRestantes(c.dataFim)===0?"Encerra hoje":diasRestantes(c.dataFim)+" dias restantes"}
+              </div>
+              <div style="font-size:10px;color:#aaa;margin-top:2px">até ${new Date(c.dataFim).toLocaleDateString("pt-BR")}</div>
+            </div>
+          </div>
+          ${c.tipo==="novidade"?`
+            <div style="font-size:12px;color:#888">Produto: <strong>${c.produto||"—"}</strong></div>
+          `:""}
+          ${c.tipo==="kit"?`
+            <div style="font-size:12px;color:#888">Itens: ${(c.itens||[]).join(" + ")} → <strong style="color:#1A5FA8">${fmt(c.precoKit||0)}</strong></div>
+          `:""}
+          ${c.tipo==="progressivo"?`
+            <div style="font-size:12px;color:#888">
+              Produto: <strong>${c.produto||"—"}</strong><br>
+              Regra: leve ${c.qtdMin||2} → ${c.desconto||0}% off na ${c.qtdMin||2}ª unidade
+            </div>
+          `:""}
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <button onclick="encerrarCamp(${i})" style="padding:6px 12px;background:#fef2f2;color:#dc2626;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit">Encerrar</button>
+          </div>
+        </div>`).join("");
+
+  return`
+    <div style="background:linear-gradient(135deg,#E03A3A,#b91c1c);border-radius:12px;padding:16px 20px;margin-bottom:16px;color:#fff;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+      <div>
+        <div style="font-size:16px;font-weight:700">📢 Campanhas e Promoções</div>
+        <div style="font-size:12px;opacity:.85;margin-top:3px">Novidades · Kits · Descontos progressivos · Preço nunca abaixo do custo</div>
+      </div>
+      <button onclick="campEtapa='nova';campForm={};campTipo='novidade';renderContent()"
+        style="padding:9px 18px;background:#fff;color:#E03A3A;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">+ Nova campanha</button>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">
+      <div style="background:#fff;border-radius:10px;padding:12px;border:1px solid #e8eaf4;text-align:center">
+        <div style="font-size:22px;font-weight:700;color:#E03A3A">${ativas.length}</div>
+        <div style="font-size:11px;color:#888;margin-top:3px">Ativas agora</div>
+      </div>
+      <div style="background:#fff;border-radius:10px;padding:12px;border:1px solid #e8eaf4;text-align:center">
+        <div style="font-size:22px;font-weight:700;color:#E8650A">${ativas.filter(c=>c.tipo==="novidade").length}</div>
+        <div style="font-size:11px;color:#888;margin-top:3px">Novidades</div>
+      </div>
+      <div style="background:#fff;border-radius:10px;padding:12px;border:1px solid #e8eaf4;text-align:center">
+        <div style="font-size:22px;font-weight:700;color:#3BAA35">${ativas.filter(c=>c.tipo==="kit"||c.tipo==="progressivo").length}</div>
+        <div style="font-size:11px;color:#888;margin-top:3px">Kits / Promos</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:14px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:12px">Campanhas ativas (${ativas.length})</div>
+      ${cardsAtivas}
+    </div>
+
+    ${enc.length>0?`
+    <div class="card">
+      <div style="font-size:13px;font-weight:600;margin-bottom:12px;color:#aaa">Encerradas (${enc.length})</div>
+      ${enc.map(c=>`
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f5f5f5;opacity:.5">
+          <div style="font-size:12px">${c.nome}</div>
+          <div style="font-size:11px;color:#aaa">${new Date(c.dataFim).toLocaleDateString("pt-BR")}</div>
+        </div>`).join("")}
+    </div>`:""}`;
+}
+
+function renderCampNova(){
+  const tipoInfo = TIPOS_CAMPANHA[campTipo] || TIPOS_CAMPANHA.novidade;
+  const hoje = new Date().toISOString().split("T")[0];
+
+  return`
+    <div style="background:#fff;border-bottom:1px solid #eee;padding:12px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:52px;z-index:90;margin:-16px -16px 16px">
+      <button onclick="campEtapa='lista';renderContent()" style="background:transparent;color:#5a5e7a;font-size:20px;padding:0;border:none;cursor:pointer">←</button>
+      <div style="font-weight:600">Nova campanha</div>
+    </div>
+
+    <div class="card" style="margin-bottom:14px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:12px">Tipo de campanha</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
+        ${Object.entries(TIPOS_CAMPANHA).map(([k,t])=>`
+          <div onclick="campTipo='${k}';renderContent()"
+            style="border:2px solid ${campTipo===k?t.cor:"#e0e0e0"};background:${campTipo===k?t.bg:"#fff"};border-radius:10px;padding:12px;cursor:pointer;text-align:center;transition:all .15s">
+            <div style="font-size:13px;font-weight:700;color:${campTipo===k?t.cor:"#555"}">${t.label}</div>
+          </div>`).join("")}
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:14px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:12px;color:${tipoInfo.cor}">${tipoInfo.label} — configuração</div>
+
+      <div style="margin-bottom:10px">
+        <label style="font-size:11px;color:#888;display:block;margin-bottom:3px">Nome da campanha *</label>
+        <input type="text" id="c-nome" placeholder="Ex: Shampoo + Condicionador em Kit"
+          style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:13px"
+          oninput="campForm.nome=this.value">
+      </div>
+
+      <div style="margin-bottom:10px">
+        <label style="font-size:11px;color:#888;display:block;margin-bottom:3px">Descrição (aparece no app)</label>
+        <input type="text" id="c-desc" placeholder="Ex: Leve os dois juntos e economize!"
+          style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:13px"
+          oninput="campForm.descricao=this.value">
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+        <div>
+          <label style="font-size:11px;color:#888;display:block;margin-bottom:3px">Início</label>
+          <input type="date" id="c-ini" value="${hoje}" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:13px"
+            oninput="campForm.dataIni=this.value">
+        </div>
+        <div>
+          <label style="font-size:11px;color:#888;display:block;margin-bottom:3px">Fim ${campTipo==="novidade"?"(máx 6 meses)":""}</label>
+          <input type="date" id="c-fim" value="${dataMaxNovidade()}"
+            max="${campTipo==="novidade"?dataMaxNovidade():""}"
+            style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:13px"
+            oninput="campForm.dataFim=this.value">
+        </div>
+      </div>
+
+      ${campTipo==="novidade"?`
+        <div>
+          <label style="font-size:11px;color:#888;display:block;margin-bottom:3px">Produto *</label>
+          <select id="c-prod" onchange="campForm.produto=this.value;campForm.custoProd=parseFloat(this.options[this.selectedIndex].dataset.custo);atualizarPreviewNov()"
+            style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:13px">
+            <option value="">Selecione o produto</option>
+            ${produtos.map(p=>`<option value="${p.nome}" data-custo="${p.custo}">${p.nome} — custo: ${fmt(p.custo)}</option>`).join("")}
+          </select>
+        </div>
+        <div style="margin-top:10px;background:#fff3e8;border:1px solid #fed7aa;border-radius:8px;padding:10px;font-size:12px;color:#92400e">
+          🟠 A tag <strong>NOVIDADE</strong> aparecerá no app e no site por até 6 meses.
+        </div>
+      `:""}
+
+      ${campTipo==="kit"?`
+        <div style="margin-bottom:10px">
+          <label style="font-size:11px;color:#888;display:block;margin-bottom:6px">Produtos do kit *</label>
+          <div id="kit-itens">
+            ${[0,1].map(i=>`
+              <div style="display:flex;gap:8px;margin-bottom:6px">
+                <select onchange="atualizarKitItem(${i},this)" style="flex:1;padding:9px;border:1px solid #ddd;border-radius:8px;font-size:12px">
+                  <option value="">Produto ${i+1}</option>
+                  ${produtos.map(p=>`<option value="${p.nome}" data-custo="${p.custo}" data-preco="${p.preco}">${p.nome}</option>`).join("")}
+                </select>
+              </div>`).join("")}
+          </div>
+          <button onclick="adicionarKitItem()" style="font-size:11px;padding:6px 12px;background:#eff6ff;color:#1A5FA8;border:1px solid #bfdbfe;border-radius:6px;cursor:pointer;font-family:inherit">+ Adicionar produto</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div>
+            <label style="font-size:11px;color:#888;display:block;margin-bottom:3px">Custo total do kit</label>
+            <div id="kit-custo" style="padding:10px;background:#f8f8f8;border-radius:8px;font-size:13px;font-weight:600;color:#555">R$ —</div>
+          </div>
+          <div>
+            <label style="font-size:11px;color:#888;display:block;margin-bottom:3px">Preço do kit * <span style="color:#3BAA35;font-size:10px">(acima do custo)</span></label>
+            <input type="number" id="c-precokit" placeholder="0,00" step="0.01"
+              style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:13px"
+              oninput="campForm.precoKit=parseFloat(this.value)||0;validarKitPreco()">
+          </div>
+        </div>
+        <div id="kit-aviso" style="font-size:11px;margin-top:6px;min-height:16px"></div>
+      `:""}
+
+      ${campTipo==="progressivo"?`
+        <div style="margin-bottom:10px">
+          <label style="font-size:11px;color:#888;display:block;margin-bottom:3px">Produto *</label>
+          <select id="c-prod-prog" onchange="campForm.produto=this.value;campForm.custoProd=parseFloat(this.options[this.selectedIndex].dataset.custo);campForm.precoProd=parseFloat(this.options[this.selectedIndex].dataset.preco);atualizarPreviewProg()"
+            style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:13px">
+            <option value="">Selecione o produto</option>
+            ${produtos.map(p=>`<option value="${p.nome}" data-custo="${p.custo}" data-preco="${p.preco}">${p.nome} — R$ ${p.preco.toFixed(2)}</option>`).join("")}
+          </select>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div>
+            <label style="font-size:11px;color:#888;display:block;margin-bottom:3px">Qtd mínima para desconto</label>
+            <input type="number" id="c-qtdmin" value="2" min="2" max="10"
+              style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:13px"
+              oninput="campForm.qtdMin=parseInt(this.value)||2;atualizarPreviewProg()">
+          </div>
+          <div>
+            <label style="font-size:11px;color:#888;display:block;margin-bottom:3px">% desconto na ${campForm.qtdMin||2}ª unidade</label>
+            <input type="number" id="c-desc-pct" value="30" min="1" max="90"
+              style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:13px"
+              oninput="campForm.desconto=parseInt(this.value)||30;atualizarPreviewProg()">
+          </div>
+        </div>
+        <div id="prog-preview" style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px;font-size:12px;color:#16a34a;line-height:1.8">
+          Selecione o produto para ver a prévia
+        </div>
+        <div id="prog-aviso" style="font-size:11px;margin-top:6px;min-height:16px"></div>
+      `:""}
+    </div>
+
+    <div style="padding:0 0 16px">
+      <div id="msg-camp" style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px;font-size:12px;color:#dc2626;margin-bottom:10px;display:none"></div>
+      <button onclick="salvarCampanha()"
+        style="width:100%;padding:13px;background:#E03A3A;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">
+        ✅ Publicar campanha no app e no site
+      </button>
+      <button onclick="campEtapa='lista';renderContent()"
+        style="width:100%;padding:11px;background:transparent;border:1.5px solid #ddd;color:#888;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:8px">
+        Cancelar
+      </button>
+    </div>`;
+}
+
+// ── HELPERS CAMPANHAS ──
+window.atualizarPreviewNov = function(){
+  // sem validação especial para novidade
+};
+
+window.atualizarKitItem = function(idx, sel){
+  if(!campForm.kitItens) campForm.kitItens=[];
+  campForm.kitItens[idx] = {
+    nome:  sel.value,
+    custo: parseFloat(sel.selectedOptions[0]?.dataset?.custo)||0,
+    preco: parseFloat(sel.selectedOptions[0]?.dataset?.preco)||0,
+  };
+  const custoTotal = (campForm.kitItens||[]).reduce((s,i)=>s+(i.custo||0),0);
+  campForm.custoKit = custoTotal;
+  const el = document.getElementById("kit-custo");
+  if(el) el.textContent = fmt(custoTotal);
+};
+
+window.adicionarKitItem = function(){
+  const container = document.getElementById("kit-itens");
+  if(!container) return;
+  const idx = container.children.length;
+  const div = document.createElement("div");
+  div.style.cssText = "display:flex;gap:8px;margin-bottom:6px";
+  div.innerHTML = `<select onchange="atualizarKitItem(${idx},this)" style="flex:1;padding:9px;border:1px solid #ddd;border-radius:8px;font-size:12px">
+    <option value="">Produto ${idx+1}</option>
+    ${produtos.map(p=>`<option value="${p.nome}" data-custo="${p.custo}" data-preco="${p.preco}">${p.nome}</option>`).join("")}
+  </select>`;
+  container.appendChild(div);
+};
+
+window.validarKitPreco = function(){
+  const aviso = document.getElementById("kit-aviso");
+  if(!aviso) return;
+  const custo = campForm.custoKit||0;
+  const preco = campForm.precoKit||0;
+  if(preco>0 && preco<custo){
+    aviso.innerHTML = `<span style="color:#dc2626">⚠️ Preço do kit (${fmt(preco)}) está abaixo do custo total (${fmt(custo)}). Ajuste para evitar prejuízo.</span>`;
+  } else if(preco>=custo&&preco>0){
+    aviso.innerHTML = `<span style="color:#16a34a">✓ Margem do kit: ${fmt(preco-custo)} (${((preco-custo)/preco*100).toFixed(1)}%)</span>`;
+  }
+};
+
+window.atualizarPreviewProg = function(){
+  const el = document.getElementById("prog-preview");
+  const av = document.getElementById("prog-aviso");
+  if(!el) return;
+  const custo = campForm.custoProd||0;
+  const preco = campForm.precoProd||0;
+  const qtd   = campForm.qtdMin||2;
+  const pct   = campForm.desconto||30;
+  if(!campForm.produto){el.textContent="Selecione o produto para ver a prévia";return;}
+  const precoDesc = +(preco*(1-pct/100)).toFixed(2);
+  const totalSem  = preco*qtd;
+  const totalCom  = preco*(qtd-1)+precoDesc;
+  const economia  = totalSem-totalCom;
+
+  if(precoDesc < custo){
+    if(av) av.innerHTML=`<span style="color:#dc2626">⚠️ Com ${pct}% de desconto, o preço (${fmt(precoDesc)}) fica abaixo do custo (${fmt(custo)}). O sistema ajustará automaticamente o desconto máximo.</span>`;
+    // Calcular desconto máximo permitido
+    const descontoMax = Math.floor((1-custo/preco)*100);
+    if(av) av.innerHTML += ` Desconto máximo permitido: <strong>${descontoMax}%</strong>`;
+  } else {
+    if(av) av.innerHTML="";
+  }
+
+  el.innerHTML = `
+    <strong>${campForm.produto}</strong><br>
+    Preço normal: ${fmt(preco)} cada<br>
+    Leve ${qtd} → ${qtd-1}x ${fmt(preco)} + 1x ${fmt(Math.max(precoDesc,custo))} = <strong style="color:#16a34a">${fmt(Math.min(totalCom,preco*(qtd-1)+custo))}</strong><br>
+    Economia do cliente: <strong>${fmt(Math.max(0,economia))}</strong><br>
+    Custo unitário: ${fmt(custo)} · Preço com desconto: ${fmt(Math.max(precoDesc,custo))}
+    ${precoDesc<custo?`<br><span style="color:#d97706">⚠ Desconto ajustado para proteger sua margem</span>`:""}`;
+};
+
+window.salvarCampanha = function(){
+  const nome = document.getElementById("c-nome")?.value.trim();
+  const desc = document.getElementById("c-desc")?.value.trim();
+  const dataIni = document.getElementById("c-ini")?.value || new Date().toISOString().split("T")[0];
+  const dataFim = document.getElementById("c-fim")?.value;
+  const msgEl = document.getElementById("msg-camp");
+
+  const mostrarErro = msg => {
+    if(msgEl){msgEl.textContent=msg;msgEl.style.display="block";}
+    else alert(msg);
+  };
+
+  if(!nome){mostrarErro("Informe o nome da campanha.");return;}
+  if(!dataFim){mostrarErro("Informe a data de encerramento.");return;}
+  if(new Date(dataFim)<new Date()){mostrarErro("A data de encerramento deve ser futura.");return;}
+
+  // Validações específicas por tipo
+  if(campTipo==="kit"){
+    const custo = campForm.custoKit||0;
+    const preco = campForm.precoKit||0;
+    if(preco<=0){mostrarErro("Informe o preço do kit.");return;}
+    if(!validarPrecoAcimaCusto(custo,preco)){
+      mostrarErro(`Preço do kit (${fmt(preco)}) está abaixo do custo total (${fmt(custo)}). Ajuste para evitar prejuízo.`);
+      return;
+    }
+  }
+
+  if(campTipo==="progressivo"){
+    if(!campForm.produto){mostrarErro("Selecione o produto.");return;}
+    const custo = campForm.custoProd||0;
+    const preco = campForm.precoProd||0;
+    const pct   = campForm.desconto||30;
+    const precoDesc = +(preco*(1-pct/100)).toFixed(2);
+    if(precoDesc < custo){
+      // Ajustar automaticamente para não ter prejuízo
+      campForm.desconto = Math.floor((1-custo/preco)*100);
+    }
+  }
+
+  const nova = {
+    id: Date.now(),
+    tipo: campTipo,
+    nome,
+    descricao: desc||"",
+    dataIni,
+    dataFim,
+    farmacia: "Farmácia São João",
+    ativa: true,
+    criadoEm: new Date().toISOString(),
+    // dados por tipo
+    produto:  campForm.produto||"",
+    itens:    (campForm.kitItens||[]).map(i=>i.nome),
+    precoKit: campForm.precoKit||0,
+    custoKit: campForm.custoKit||0,
+    qtdMin:   campForm.qtdMin||2,
+    desconto: campForm.desconto||30,
+    custoProd:campForm.custoProd||0,
+    precoProd:campForm.precoProd||0,
+  };
+
+  const camps = getCampanhas();
+  camps.push(nova);
+  salvarCampanhas(camps);
+
+  campEtapa = "lista";
+  campForm  = {};
+  renderContent();
+  alert("✅ Campanha publicada! Já aparece no app e no site.");
+};
+
+window.encerrarCamp = function(idx){
+  if(!confirm("Encerrar esta campanha agora?")) return;
+  const camps = getCampanhas();
+  const ativas = camps.filter(c=>c.ativa && new Date(c.dataFim)>=new Date());
+  ativas[idx].ativa = false;
+  salvarCampanhas(camps);
+  renderContent();
+};
+
+const renders={dashboard:renderDashboard,pdv:renderPDV,estoque:renderEstoque,precificacao:renderPrecificacao,nfe:renderNFE,financeiro:renderFinanceiro,clientes:renderClientes,relatorios:renderRelatorios,judicial:renderJudicial,pedido_reposicao:renderPedidoReposicao,campanhas:renderCampanhas};
 const titulos={dashboard:"Dashboard",pdv:"PDV — Ponto de Venda",estoque:"Controle de Estoque",precificacao:"Precificação Automática",nfe:"Entrada de Nota Fiscal",financeiro:"Financeiro",clientes:"Clientes",relatorios:"Relatórios & IA"};
 let tabAtual="dashboard";
 

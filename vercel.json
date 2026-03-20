@@ -1,5 +1,10 @@
 {
   "rewrites": [
-    { "source": "/", "destination": "/farmaclub_central.html" }
+    { "source": "/",           "destination": "/farmaclub_app_cliente.html" },
+    { "source": "/erp",        "destination": "/farmaclub_erp_central.html" },
+    { "source": "/farmacia",   "destination": "/farmaclub_erp_farmacia.html" },
+    { "source": "/motoboy",    "destination": "/farmaclub_app_motoboy.html" },
+    { "source": "/instalar",   "destination": "/farmaclub_instalar.html" },
+    { "source": "/central",    "destination": "/farmaclub_central.html" }
   ]
 }

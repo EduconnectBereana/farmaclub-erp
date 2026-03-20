@@ -61,6 +61,7 @@ tfoot td{font-weight:700;font-size:12px;padding:10px 12px;background:#f8f8f8;bor
   <button class="nav-btn" data-tab="financeiro" onclick="setTab('financeiro')">💰 Financeiro</button>
   <button class="nav-btn" data-tab="compras" onclick="setTab('compras')">🛒 Compras</button>
   <button class="nav-btn" data-tab="pedidos_farmacias" onclick="setTab('pedidos_farmacias')" style="color:#d97706;font-weight:600">📥 Pedidos das Farmácias</button>
+  <button class="nav-btn" data-tab="campanhas_rede" onclick="setTab('campanhas_rede')" style="color:#E03A3A;font-weight:600">📢 Campanhas da Rede</button>
   <div class="nav-sec">Inteligência</div>
   <button class="nav-btn" data-tab="estoque_rede" onclick="setTab('estoque_rede')">📦 Estoque da Rede</button>
   <button class="nav-btn" data-tab="distribuicao" onclick="setTab('distribuicao')" style="color:#1A5FA8;font-weight:600">🚚 Distribuição</button>
@@ -1129,7 +1130,66 @@ window.imprimirConsolidado = function(){
   win.document.close();
 };
 
-const renders={dashboard:renderDashboard,farmacias:renderFarmacias,pedidos:renderPedidos,motoboys:renderMotoboys,financeiro:renderFinanceiro,compras:renderCompras,estoque_rede:renderEstoqueRede,distribuicao:renderDistribuicao,pedidos_farmacias:renderPedidosFarmacias,insights:renderInsights,relatorios:renderRelatorios};
+
+// ── CAMPANHAS DA REDE — ERP CENTRAL ──
+function renderCampanhasRede(){
+  const farmNomesLocal = {1:"São João",2:"Vida & Saúde",3:"Popular",4:"Esperança",5:"Boa Saúde",6:"Central"};
+  const camps = JSON.parse(localStorage.getItem("fc_campanhas")||"[]");
+  const ativas = camps.filter(c=>c.ativa && new Date(c.dataFim)>=new Date());
+  const fmtLocal = v=>"R$ "+v.toFixed(2).replace(".",",");
+  const dias = d=>{const diff=new Date(d)-new Date();return Math.max(0,Math.ceil(diff/(1000*60*60*24)));};
+  const TIPOS = {novidade:{cor:"#E8650A",label:"Novidade"},kit:{cor:"#1A5FA8",label:"Kit"},progressivo:{cor:"#3BAA35",label:"Leve Mais"}};
+
+  return`
+    <div style="background:linear-gradient(135deg,#E03A3A,#b91c1c);border-radius:12px;padding:16px 20px;margin-bottom:16px;color:#fff;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+      <div>
+        <div style="font-size:16px;font-weight:700">📢 Campanhas da Rede FarmaClub</div>
+        <div style="font-size:12px;opacity:.85;margin-top:3px">Visão consolidada de todas as campanhas ativas</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:22px;font-weight:700">${ativas.length}</div>
+        <div style="font-size:11px;opacity:.8">campanhas ativas</div>
+      </div>
+    </div>
+
+    ${ativas.length===0?`
+    <div class="card" style="text-align:center;padding:40px;color:#aaa">
+      <div style="font-size:32px;margin-bottom:10px">📢</div>
+      <div>Nenhuma campanha ativa na rede no momento.</div>
+      <div style="font-size:12px;margin-top:6px">As farmácias cadastram campanhas no ERP delas.</div>
+    </div>`:`
+    <div class="card">
+      <div style="font-size:13px;font-weight:600;margin-bottom:14px">Todas as campanhas ativas</div>
+      ${ativas.map((c,i)=>`
+        <div style="padding:12px 0;border-bottom:${i<ativas.length-1?"1px solid #f5f5f5":"none"};display:flex;align-items:flex-start;gap:12px">
+          <div style="flex-shrink:0">
+            <span style="background:${TIPOS[c.tipo]?.cor||"#888"}22;color:${TIPOS[c.tipo]?.cor||"#888"};padding:3px 9px;border-radius:10px;font-size:11px;font-weight:700">${TIPOS[c.tipo]?.label||c.tipo}</span>
+          </div>
+          <div style="flex:1">
+            <div style="font-weight:600;font-size:13px">${c.nome}</div>
+            <div style="font-size:11px;color:#888;margin-top:2px">${c.farmacia||"FarmaClub"}</div>
+            ${c.tipo==="kit"?`<div style="font-size:11px;color:#1A5FA8;margin-top:2px">Preço do kit: <strong>${fmtLocal(c.precoKit||0)}</strong></div>`:""}
+            ${c.tipo==="progressivo"?`<div style="font-size:11px;color:#3BAA35;margin-top:2px">Leve ${c.qtdMin||2} → ${c.desconto||30}% off na ${c.qtdMin||2}ª unidade</div>`:""}
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div style="font-size:11px;color:${dias(c.dataFim)<=7?"#E03A3A":"#3BAA35"};font-weight:600">${dias(c.dataFim)} dias</div>
+            <div style="font-size:10px;color:#aaa">até ${new Date(c.dataFim).toLocaleDateString("pt-BR")}</div>
+            <button onclick="encerrarCampCentral(${i})" style="margin-top:6px;padding:3px 8px;background:#fef2f2;color:#dc2626;border:none;border-radius:5px;font-size:10px;cursor:pointer;font-family:inherit">Encerrar</button>
+          </div>
+        </div>`).join("")}
+    </div>`}`;
+}
+
+window.encerrarCampCentral = function(idx){
+  if(!confirm("Encerrar esta campanha?")) return;
+  const camps = JSON.parse(localStorage.getItem("fc_campanhas")||"[]");
+  const ativas = camps.filter(c=>c.ativa && new Date(c.dataFim)>=new Date());
+  ativas[idx].ativa = false;
+  localStorage.setItem("fc_campanhas",JSON.stringify(camps));
+  renderContent();
+};
+
+const renders={dashboard:renderDashboard,farmacias:renderFarmacias,pedidos:renderPedidos,motoboys:renderMotoboys,financeiro:renderFinanceiro,compras:renderCompras,estoque_rede:renderEstoqueRede,distribuicao:renderDistribuicao,pedidos_farmacias:renderPedidosFarmacias,campanhas_rede:renderCampanhasRede,insights:renderInsights,relatorios:renderRelatorios};
 let tabAtual="dashboard";
 
 function setTab(t){
