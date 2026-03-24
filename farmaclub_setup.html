@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>FarmaClub — Setup Inicial</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:#f4f4f2;color:#1a1a2e;font-size:14px}
+.topo{background:linear-gradient(135deg,#3BAA35,#2E8A2A);padding:20px 28px;color:#fff;display:flex;align-items:center;gap:14px}
+.topo h1{font-size:20px;font-weight:700}
+.topo small{opacity:.8;font-size:12px}
+.container{max-width:860px;margin:0 auto;padding:28px 20px}
+.card{background:#fff;border-radius:14px;border:1px solid #e8eaf4;padding:22px;margin-bottom:18px}
+.card h2{font-size:15px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.card p{font-size:12px;color:#9a9eb8;margin-bottom:16px;line-height:1.6}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+label{font-size:11px;font-weight:600;color:#9a9eb8;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px}
+input,select,textarea{width:100%;padding:10px 12px;border:1.5px solid #e0e0e0;border-radius:8px;font-size:13px;font-family:inherit;outline:none;transition:border-color .15s;background:#fff;color:#1a1a2e}
+input:focus,select:focus,textarea:focus{border-color:#3BAA35}
+.btn{padding:10px 20px;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s}
+.btn-verde{background:#3BAA35;color:#fff}
+.btn-verde:hover{background:#2E8A2A}
+.btn-azul{background:#1A5FA8;color:#fff}
+.btn-vermelho{background:#E03A3A;color:#fff}
+.btn-cinza{background:#f5f5f5;color:#555;border:1px solid #e0e0e0}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.status{padding:10px 14px;border-radius:8px;font-size:12px;font-weight:500;margin-bottom:12px;display:none}
+.ok{background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0}
+.err{background:#fef2f2;color:#dc2626;border:1px solid #fecaca}
+.aviso{background:#fffbeb;color:#d97706;border:1px solid #fde68a}
+.step{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;margin-bottom:8px;border:1.5px solid #e8eaf4;cursor:pointer;transition:all .15s}
+.step:hover{border-color:#3BAA35;background:#f8fdf8}
+.step.ativo{border-color:#3BAA35;background:#f0fdf4}
+.step.concluido{border-color:#bbf7d0;background:#f0fdf4}
+.step-num{width:32px;height:32px;border-radius:50%;background:#e8eaf4;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0}
+.step.ativo .step-num{background:#3BAA35;color:#fff}
+.step.concluido .step-num{background:#16a34a;color:#fff}
+.separador{border-top:1px solid #f0f0f0;margin:16px 0}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600}
+.farm-item{background:#f8f8f8;border-radius:8px;padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.prod-item{display:flex;gap:8px;padding:8px 0;border-bottom:1px solid #f0f0f0;align-items:center}
+.badge-ok{background:#f0fdf4;color:#16a34a}
+.badge-pend{background:#fef2f2;color:#E03A3A}
+/* Seções */
+.secao{display:none}
+.secao.ativa{display:block}
+</style>
+</head>
+<body>
+
+<div class="topo">
+  <div style="font-size:36px">⚙️</div>
+  <div>
+    <h1>FarmaClub — Setup Inicial</h1>
+    <small>Configure o Supabase com os dados reais da sua rede</small>
+  </div>
+  <div style="margin-left:auto;text-align:right">
+    <div id="conexao-badge" style="background:rgba(255,255,255,.2);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;color:#fff">
+      ⏳ Verificando conexão...
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- PROGRESSO -->
+  <div class="card">
+    <h2>📋 Roteiro de configuração</h2>
+    <p>Siga os passos em ordem. Cada etapa salva os dados diretamente no Supabase.</p>
+    <div id="steps-lista">
+      <div class="step ativo" onclick="irPara('config')" id="step-0">
+        <div class="step-num" id="sn-0">1</div>
+        <div><div style="font-weight:600;font-size:13px">Configurar chave do Supabase</div><div style="font-size:11px;color:#9a9eb8">Colar a chave anon e testar a conexão</div></div>
+        <div id="st-0" style="margin-left:auto"></div>
+      </div>
+      <div class="step" onclick="irPara('farmacias')" id="step-1">
+        <div class="step-num" id="sn-1">2</div>
+        <div><div style="font-weight:600;font-size:13px">Cadastrar farmácias parceiras</div><div style="font-size:11px;color:#9a9eb8">Nome, endereço, CNPJ e coordenadas</div></div>
+        <div id="st-1" style="margin-left:auto"></div>
+      </div>
+      <div class="step" onclick="irPara('usuarios')" id="step-2">
+        <div class="step-num" id="sn-2">3</div>
+        <div><div style="font-weight:600;font-size:13px">Criar usuários e acessos</div><div style="font-size:11px;color:#9a9eb8">Login para cada farmácia + seu acesso de gestor</div></div>
+        <div id="st-2" style="margin-left:auto"></div>
+      </div>
+      <div class="step" onclick="irPara('produtos')" id="step-3">
+        <div class="step-num" id="sn-3">4</div>
+        <div><div style="font-weight:600;font-size:13px">Cadastrar produtos</div><div style="font-size:11px;color:#9a9eb8">Medicamentos com preço e estoque inicial</div></div>
+        <div id="st-3" style="margin-left:auto"></div>
+      </div>
+      <div class="step" onclick="irPara('motoboys')" id="step-4">
+        <div class="step-num" id="sn-4">5</div>
+        <div><div style="font-weight:600;font-size:13px">Cadastrar motoboys</div><div style="font-size:11px;color:#9a9eb8">Nome, telefone e chave PIX</div></div>
+        <div id="st-4" style="margin-left:auto"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASSO 1: CHAVE SUPABASE -->
+  <div class="card secao ativa" id="sec-config">
+    <h2>🔑 Passo 1 — Chave do Supabase</h2>
+    <p>
+      No Supabase, acesse: <strong>Project Settings → API → Project API keys</strong><br>
+      Copie a chave chamada <strong>"anon public"</strong> e cole abaixo.
+    </p>
+    <div id="msg-config" class="status"></div>
+    <div class="grid2" style="margin-bottom:12px">
+      <div>
+        <label>URL do projeto (já preenchida)</label>
+        <input type="text" id="sb-url" value="https://eswwvonedfexvxlzkoof.supabase.co" readonly style="background:#f5f5f5;color:#888">
+      </div>
+      <div>
+        <label>Chave anon public *</label>
+        <input type="text" id="sb-anon" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-verde" onclick="testarConexao()">🔗 Testar conexão</button>
+      <button class="btn btn-cinza" onclick="salvarChave()">💾 Salvar e continuar</button>
+    </div>
+
+    <div class="separador"></div>
+    <div style="background:#eff6ff;border-radius:10px;padding:14px;font-size:12px;color:#1d4ed8;line-height:1.8">
+      <strong>Onde encontrar no Supabase:</strong><br>
+      1. Acesse <a href="https://supabase.com" target="_blank" style="color:#1A5FA8">supabase.com</a> → seu projeto<br>
+      2. Menu esquerdo: clique em ⚙️ <strong>Settings</strong><br>
+      3. Clique em <strong>API</strong><br>
+      4. Em "Project API keys", copie a <strong>anon public</strong> (NÃO é a service_role)<br>
+      5. Cole no campo acima e clique em "Testar conexão"
+    </div>
+  </div>
+
+  <!-- PASSO 2: FARMÁCIAS -->
+  <div class="card secao" id="sec-farmacias">
+    <h2>🏥 Passo 2 — Farmácias parceiras</h2>
+    <p>Cadastre cada farmácia da rede. As coordenadas GPS são usadas para calcular o frete e ordenar os motoboys.</p>
+
+    <div id="msg-farm" class="status"></div>
+
+    <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;font-size:12px;color:#92400e;margin-bottom:14px">
+      💡 Para pegar as coordenadas GPS: abra <a href="https://maps.google.com" target="_blank">maps.google.com</a>, pesquise o endereço da farmácia, clique com o botão direito no mapa e copie os números que aparecem (ex: -21.2062, -41.8878)
+    </div>
+
+    <!-- Formulário de cadastro -->
+    <div style="background:#f8fdf8;border:1.5px solid #bbf7d0;border-radius:10px;padding:16px;margin-bottom:16px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:12px;color:#16a34a">+ Nova farmácia</div>
+      <div class="grid2">
+        <div><label>Nome da farmácia *</label><input type="text" id="f-nome" placeholder="Farmácia São João"></div>
+        <div><label>CNPJ</label><input type="text" id="f-cnpj" placeholder="00.000.000/0001-00"></div>
+        <div><label>Farmacêutico responsável</label><input type="text" id="f-resp" placeholder="Nome completo"></div>
+        <div><label>CRF-RJ</label><input type="text" id="f-crf" placeholder="CRF-RJ 12345"></div>
+        <div><label>Telefone</label><input type="text" id="f-tel" placeholder="(22) 3822-0000"></div>
+        <div><label>Horário de funcionamento</label><input type="text" id="f-hor" placeholder="Seg–Sex 8h–20h · Sáb 8h–18h"></div>
+      </div>
+      <div class="grid2" style="margin-top:10px">
+        <div><label>Endereço completo *</label><input type="text" id="f-end" placeholder="Rua Getúlio Vargas, 342"></div>
+        <div><label>Bairro *</label><input type="text" id="f-bairro" placeholder="Centro"></div>
+        <div><label>Latitude GPS (ex: -21.2062)</label><input type="number" step="0.0001" id="f-lat" placeholder="-21.2062"></div>
+        <div><label>Longitude GPS (ex: -41.8878)</label><input type="number" step="0.0001" id="f-lng" placeholder="-41.8878"></div>
+      </div>
+      <div style="margin-top:12px">
+        <button class="btn btn-verde" onclick="cadastrarFarmacia()">✅ Cadastrar farmácia</button>
+      </div>
+    </div>
+
+    <!-- Lista de farmácias cadastradas -->
+    <div style="font-size:12px;font-weight:600;color:#9a9eb8;margin-bottom:8px">FARMÁCIAS CADASTRADAS</div>
+    <div id="lista-farmacias">
+      <div style="text-align:center;padding:20px;color:#aaa;font-size:12px">Nenhuma farmácia cadastrada ainda</div>
+    </div>
+
+    <div style="margin-top:14px;display:flex;gap:10px">
+      <button class="btn btn-azul" onclick="carregarFarmacias()">🔄 Atualizar lista</button>
+      <button class="btn btn-verde" onclick="irPara('usuarios')" id="btn-prox-farm" disabled>Próximo passo →</button>
+    </div>
+  </div>
+
+  <!-- PASSO 3: USUÁRIOS -->
+  <div class="card secao" id="sec-usuarios">
+    <h2>👤 Passo 3 — Usuários e acessos</h2>
+    <p>Crie um login (e-mail + senha) para cada farmácia parceira. Também crie o seu acesso como gestor da rede.</p>
+
+    <div id="msg-user" class="status"></div>
+
+    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px 14px;font-size:12px;color:#1d4ed8;margin-bottom:14px;line-height:1.6">
+      📧 O e-mail precisa ser válido — o Supabase envia um link de confirmação. Após confirmar o e-mail, o usuário pode logar no ERP. Para pular a confirmação em testes, ative "Disable email confirmation" em Authentication → Settings no Supabase.
+    </div>
+
+    <div style="background:#f8fdf8;border:1.5px solid #bbf7d0;border-radius:10px;padding:16px;margin-bottom:16px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:12px;color:#16a34a">+ Novo usuário</div>
+      <div class="grid2">
+        <div><label>Nome completo *</label><input type="text" id="u-nome" placeholder="Ex: João Carlos (dono)"></div>
+        <div>
+          <label>Perfil *</label>
+          <select id="u-perfil">
+            <option value="gestor">Gestor (você — acesso total)</option>
+            <option value="farmacia">Farmácia (acessa só o próprio ERP)</option>
+            <option value="motoboy">Motoboy (app de entregas)</option>
+            <option value="contador">Contador (módulo contabilidade)</option>
+          </select>
+        </div>
+        <div>
+          <label>Farmácia vinculada (se for farmácia)</label>
+          <select id="u-farmacia"><option value="">— Selecione —</option></select>
+        </div>
+        <div><label>E-mail *</label><input type="email" id="u-email" placeholder="farmacia@email.com"></div>
+        <div><label>Senha * (mínimo 8 caracteres)</label><input type="password" id="u-senha" placeholder="Senha segura"></div>
+        <div><label>Confirmar senha *</label><input type="password" id="u-senha2" placeholder="Confirmar"></div>
+      </div>
+      <div style="margin-top:12px">
+        <button class="btn btn-verde" onclick="cadastrarUsuario()">✅ Criar usuário</button>
+      </div>
+    </div>
+
+    <div style="font-size:12px;font-weight:600;color:#9a9eb8;margin-bottom:8px">USUÁRIOS CRIADOS</div>
+    <div id="lista-usuarios">
+      <div style="text-align:center;padding:20px;color:#aaa;font-size:12px">Nenhum usuário criado ainda</div>
+    </div>
+
+    <div style="margin-top:14px;display:flex;gap:10px">
+      <button class="btn btn-azul" onclick="carregarUsuarios()">🔄 Atualizar</button>
+      <button class="btn btn-verde" onclick="irPara('produtos')">Próximo passo →</button>
+    </div>
+  </div>
+
+  <!-- PASSO 4: PRODUTOS -->
+  <div class="card secao" id="sec-produtos">
+    <h2>💊 Passo 4 — Produtos</h2>
+    <p>Cadastre os medicamentos de cada farmácia. Pode importar do catálogo de demonstração ou adicionar manualmente.</p>
+
+    <div id="msg-prod" class="status"></div>
+
+    <div style="background:#f8fdf8;border:1.5px solid #bbf7d0;border-radius:10px;padding:16px;margin-bottom:16px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:12px;color:#16a34a">+ Novo produto</div>
+      <div class="grid3">
+        <div><label>Farmácia *</label><select id="p-farm"><option value="">— Selecione —</option></select></div>
+        <div><label>Nome *</label><input type="text" id="p-nome" placeholder="Dipirona 500mg 20cp"></div>
+        <div><label>Código EAN</label><input type="text" id="p-ean" placeholder="7896004004532"></div>
+        <div><label>Laboratório</label><input type="text" id="p-lab" placeholder="EMS"></div>
+        <div>
+          <label>Categoria</label>
+          <select id="p-cat">
+            <option value="analgesicos">Analgésicos</option>
+            <option value="antibioticos">Antibióticos</option>
+            <option value="gastro">Gastro</option>
+            <option value="cardiovasc">Cardiovascular</option>
+            <option value="diabetes">Diabetes</option>
+            <option value="vitaminas">Vitaminas</option>
+            <option value="outros">Outros</option>
+          </select>
+        </div>
+        <div>
+          <label>Requer receita?</label>
+          <select id="p-rec">
+            <option value="false">Não (venda livre)</option>
+            <option value="true">Sim (receita obrigatória)</option>
+          </select>
+        </div>
+        <div><label>Preço de custo (R$) *</label><input type="number" step="0.01" id="p-custo" placeholder="4.50"></div>
+        <div><label>Preço de venda PIX (R$) *</label><input type="number" step="0.01" id="p-preco" placeholder="8.90"></div>
+        <div><label>Qtd em estoque *</label><input type="number" id="p-estq" placeholder="50"></div>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-verde" onclick="cadastrarProduto()">✅ Cadastrar produto</button>
+        <button class="btn btn-azul" onclick="importarCatalogo()">📦 Importar catálogo demo (14 produtos)</button>
+      </div>
+    </div>
+
+    <div style="font-size:12px;font-weight:600;color:#9a9eb8;margin-bottom:8px">PRODUTOS CADASTRADOS — <span id="total-prod">0</span></div>
+    <div id="lista-produtos" style="max-height:300px;overflow-y:auto">
+      <div style="text-align:center;padding:20px;color:#aaa;font-size:12px">Nenhum produto ainda</div>
+    </div>
+
+    <div style="margin-top:14px;display:flex;gap:10px">
+      <button class="btn btn-azul" onclick="carregarProdutos()">🔄 Atualizar</button>
+      <button class="btn btn-verde" onclick="irPara('motoboys')">Próximo passo →</button>
+    </div>
+  </div>
+
+  <!-- PASSO 5: MOTOBOYS -->
+  <div class="card secao" id="sec-motoboys">
+    <h2>🛵 Passo 5 — Motoboys</h2>
+    <p>Cadastre os motoboys parceiros. A chave PIX é usada para os pagamentos quinzenais.</p>
+
+    <div id="msg-moto" class="status"></div>
+
+    <div style="background:#f8fdf8;border:1.5px solid #bbf7d0;border-radius:10px;padding:16px;margin-bottom:16px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:12px;color:#16a34a">+ Novo motoboy</div>
+      <div class="grid2">
+        <div><label>Nome completo *</label><input type="text" id="m-nome" placeholder="Carlos Mendes"></div>
+        <div><label>Telefone / WhatsApp *</label><input type="text" id="m-tel" placeholder="(22) 99999-9999"></div>
+        <div><label>CNH (número)</label><input type="text" id="m-cnh" placeholder="00000000000"></div>
+        <div><label>Placa da moto</label><input type="text" id="m-placa" placeholder="ABC-1234"></div>
+        <div><label>Chave PIX (CPF, telefone ou e-mail)</label><input type="text" id="m-pix" placeholder="cpf ou telefone"></div>
+        <div><label>Latitude atual (aprox)</label><input type="number" step="0.0001" id="m-lat" value="-21.2062"></div>
+      </div>
+      <div style="margin-top:12px">
+        <button class="btn btn-verde" onclick="cadastrarMotoboy()">✅ Cadastrar motoboy</button>
+      </div>
+    </div>
+
+    <div id="lista-motoboys">
+      <div style="text-align:center;padding:20px;color:#aaa;font-size:12px">Nenhum motoboy cadastrado</div>
+    </div>
+
+    <div style="margin-top:14px">
+      <button class="btn btn-verde" onclick="finalizarSetup()" style="width:100%;padding:14px;font-size:15px">
+        🎉 Finalizar configuração — sistema pronto!
+      </button>
+    </div>
+  </div>
+
+  <!-- CONCLUÍDO -->
+  <div class="card secao" id="sec-concluido" style="text-align:center;padding:40px">
+    <div style="font-size:56px;margin-bottom:16px">🎉</div>
+    <h2 style="font-size:22px;font-weight:800;color:#3BAA35;justify-content:center;margin-bottom:8px">FarmaClub configurado!</h2>
+    <p style="font-size:14px;color:#555;line-height:1.8;max-width:480px;margin:0 auto 24px">
+      Todos os dados foram salvos no Supabase. O sistema está pronto para operar com dados reais.
+    </p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+      <a href="farmaclub_erp_central.html" class="btn btn-verde" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px">🖥 Abrir ERP Central</a>
+      <a href="farmaclub_erp_farmacia.html" class="btn btn-azul" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px">🏥 Abrir ERP Farmácia</a>
+      <a href="farmaclub_app_cliente.html" class="btn btn-verde" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px">📱 Abrir App</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// CONFIGURAÇÃO
+// ══════════════════════════════════════════════════════════
+const SB_URL = "https://eswwvonedfexvxlzkoof.supabase.co";
+let SB_ANON  = localStorage.getItem("fc_setup_anon") || "";
+let farmaciasCadastradas = [];
+
+if (SB_ANON) {
+  document.getElementById("sb-anon").value = SB_ANON;
+  testarConexao(true);
+}
+
+// ── HELPERS ──
+const headers = (anon) => ({
+  "Content-Type": "application/json",
+  "apikey": anon || SB_ANON,
+  "Authorization": `Bearer ${anon || SB_ANON}`,
+  "Prefer": "return=representation",
+});
+
+async function sbGet(tabela, params = "") {
+  const r = await fetch(`${SB_URL}/rest/v1/${tabela}?${params}&select=*`, { headers: headers() });
+  if (!r.ok) throw new Error(`HTTP ${r.status}: ${await r.text()}`);
+  return r.json();
+}
+
+async function sbInsert(tabela, body) {
+  const r = await fetch(`${SB_URL}/rest/v1/${tabela}`, {
+    method: "POST",
+    headers: headers(),
+    body: JSON.stringify(body),
+  });
+  if (!r.ok) {
+    const err = await r.json();
+    throw new Error(err.message || err.hint || JSON.stringify(err));
+  }
+  return r.json();
+}
+
+async function sbAuthSignup(email, senha, meta) {
+  const r = await fetch(`${SB_URL}/auth/v1/signup`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "apikey": SB_ANON },
+    body: JSON.stringify({ email, password: senha, data: meta }),
+  });
+  const data = await r.json();
+  if (!r.ok) throw new Error(data.msg || data.message || JSON.stringify(data));
+  return data;
+}
+
+function msg(id, texto, tipo) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = texto;
+  el.className = `status ${tipo}`;
+  el.style.display = "block";
+  if (tipo === "ok") setTimeout(() => el.style.display = "none", 4000);
+}
+
+function irPara(sec) {
+  document.querySelectorAll(".secao").forEach(s => s.classList.remove("ativa"));
+  document.querySelectorAll(".step").forEach(s => s.classList.remove("ativo"));
+  const mapa = { config: 0, farmacias: 1, usuarios: 2, produtos: 3, motoboys: 4, concluido: 5 };
+  const secEl = document.getElementById(`sec-${sec}`);
+  const stepEl = document.getElementById(`step-${mapa[sec]}`);
+  if (secEl) secEl.classList.add("ativa");
+  if (stepEl) { stepEl.classList.add("ativo"); stepEl.scrollIntoView({ behavior: "smooth", block: "center" }); }
+  // Atualizar selects ao entrar em certas seções
+  if (sec === "usuarios")  carregarFarmaciasNosSelects();
+  if (sec === "produtos")  { carregarFarmaciasNosSelects(); carregarProdutos(); }
+  if (sec === "motoboys")  carregarMotoboys();
+}
+
+// ══════════════════════════════════════════════════════════
+// PASSO 1 — CONEXÃO
+// ══════════════════════════════════════════════════════════
+async function testarConexao(silencioso = false) {
+  const anon = document.getElementById("sb-anon").value.trim();
+  if (!anon) { if (!silencioso) msg("msg-config", "Cole a chave anon public antes de testar.", "err"); return; }
+  SB_ANON = anon;
+  const badge = document.getElementById("conexao-badge");
+  badge.textContent = "⏳ Testando...";
+  try {
+    const r = await fetch(`${SB_URL}/rest/v1/farmacias?select=id&limit=1`, {
+      headers: { "apikey": anon, "Authorization": `Bearer ${anon}` }
+    });
+    if (r.status === 401) throw new Error("Chave incorreta ou sem permissão");
+    if (r.status === 404) throw new Error("Tabela 'farmacias' não encontrada — rode o SQL de criação primeiro");
+    if (!r.ok) throw new Error(`Erro HTTP ${r.status}`);
+    badge.textContent = "🟢 Supabase conectado";
+    badge.style.background = "rgba(34,197,94,.3)";
+    if (!silencioso) msg("msg-config", "✅ Conexão com Supabase estabelecida com sucesso!", "ok");
+    document.getElementById("step-0").classList.add("concluido");
+    document.getElementById("sn-0").textContent = "✓";
+  } catch(e) {
+    badge.textContent = "🔴 Falha na conexão";
+    badge.style.background = "rgba(239,68,68,.3)";
+    if (!silencioso) msg("msg-config", "❌ " + e.message, "err");
+  }
+}
+
+function salvarChave() {
+  const anon = document.getElementById("sb-anon").value.trim();
+  if (!anon) { msg("msg-config", "Cole a chave antes de salvar.", "err"); return; }
+  SB_ANON = anon;
+  localStorage.setItem("fc_setup_anon", anon);
+  msg("msg-config", "✅ Chave salva! Avançando para o cadastro de farmácias...", "ok");
+  setTimeout(() => irPara("farmacias"), 1500);
+}
+
+// ══════════════════════════════════════════════════════════
+// PASSO 2 — FARMÁCIAS
+// ══════════════════════════════════════════════════════════
+async function cadastrarFarmacia() {
+  const nome   = document.getElementById("f-nome").value.trim();
+  const cnpj   = document.getElementById("f-cnpj").value.trim();
+  const resp   = document.getElementById("f-resp").value.trim();
+  const crf    = document.getElementById("f-crf").value.trim();
+  const tel    = document.getElementById("f-tel").value.trim();
+  const hor    = document.getElementById("f-hor").value.trim();
+  const end    = document.getElementById("f-end").value.trim();
+  const bairro = document.getElementById("f-bairro").value.trim();
+  const lat    = parseFloat(document.getElementById("f-lat").value);
+  const lng    = parseFloat(document.getElementById("f-lng").value);
+
+  if (!nome || !end || !bairro) { msg("msg-farm", "Preencha nome, endereço e bairro.", "err"); return; }
+  if (isNaN(lat) || isNaN(lng)) { msg("msg-farm", "Informe as coordenadas GPS (latitude e longitude).", "err"); return; }
+
+  try {
+    await sbInsert("farmacias", {
+      nome, cnpj, responsavel: resp, crf, telefone: tel,
+      horario: hor || "Seg–Sex 8h–20h",
+      endereco: end, bairro,
+      cidade: "Itaperuna", uf: "RJ", cep: "28300-000",
+      lat, lng,
+      nota: 5.0, cor: "#3BAA35",
+      ativo: true, aberto: true,
+      comissao_pct: 10.00,
+    });
+    msg("msg-farm", `✅ Farmácia "${nome}" cadastrada com sucesso!`, "ok");
+    // Limpar formulário
+    ["f-nome","f-cnpj","f-resp","f-crf","f-tel","f-hor","f-end","f-bairro","f-lat","f-lng"]
+      .forEach(id => { const el = document.getElementById(id); if(el) el.value = id==="f-lat"?"-21.":id==="f-lng"?"-41.":""; });
+    await carregarFarmacias();
+  } catch(e) {
+    msg("msg-farm", "❌ Erro: " + e.message, "err");
+  }
+}
+
+async function carregarFarmacias() {
+  try {
+    farmaciasCadastradas = await sbGet("farmacias", "order=nome.asc");
+    const lista = document.getElementById("lista-farmacias");
+    const btnProx = document.getElementById("btn-prox-farm");
+    if (!farmaciasCadastradas.length) {
+      lista.innerHTML = '<div style="text-align:center;padding:20px;color:#aaa;font-size:12px">Nenhuma farmácia cadastrada ainda</div>';
+      if (btnProx) btnProx.disabled = true;
+      return;
+    }
+    lista.innerHTML = farmaciasCadastradas.map(f => `
+      <div class="farm-item">
+        <div>
+          <div style="font-weight:600;font-size:13px">${f.nome}</div>
+          <div style="font-size:11px;color:#9a9eb8">${f.bairro} · ${f.cnpj||"CNPJ não informado"}</div>
+          <div style="font-size:11px;color:#9a9eb8">GPS: ${f.lat}, ${f.lng}</div>
+        </div>
+        <span class="tag badge-ok">✓ Cadastrada</span>
+      </div>`).join("");
+    if (btnProx) btnProx.disabled = false;
+    document.getElementById("step-1").classList.add("concluido");
+    document.getElementById("sn-1").textContent = "✓";
+  } catch(e) {
+    document.getElementById("lista-farmacias").innerHTML = `<div style="color:#E03A3A;font-size:12px;padding:10px">Erro ao carregar: ${e.message}</div>`;
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// PASSO 3 — USUÁRIOS
+// ══════════════════════════════════════════════════════════
+async function carregarFarmaciasNosSelects() {
+  if (!farmaciasCadastradas.length) {
+    try { farmaciasCadastradas = await sbGet("farmacias", "order=nome.asc"); } catch(e) {}
+  }
+  ["u-farmacia","p-farm"].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    const val = sel.value;
+    sel.innerHTML = '<option value="">— Selecione —</option>';
+    farmaciasCadastradas.forEach(f => {
+      const opt = document.createElement("option");
+      opt.value = f.id;
+      opt.textContent = f.nome;
+      if (String(f.id) === val) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  });
+}
+
+async function cadastrarUsuario() {
+  const nome     = document.getElementById("u-nome").value.trim();
+  const perfil   = document.getElementById("u-perfil").value;
+  const farmId   = document.getElementById("u-farmacia").value;
+  const email    = document.getElementById("u-email").value.trim();
+  const senha    = document.getElementById("u-senha").value;
+  const senha2   = document.getElementById("u-senha2").value;
+
+  if (!nome || !email || !senha) { msg("msg-user", "Preencha todos os campos obrigatórios.", "err"); return; }
+  if (senha.length < 8)  { msg("msg-user", "A senha precisa ter pelo menos 8 caracteres.", "err"); return; }
+  if (senha !== senha2)  { msg("msg-user", "As senhas não coincidem.", "err"); return; }
+  if (perfil === "farmacia" && !farmId) { msg("msg-user", "Selecione a farmácia vinculada.", "err"); return; }
+
+  try {
+    // Criar na Auth do Supabase
+    const { user } = await sbAuthSignup(email, senha, { nome, perfil });
+    // Registrar na tabela usuarios
+    await sbInsert("usuarios", {
+      nome, email, perfil,
+      farmacia_id: farmId ? parseInt(farmId) : null,
+      auth_uid: user?.id || null,
+      ativo: true,
+    });
+    msg("msg-user", `✅ Usuário "${nome}" criado! E-mail de confirmação enviado para ${email}.`, "ok");
+    ["u-nome","u-email","u-senha","u-senha2"].forEach(id => { const el=document.getElementById(id); if(el)el.value=""; });
+    await carregarUsuarios();
+  } catch(e) {
+    msg("msg-user", "❌ Erro: " + e.message, "err");
+  }
+}
+
+async function carregarUsuarios() {
+  try {
+    const users = await sbGet("usuarios", "order=nome.asc");
+    const lista = document.getElementById("lista-usuarios");
+    if (!users.length) { lista.innerHTML='<div style="text-align:center;padding:20px;color:#aaa;font-size:12px">Nenhum usuário</div>'; return; }
+    const perfis = { gestor:"🟣 Gestor", farmacia:"🏥 Farmácia", motoboy:"🛵 Motoboy", contador:"📊 Contador" };
+    lista.innerHTML = users.map(u => `
+      <div class="farm-item">
+        <div>
+          <div style="font-weight:600;font-size:13px">${u.nome}</div>
+          <div style="font-size:11px;color:#9a9eb8">${u.email}</div>
+        </div>
+        <span class="tag badge-ok">${perfis[u.perfil]||u.perfil}</span>
+      </div>`).join("");
+    document.getElementById("step-2").classList.add("concluido");
+    document.getElementById("sn-2").textContent = "✓";
+  } catch(e) { console.warn(e); }
+}
+
+// ══════════════════════════════════════════════════════════
+// PASSO 4 — PRODUTOS
+// ══════════════════════════════════════════════════════════
+const CATALOGO_DEMO = [
+  {ean:"7896004004532",ico:"💊",nome:"Dipirona Sódica 500mg 20cp",lab:"EMS",cat:"analgesicos",custo:3.80,preco:8.90,receita:false,estq:84},
+  {ean:"7896714240118",ico:"🔬",nome:"Amoxicilina 500mg 21cp",lab:"Medley",cat:"antibioticos",custo:14.50,preco:22.50,receita:true,estq:31},
+  {ean:"7896523240065",ico:"🫀",nome:"Omeprazol 20mg 28cp",lab:"Aché",cat:"gastro",custo:8.00,preco:14.90,receita:false,estq:55},
+  {ean:"7891058006824",ico:"⚡",nome:"Vitamina C 1g 10cp",lab:"EMS",cat:"vitaminas",custo:2.50,preco:5.90,receita:false,estq:102},
+  {ean:"7896658010077",ico:"❤️",nome:"Losartana 50mg 30cp",lab:"EMS",cat:"cardiovasc",custo:10.00,preco:18.50,receita:true,estq:12},
+  {ean:"7891047944513",ico:"🩺",nome:"Metformina 850mg 30cp",lab:"Merck",cat:"diabetes",custo:5.00,preco:9.90,receita:true,estq:44},
+  {ean:"7896714270048",ico:"💊",nome:"Ibuprofeno 600mg 20cp",lab:"Medley",cat:"analgesicos",custo:8.50,preco:15.90,receita:false,estq:67},
+  {ean:"7896523405055",ico:"🫧",nome:"Simeticona 40mg 50cp",lab:"Aché",cat:"gastro",custo:6.00,preco:11.50,receita:false,estq:29},
+  {ean:"7896658020076",ico:"💙",nome:"Atenolol 25mg 30cp",lab:"EMS",cat:"cardiovasc",custo:4.00,preco:8.00,receita:true,estq:45},
+  {ean:"7896181916749",ico:"💊",nome:"Paracetamol 750mg 20cp",lab:"Farmoquímica",cat:"analgesicos",custo:3.50,preco:7.90,receita:false,estq:88},
+  {ean:"7891058001234",ico:"🌿",nome:"Loratadina 10mg 12cp",lab:"EMS",cat:"outros",custo:3.00,preco:7.50,receita:false,estq:30},
+  {ean:"7891058007711",ico:"🎯",nome:"Dorflex 36cp",lab:"EMS",cat:"analgesicos",custo:12.00,preco:22.00,receita:false,estq:40},
+  {ean:"7896714880055",ico:"👃",nome:"Neosoro 30ml",lab:"EMS",cat:"outros",custo:6.00,preco:12.50,receita:false,estq:55},
+  {ean:"7896523440088",ico:"🌀",nome:"Buscopan Composto 30cp",lab:"Aché",cat:"gastro",custo:16.00,preco:32.00,receita:false,estq:22},
+];
+
+async function cadastrarProduto() {
+  const farmId = document.getElementById("p-farm").value;
+  const nome   = document.getElementById("p-nome").value.trim();
+  const ean    = document.getElementById("p-ean").value.trim();
+  const lab    = document.getElementById("p-lab").value.trim();
+  const cat    = document.getElementById("p-cat").value;
+  const receita = document.getElementById("p-rec").value === "true";
+  const custo  = parseFloat(document.getElementById("p-custo").value);
+  const preco  = parseFloat(document.getElementById("p-preco").value);
+  const estq   = parseInt(document.getElementById("p-estq").value) || 0;
+
+  if (!farmId || !nome || !preco) { msg("msg-prod", "Preencha farmácia, nome e preço.", "err"); return; }
+  if (custo >= preco) { msg("msg-prod", "⚠️ Preço de venda precisa ser maior que o custo.", "aviso"); return; }
+
+  try {
+    const { id } = await sbInsert("produtos", {
+      farmacia_id: parseInt(farmId), ean, nome, laboratorio: lab,
+      categoria: cat, preco_custo: custo, preco_venda: preco,
+      preco_pix: preco, receita, ativo: true, icone: "💊",
+    });
+    // Estoque inicial
+    if (id) await sbInsert("estoque", { farmacia_id: parseInt(farmId), produto_id: id, quantidade: estq, quantidade_min: 5 });
+    msg("msg-prod", `✅ Produto "${nome}" cadastrado com ${estq} unidades em estoque!`, "ok");
+    ["p-nome","p-ean","p-lab","p-custo","p-preco","p-estq"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
+    await carregarProdutos();
+  } catch(e) { msg("msg-prod", "❌ Erro: " + e.message, "err"); }
+}
+
+async function importarCatalogo() {
+  const farmId = document.getElementById("p-farm").value;
+  if (!farmId) { msg("msg-prod", "Selecione a farmácia antes de importar.", "err"); return; }
+  if (!confirm(`Importar ${CATALOGO_DEMO.length} produtos do catálogo de demonstração para esta farmácia?`)) return;
+  msg("msg-prod", `⏳ Importando ${CATALOGO_DEMO.length} produtos...`, "aviso");
+  let ok = 0, erros = 0;
+  for (const p of CATALOGO_DEMO) {
+    try {
+      const prod = await sbInsert("produtos", {
+        farmacia_id: parseInt(farmId), ean: p.ean, nome: p.nome,
+        laboratorio: p.lab, categoria: p.cat,
+        preco_custo: p.custo, preco_venda: p.preco, preco_pix: p.preco,
+        receita: p.receita, ativo: true, icone: p.ico,
+      });
+      if (prod?.id) {
+        await sbInsert("estoque", { farmacia_id: parseInt(farmId), produto_id: prod.id, quantidade: p.estq, quantidade_min: 5 });
+      }
+      ok++;
+    } catch(e) { erros++; }
+  }
+  msg("msg-prod", `✅ Importação concluída: ${ok} produtos importados${erros>0?`, ${erros} com erro`:""}!`, ok>0?"ok":"err");
+  await carregarProdutos();
+}
+
+async function carregarProdutos() {
+  try {
+    const farmId = document.getElementById("p-farm")?.value;
+    const q = farmId ? `farmacia_id=eq.${farmId}&order=nome.asc&limit=50` : "order=nome.asc&limit=50";
+    const prods = await sbGet("produtos", q);
+    const lista = document.getElementById("lista-produtos");
+    const total = document.getElementById("total-prod");
+    if (total) total.textContent = prods.length;
+    if (!prods.length) { lista.innerHTML = '<div style="text-align:center;padding:20px;color:#aaa;font-size:12px">Nenhum produto</div>'; return; }
+    lista.innerHTML = prods.map(p => `
+      <div class="prod-item">
+        <div style="font-size:18px">${p.icone||"💊"}</div>
+        <div style="flex:1">
+          <div style="font-size:12px;font-weight:600">${p.nome}</div>
+          <div style="font-size:10px;color:#aaa">${p.laboratorio||""} · ${p.categoria||""}</div>
+        </div>
+        <div style="font-size:12px;font-weight:700;color:#3BAA35">R$ ${p.preco_venda?.toFixed(2).replace(".",",")}</div>
+        ${p.receita?'<span class="tag" style="background:#fef2f2;color:#E03A3A;margin-left:6px">Receita</span>':""}
+      </div>`).join("");
+    document.getElementById("step-3").classList.add("concluido");
+    document.getElementById("sn-3").textContent = "✓";
+  } catch(e) { console.warn(e); }
+}
+
+// ══════════════════════════════════════════════════════════
+// PASSO 5 — MOTOBOYS
+// ══════════════════════════════════════════════════════════
+async function cadastrarMotoboy() {
+  const nome  = document.getElementById("m-nome").value.trim();
+  const tel   = document.getElementById("m-tel").value.trim();
+  const cnh   = document.getElementById("m-cnh").value.trim();
+  const placa = document.getElementById("m-placa").value.trim();
+  const pix   = document.getElementById("m-pix").value.trim();
+  const lat   = parseFloat(document.getElementById("m-lat").value) || -21.2062;
+
+  if (!nome || !tel) { msg("msg-moto", "Preencha nome e telefone.", "err"); return; }
+
+  try {
+    await sbInsert("motoboys", {
+      nome, telefone: tel, cnh, placa,
+      lat, lng: -41.8878,
+      disponivel: true, em_entrega: false,
+      ganhos_hoje: 0, entregas_hoje: 0,
+      nota: 5.0, ativo: true,
+    });
+    msg("msg-moto", `✅ Motoboy "${nome}" cadastrado!`, "ok");
+    ["m-nome","m-tel","m-cnh","m-placa","m-pix"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
+    await carregarMotoboys();
+  } catch(e) { msg("msg-moto", "❌ Erro: " + e.message, "err"); }
+}
+
+async function carregarMotoboys() {
+  try {
+    const motos = await sbGet("motoboys", "order=nome.asc");
+    const lista = document.getElementById("lista-motoboys");
+    if (!motos.length) { lista.innerHTML='<div style="text-align:center;padding:20px;color:#aaa;font-size:12px">Nenhum motoboy cadastrado</div>'; return; }
+    lista.innerHTML = motos.map(m => `
+      <div class="farm-item">
+        <div>
+          <div style="font-weight:600;font-size:13px">🛵 ${m.nome}</div>
+          <div style="font-size:11px;color:#9a9eb8">${m.telefone} · ${m.placa||"sem placa"}</div>
+        </div>
+        <span class="tag badge-ok">✓ Ativo</span>
+      </div>`).join("");
+    document.getElementById("step-4").classList.add("concluido");
+    document.getElementById("sn-4").textContent = "✓";
+  } catch(e) { console.warn(e); }
+}
+
+function finalizarSetup() {
+  document.querySelectorAll(".step").forEach(s => { s.classList.add("concluido"); });
+  document.querySelectorAll(".step-num").forEach(s => { s.textContent = "✓"; });
+  irPara("concluido");
+}
+</script>
+</body>
+</html>
