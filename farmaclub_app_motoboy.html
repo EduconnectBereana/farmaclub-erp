@@ -71,6 +71,7 @@ input{font-family:inherit;outline:none}
   <button class="bnav-btn" id="bn-ganhos" onclick="navTo('ganhos')"><span class="bnav-ico">💰</span>Ganhos</button>
 </nav>
 
+<script src="farmaclub_supabase.js"></script>
 <script>
 // ── DADOS ──
 const NOME_MOTOBOY = "Carlos Mendes";
@@ -492,6 +493,55 @@ function mostrarBannerMotoboy(prompt) {
 
   setTimeout(() => { if (banner.parentNode) banner.remove(); }, 8000);
 }
+
+// ── FASE B: SUPABASE — polling de pedidos em tempo real ──
+async function buscarPedidosSupabase() {
+  if (typeof sb === "undefined" || SUPABASE_ANON === "COLE_AQUI_SUA_CHAVE_ANON_PUBLIC") return;
+  try {
+    const { data } = await sb.from("pedidos")
+      .eq("status", "aguardando")
+      .order("created_at", false)
+      .limit(10)
+      .get();
+    if (!data || !data.length) return;
+    const alertas = JSON.parse(localStorage.getItem("fc_alertas_motoboy") || "[]");
+    let mudou = false;
+    data.forEach(ped => {
+      if (!alertas.find(a => a.pedidoId === ped.id)) {
+        alertas.push({
+          pedidoId: ped.id,
+          farmacia: ped.farmacia_nome || "FarmaClub",
+          endereco: ped.endereco_entrega || "",
+          total: ped.total_final || 0,
+          motoboysFila: [],
+          ts: new Date(ped.created_at).getTime(),
+          status: "aguardando",
+          fonte: "supabase",
+        });
+        mudou = true;
+      }
+    });
+    if (mudou) {
+      localStorage.setItem("fc_alertas_motoboy", JSON.stringify(alertas));
+      if (typeof renderContent === "function") renderContent();
+    }
+  } catch(e) { /* offline */ }
+}
+
+async function atualizarPedidoSupabase(pedidoId, status, extra) {
+  if (typeof sb === "undefined" || SUPABASE_ANON === "COLE_AQUI_SUA_CHAVE_ANON_PUBLIC") return;
+  try {
+    await sb.from("pedidos").eq("id", pedidoId).update({ status, ...(extra||{}) });
+  } catch(e) { /* silencioso */ }
+}
+
+function iniciarPollingMotoboy() {
+  buscarPedidosSupabase();
+  setInterval(buscarPedidosSupabase, 10000);
+}
+
+iniciarPollingMotoboy();
+
 </script>
 </body>
 </html>

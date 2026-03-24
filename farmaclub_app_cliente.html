@@ -7,6 +7,7 @@
 <link rel="manifest" href="manifest-cliente.json">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="farmaclub_supabase.js"></script>
 <meta name="theme-color" content="#3BAA35">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FarmaClub">
@@ -1209,12 +1210,53 @@ function confirmarPedido(nm,tel,end,bairro){
   };
   // Ajuste para retirada (sem frete)
   if(modoEntrega==="retirada"){ped.frete=0;ped.total=totalComPag(pagSel);ped.modoEntrega="retirada";}
+  // Salvar localmente (sempre — fallback offline)
   const peds=getPedidos();peds.push(ped);salvarPedidos(peds);
-  // Notificar motoboys ordenados por distância (só se entrega em casa)
   if(modoEntrega==="entrega") notificarMotoboysPorDistancia(ped);
   pedidoAtual=ped;carrinho=[];updBadge();
   tela="rastreamento";rc();
   toast("🎉 Pedido realizado com sucesso!");
+
+  // Salvar no Supabase em background (não bloqueia o app)
+  if(typeof sb !== "undefined" && SUPABASE_ANON !== "COLE_AQUI_SUA_CHAVE_ANON_PUBLIC"){
+    (async()=>{
+      try {
+        const pedidoSb = {
+          id: ped.id,
+          farmacia_id: ped.farmId||1,
+          cliente_nome: ped.cliente,
+          cliente_tel: ped.tel,
+          cliente_email: ped.email||"",
+          endereco_entrega: ped.endereco,
+          bairro_entrega: ped.bairro||"",
+          lat_cliente: ped.clienteLat,
+          lng_cliente: ped.clienteLng,
+          total_base: ped.totalBase,
+          total_final: ped.total,
+          frete: ped.frete,
+          comissao_fc: +(ped.totalBase*0.10).toFixed(2),
+          forma_pagamento: ped.pagamento,
+          modo_entrega: ped.modoEntrega||"entrega",
+          status: "aguardando",
+        };
+        const { error } = await sb.from("pedidos").insert(pedidoSb);
+        if(!error) {
+          // Salvar itens
+          const itens = (ped.itens||[]).map(it=>({
+            pedido_id: ped.id,
+            farmacia_id: it.fid||1,
+            nome: it.nome,
+            icone: it.ico||"💊",
+            preco_unit: it.preco,
+            quantidade: it.qtd,
+            subtotal: +(it.preco*it.qtd).toFixed(2),
+            receita: it.receita||false,
+          }));
+          if(itens.length) await sb.from("pedido_itens").insert(itens);
+        }
+      } catch(e){ console.warn("Falha ao salvar pedido no Supabase:", e.message); }
+    })();
+  }
 }
 
 // RASTREAMENTO
@@ -1871,6 +1913,26 @@ window.confirmarAgendamento = function(){
 };
 
 
+
+
+// Atualizar status do pedido do Supabase em tempo real
+async function atualizarStatusDoSupabase(pedId) {
+  if (typeof sb === "undefined" || SUPABASE_ANON === "COLE_AQUI_SUA_CHAVE_ANON_PUBLIC") return;
+  try {
+    const { data } = await sb.from("pedidos").eq("id", pedId).single();
+    if (!data) return;
+    const peds = getPedidos();
+    const idx = peds.findIndex(p => p.id === pedId);
+    if (idx >= 0) {
+      peds[idx].status = data.status;
+      peds[idx].motoboy = data.motoboy_nome || peds[idx].motoboy;
+      if (data.motoboy_lat) peds[idx].motoboyLat = data.motoboy_lat;
+      if (data.motoboy_lng) peds[idx].motoboyLng = data.motoboy_lng;
+      if (data.confirmado_cliente) peds[idx].confirmadoCliente = data.confirmado_cliente;
+      salvarPedidos(peds);
+    }
+  } catch(e) { /* silencioso — fallback no localStorage */ }
+}
 
 // INIT
 atualizarTopUser();

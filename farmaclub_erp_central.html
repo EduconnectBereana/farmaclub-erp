@@ -6,7 +6,7 @@
 <title>FarmaClub — ERP Central</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#f4f4f2;color:#1a1a1a;font-size:14px;display:flex;min-height:100vh}
+body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#f4f4f2;color:#1a1a1a;font-size:14px;display:flex;height:100vh;overflow:hidden}
 button,input,select{font-family:inherit;cursor:pointer}
 input,select{background:#fff;color:#1a1a1a;border:1px solid #ddd;border-radius:7px;padding:7px 10px;font-size:12px}
 #sidebar{width:190px;background:#fff;border-right:1px solid #e8e8e8;padding:18px 10px;display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
@@ -16,7 +16,7 @@ input,select{background:#fff;color:#1a1a1a;border:1px solid #ddd;border-radius:7
 .nav-btn{display:flex;align-items:center;gap:8px;width:100%;padding:8px 10px;border-radius:8px;border:none;border-left:3px solid transparent;background:transparent;color:#666;font-size:12px;text-align:left;cursor:pointer;margin-bottom:2px;transition:all .15s}
 .nav-btn:hover{background:#f5f5f5;color:#1a1a1a}
 .nav-btn.ativo{background:#3BAA35;color:#fff;border-left-color:#3BAA35}
-#main{flex:1;display:flex;flex-direction:column;min-width:0}
+#main{flex:1;display:flex;flex-direction:column;min-width:0;height:100vh;overflow:hidden}
 #topbar{padding:13px 24px;background:#fff;border-bottom:1px solid #e8e8e8;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
 #content{padding:22px 24px;flex:1;overflow-y:auto}
 .card{background:#fff;border-radius:12px;border:1px solid #e8e8e8;padding:16px}
@@ -62,6 +62,10 @@ tfoot td{font-weight:700;font-size:12px;padding:10px 12px;background:#f8f8f8;bor
   <button class="nav-btn" data-tab="compras" onclick="setTab('compras')">🛒 Compras</button>
   <button class="nav-btn" data-tab="pedidos_farmacias" onclick="setTab('pedidos_farmacias')" style="color:#d97706;font-weight:600">📥 Pedidos das Farmácias</button>
   <button class="nav-btn" data-tab="campanhas_rede" onclick="setTab('campanhas_rede')" style="color:#E03A3A;font-weight:600">📢 Campanhas da Rede</button>
+  <button class="nav-btn" data-tab="medicos_rede" onclick="setTab('medicos_rede')" style="color:#1A5FA8;font-weight:600">👨‍⚕️ Médicos Parceiros</button>
+  <button class="nav-btn" data-tab="dentistas_rede" onclick="setTab('dentistas_rede')" style="color:#0891b2;font-weight:600">🦷 Dentistas Parceiros</button>
+  <div class="nav-sec" style="color:#7c3aed;margin-top:4px">⚙ Sistema</div>
+  <button class="nav-btn" data-tab="modulos" onclick="setTab('modulos')" style="color:#7c3aed;font-weight:600">🔧 Módulos & Fases</button>
   <div class="nav-sec">Inteligência</div>
   <button class="nav-btn" data-tab="estoque_rede" onclick="setTab('estoque_rede')">📦 Estoque da Rede</button>
   <button class="nav-btn" data-tab="distribuicao" onclick="setTab('distribuicao')" style="color:#1A5FA8;font-weight:600">🚚 Distribuição</button>
@@ -84,14 +88,17 @@ tfoot td{font-weight:700;font-size:12px;padding:10px 12px;background:#f8f8f8;bor
       <div style="background:#e6faf8;color:#3BAA35;border:1px solid #b2ece7;border-radius:20px;padding:5px 14px;font-size:11px;font-weight:600">
         <span class="live">●</span> Sistema operacional
       </div>
+      <span id="central-badge" style="background:#fffbeb;color:#d97706;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600">🟡 Carregando...</span>
+      <button id="btn-recarregar" onclick="recarregarDados()" style="padding:5px 12px;background:#f5f5f5;border:1px solid #e0e0e0;border-radius:8px;font-size:11px;cursor:pointer;font-family:inherit">🔄 Atualizar</button>
       <select style="font-size:12px;padding:6px 10px;width:auto">
         <option>Março/2026</option><option>Fevereiro/2026</option><option>Janeiro/2026</option>
       </select>
     </div>
   </div>
-  <div id="content" style="overflow-y:auto;flex:1;padding:22px 24px"></div>
+  <div id="content" style="overflow-y:auto;flex:1;padding:22px 24px;min-height:0"></div>
 </div>
 
+<script src="farmaclub_supabase.js"></script>
 <script>
 const T="#3BAA35",AM="#d97706",RD="#dc2626",GN="#16a34a",BL="#2563eb",PU="#7c3aed";
 const fmt=v=>v.toLocaleString("pt-BR",{style:"currency",currency:"BRL",minimumFractionDigits:2});
@@ -337,6 +344,13 @@ const tabTitles={
   motoboys:["Motoboys","Equipe de entrega FarmaClub"],
   financeiro:["Financeiro & Repasses","Comissões e repasses"],
   compras:["Compras Coletivas","Necessidades e cotações"],
+  pedidos_farmacias:["Pedidos das Farmácias","Consolidação e compra coletiva"],
+  estoque_rede:["Estoque da Rede","Visão cruzada de todas as farmácias"],
+  distribuicao:["Distribuição","Separação e envio para farmácias"],
+  campanhas_rede:["Campanhas da Rede","Novidades, kits e promoções ativas"],
+  medicos_rede:["Médicos Parceiros","Agendamentos e créditos"],
+  dentistas_rede:["Dentistas Parceiros","Fase 4 — agendamento e B2B"],
+  modulos:["Módulos & Fases","Ativar e desativar funcionalidades do sistema"],
   insights:["IA & Insights","Alertas e recomendações automáticas"],
   relatorios:["Relatórios","Análises gerenciais"],
 };
@@ -1189,7 +1203,502 @@ window.encerrarCampCentral = function(idx){
   renderContent();
 };
 
-const renders={dashboard:renderDashboard,farmacias:renderFarmacias,pedidos:renderPedidos,motoboys:renderMotoboys,financeiro:renderFinanceiro,compras:renderCompras,estoque_rede:renderEstoqueRede,distribuicao:renderDistribuicao,pedidos_farmacias:renderPedidosFarmacias,campanhas_rede:renderCampanhasRede,insights:renderInsights,relatorios:renderRelatorios};
+
+
+// ── DENTISTAS PARCEIROS — ERP CENTRAL ──
+function renderDentistasRede(){
+  const fmtL=v=>"R$ "+v.toFixed(2).replace(".",",");
+  const agendamentos=JSON.parse(localStorage.getItem("fc_agendamentos")||"[]")
+    .filter(a=>a.tipo==="dentista");
+
+  const dentistas=[
+    {id:1,nome:"Dr. Paulo Henrique Souza",especialidade:"Clínica Geral",cro:"CRO-RJ 34521",consultas:412,valorConsulta:120,credito:184.80,ativo:true},
+    {id:2,nome:"Dra. Mariana Costa",especialidade:"Ortodontia",cro:"CRO-RJ 41230",consultas:265,valorConsulta:150,credito:43.50,ativo:true},
+    {id:3,nome:"Dr. Thiago Almeida",especialidade:"Implantodontia",cro:"CRO-RJ 52789",consultas:178,valorConsulta:200,credito:220.00,ativo:true},
+  ];
+
+  const totalConsultas=dentistas.reduce((s,d)=>s+d.consultas,0);
+  const receitaPlat=dentistas.reduce((s,d)=>s+d.consultas*d.valorConsulta*0.10,0);
+  const creditoTotal=dentistas.reduce((s,d)=>s+d.credito,0);
+
+  return`
+    <div style="background:linear-gradient(135deg,#0891b2,#0e7490);border-radius:12px;padding:16px 20px;margin-bottom:16px;color:#fff;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+      <div>
+        <div style="font-size:16px;font-weight:700">🦷 Dentistas Parceiros FarmaClub</div>
+        <div style="font-size:12px;opacity:.85;margin-top:3px">Fase 2 — agendamentos, créditos e compras coletivas de materiais</div>
+      </div>
+      <button onclick="alert('Cadastro em breve.')"
+        style="padding:9px 18px;background:#fff;color:#0891b2;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">
+        + Cadastrar dentista
+      </button>
+    </div>
+
+    <!-- KPIs -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px">
+      <div style="background:#fff;border-radius:10px;padding:12px;border:1px solid #e8eaf4;text-align:center">
+        <div style="font-size:22px;font-weight:700;color:#0891b2">${dentistas.length}</div>
+        <div style="font-size:11px;color:#888;margin-top:3px">Dentistas ativos</div>
+      </div>
+      <div style="background:#fff;border-radius:10px;padding:12px;border:1px solid #e8eaf4;text-align:center">
+        <div style="font-size:22px;font-weight:700;color:#3BAA35">${totalConsultas}</div>
+        <div style="font-size:11px;color:#888;margin-top:3px">Atendimentos</div>
+      </div>
+      <div style="background:#fff;border-radius:10px;padding:12px;border:1px solid #e8eaf4;text-align:center">
+        <div style="font-size:22px;font-weight:700;color:#3BAA35">${fmtL(receitaPlat)}</div>
+        <div style="font-size:11px;color:#888;margin-top:3px">Receita (10%)</div>
+      </div>
+      <div style="background:#fff;border-radius:10px;padding:12px;border:1px solid #e8eaf4;text-align:center">
+        <div style="font-size:22px;font-weight:700;color:#d97706">${fmtL(creditoTotal)}</div>
+        <div style="font-size:11px;color:#888;margin-top:3px">Crédito a pagar</div>
+      </div>
+    </div>
+
+    <!-- VISÃO FASE 2 -->
+    <div style="background:linear-gradient(135deg,#e0f7fa,#f0fdfe);border:1.5px solid #a5f3fc;border-radius:12px;padding:16px;margin-bottom:14px">
+      <div style="font-size:13px;font-weight:700;color:#0e7490;margin-bottom:10px">🚀 Roadmap — Dentistas na Fase 2</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        ${[
+          ["📅","Agendamento online","Mesmo modelo dos médicos"],
+          ["💸","Créditos por prescrição","3% das compras indicadas"],
+          ["🛒","Compra coletiva B2B","Material odontológico em grupo"],
+          ["💊","Perfil no app","Pacientes agendam pelo FarmaClub"],
+          ["📊","Relatório de indicações","Quais produtos cada dentista indica"],
+          ["🤝","Rede de clínicas","Dentistas cadastram a clínica, não só o profissional"],
+        ].map(([ico,tit,det])=>`
+          <div style="background:#fff;border-radius:8px;padding:10px;border:1px solid #a5f3fc">
+            <div style="font-size:16px;margin-bottom:4px">${ico}</div>
+            <div style="font-size:12px;font-weight:600;color:#0e7490">${tit}</div>
+            <div style="font-size:11px;color:#9a9eb8;margin-top:2px">${det}</div>
+          </div>`).join("")}
+      </div>
+    </div>
+
+    <!-- TABELA DE DENTISTAS -->
+    <div class="card" style="margin-bottom:14px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:14px">Dentistas cadastrados</div>
+      <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse">
+        <thead style="background:#f8f8f8"><tr>
+          <th style="padding:9px 10px;text-align:left;font-size:11px;color:#888;font-weight:500">Dentista</th>
+          <th style="padding:9px 10px;text-align:center;font-size:11px;color:#888;font-weight:500">Especialidade</th>
+          <th style="padding:9px 10px;text-align:center;font-size:11px;color:#888;font-weight:500">Atendimentos</th>
+          <th style="padding:9px 10px;text-align:right;font-size:11px;color:#888;font-weight:500">Valor/consulta</th>
+          <th style="padding:9px 10px;text-align:right;font-size:11px;color:#888;font-weight:500">Crédito</th>
+          <th style="padding:9px 10px;text-align:center;font-size:11px;color:#888;font-weight:500">Ação</th>
+        </tr></thead>
+        <tbody>
+          ${dentistas.map((d,i)=>`
+          <tr style="border-bottom:${i<dentistas.length-1?"1px solid #f5f5f5":"none"}">
+            <td style="padding:10px">
+              <div style="font-weight:600;font-size:13px">${d.nome}</div>
+              <div style="font-size:10px;color:#aaa">${d.cro}</div>
+            </td>
+            <td style="padding:10px;text-align:center">
+              <span style="background:#e0f7fa;color:#0891b2;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">${d.especialidade}</span>
+            </td>
+            <td style="padding:10px;text-align:center;font-weight:600">${d.consultas}</td>
+            <td style="padding:10px;text-align:right;font-size:13px;font-weight:600">${fmtL(d.valorConsulta)}</td>
+            <td style="padding:10px;text-align:right">
+              <div style="font-weight:700;font-size:14px;color:${d.credito>=50?"#3BAA35":"#d97706"}">${fmtL(d.credito)}</div>
+              <div style="font-size:10px;color:#aaa">${d.credito>=50?"Disponível":"Min: R$ 50"}</div>
+            </td>
+            <td style="padding:8px 10px;text-align:center">
+              ${d.credito>=50?`
+              <button onclick="alert('PIX de ${fmtL(d.credito)} para ${d.nome}.')"
+                style="padding:5px 10px;background:#3BAA35;color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit">
+                💸 Pagar
+              </button>`:`<span style="font-size:11px;color:#aaa">Aguardando</span>`}
+            </td>
+          </tr>`).join("")}
+        </tbody>
+      </table>
+      </div>
+    </div>
+
+    ${agendamentos.length>0?`
+    <div class="card">
+      <div style="font-size:13px;font-weight:600;margin-bottom:12px">Agendamentos odontológicos (${agendamentos.length})</div>
+      ${agendamentos.slice(-5).reverse().map(a=>`
+        <div style="padding:10px 0;border-bottom:1px solid #f5f5f5;display:flex;align-items:center;gap:12px">
+          <div style="font-size:22px;flex-shrink:0">🦷</div>
+          <div style="flex:1">
+            <div style="font-weight:600;font-size:13px">${a.paciente}</div>
+            <div style="font-size:11px;color:#888">${a.dentista} · ${a.dia} às ${a.hora}</div>
+          </div>
+          <div style="font-weight:600;color:#0891b2">${fmtL(a.valor||0)}</div>
+        </div>`).join("")}
+    </div>`:""}`;
+}
+
+// ── MÉDICOS PARCEIROS — ERP CENTRAL ──
+const CFG_MEDICOS = {
+  comissao_plataforma: 0.10,  // 10% da consulta
+  bonificacao_prescricao: 0.03, // 3% da venda do remédio
+  saque_minimo: 50.00,
+};
+
+function renderMedicosRede(){
+  // Dados simulados — virão do Supabase
+  const agendamentos = JSON.parse(localStorage.getItem("fc_agendamentos")||"[]");
+  const medicos = [
+    {id:1,nome:"Dr. Carlos Eduardo Mury",especialidade:"Clínica Geral",crm:"CRM-RJ 52341",consultas:342,valorConsulta:150,credito:248.50,ativo:true},
+    {id:2,nome:"Dra. Ana Paula Ferreira",especialidade:"Pediatria",crm:"CRM-RJ 48912",consultas:189,valorConsulta:180,credito:87.30,ativo:true},
+    {id:3,nome:"Dr. Roberto Bastos",especialidade:"Cardiologia",crm:"CRM-RJ 61034",consultas:95,valorConsulta:220,credito:152.00,ativo:true},
+    {id:4,nome:"Dra. Fernanda Lima",especialidade:"Dermatologia",crm:"CRM-RJ 55677",consultas:278,valorConsulta:200,credito:310.80,ativo:true},
+  ];
+
+  const totalConsultas=medicos.reduce((s,m)=>s+m.consultas,0);
+  const receitaConsultas=medicos.reduce((s,m)=>s+m.consultas*m.valorConsulta*CFG_MEDICOS.comissao_plataforma,0);
+  const creditoTotal=medicos.reduce((s,m)=>s+m.credito,0);
+  const agendHoje=agendamentos.filter(a=>a.criadoEm?.startsWith(new Date().toISOString().split("T")[0])).length;
+
+  const fmtL=v=>"R$ "+v.toFixed(2).replace(".",",");
+
+  return`
+    <div style="background:linear-gradient(135deg,#1A5FA8,#0d47a1);border-radius:12px;padding:16px 20px;margin-bottom:16px;color:#fff;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+      <div>
+        <div style="font-size:16px;font-weight:700">👨‍⚕️ Médicos Parceiros FarmaClub</div>
+        <div style="font-size:12px;opacity:.85;margin-top:3px">Gestão de agendamentos, créditos e bonificações por prescrição</div>
+      </div>
+      <button onclick="alert('Cadastro de médico: formulário em breve. Por enquanto, cadastre diretamente no código.')"
+        style="padding:9px 18px;background:#fff;color:#1A5FA8;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">
+        + Cadastrar médico
+      </button>
+    </div>
+
+    <!-- KPIs -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px">
+      <div style="background:#fff;border-radius:10px;padding:12px;border:1px solid #e8eaf4;text-align:center">
+        <div style="font-size:22px;font-weight:700;color:#1A5FA8">${medicos.length}</div>
+        <div style="font-size:11px;color:#888;margin-top:3px">Médicos ativos</div>
+      </div>
+      <div style="background:#fff;border-radius:10px;padding:12px;border:1px solid #e8eaf4;text-align:center">
+        <div style="font-size:22px;font-weight:700;color:#3BAA35">${totalConsultas}</div>
+        <div style="font-size:11px;color:#888;margin-top:3px">Consultas totais</div>
+      </div>
+      <div style="background:#fff;border-radius:10px;padding:12px;border:1px solid #e8eaf4;text-align:center">
+        <div style="font-size:22px;font-weight:700;color:#d97706">${agendHoje}</div>
+        <div style="font-size:11px;color:#888;margin-top:3px">Agendamentos hoje</div>
+      </div>
+      <div style="background:#fff;border-radius:10px;padding:12px;border:1px solid #e8eaf4;text-align:center">
+        <div style="font-size:22px;font-weight:700;color:#3BAA35">${fmtL(receitaConsultas)}</div>
+        <div style="font-size:11px;color:#888;margin-top:3px">Receita (10% consultas)</div>
+      </div>
+    </div>
+
+    <!-- CONFIGURAÇÕES DE COMISSÃO -->
+    <div class="card" style="margin-bottom:14px;border:1.5px solid #e0e0e0">
+      <div style="font-size:13px;font-weight:600;margin-bottom:12px">⚙️ Configurações do modelo médico</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+        <div>
+          <label style="font-size:11px;color:#888;display:block;margin-bottom:4px">FarmaClub fica (consulta)</label>
+          <div style="display:flex;align-items:center;gap:6px">
+            <input type="number" value="${(CFG_MEDICOS.comissao_plataforma*100).toFixed(0)}" min="0" max="50"
+              style="width:70px;padding:8px;border:1px solid #ddd;border-radius:7px;font-size:14px;font-weight:700;text-align:center">
+            <span style="font-size:14px;font-weight:700;color:#1A5FA8">%</span>
+          </div>
+        </div>
+        <div>
+          <label style="font-size:11px;color:#888;display:block;margin-bottom:4px">Bonificação médico (prescrição)</label>
+          <div style="display:flex;align-items:center;gap:6px">
+            <input type="number" value="${(CFG_MEDICOS.bonificacao_prescricao*100).toFixed(0)}" min="0" max="20"
+              style="width:70px;padding:8px;border:1px solid #ddd;border-radius:7px;font-size:14px;font-weight:700;text-align:center">
+            <span style="font-size:14px;font-weight:700;color:#3BAA35">%</span>
+          </div>
+        </div>
+        <div>
+          <label style="font-size:11px;color:#888;display:block;margin-bottom:4px">Saque mínimo</label>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="font-size:13px;font-weight:600;color:#555">R$</span>
+            <input type="number" value="${CFG_MEDICOS.saque_minimo.toFixed(0)}" min="10"
+              style="width:70px;padding:8px;border:1px solid #ddd;border-radius:7px;font-size:14px;font-weight:700;text-align:center">
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:10px;background:#eff6ff;border-radius:8px;padding:10px;font-size:12px;color:#1d4ed8;line-height:1.6">
+        💡 Médico define o preço da consulta. FarmaClub fica com ${(CFG_MEDICOS.comissao_plataforma*100).toFixed(0)}% e repassa o restante para o médico em crédito. Saque disponível ao atingir R$ ${CFG_MEDICOS.saque_minimo.toFixed(0)}.
+      </div>
+    </div>
+
+    <!-- TABELA DE MÉDICOS -->
+    <div class="card" style="margin-bottom:14px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:14px">Médicos cadastrados</div>
+      <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse">
+        <thead style="background:#f8f8f8"><tr>
+          <th style="padding:9px 10px;text-align:left;font-size:11px;color:#888;font-weight:500">Médico</th>
+          <th style="padding:9px 10px;text-align:center;font-size:11px;color:#888;font-weight:500">Especialidade</th>
+          <th style="padding:9px 10px;text-align:center;font-size:11px;color:#888;font-weight:500">Consultas</th>
+          <th style="padding:9px 10px;text-align:right;font-size:11px;color:#888;font-weight:500">Valor/consulta</th>
+          <th style="padding:9px 10px;text-align:right;font-size:11px;color:#888;font-weight:500">Crédito acumulado</th>
+          <th style="padding:9px 10px;text-align:center;font-size:11px;color:#888;font-weight:500">Ações</th>
+        </tr></thead>
+        <tbody>
+          ${medicos.map((m,i)=>`
+          <tr style="border-bottom:${i<medicos.length-1?"1px solid #f5f5f5":"none"}">
+            <td style="padding:10px 10px">
+              <div style="font-weight:600;font-size:13px">${m.nome}</div>
+              <div style="font-size:10px;color:#aaa">${m.crm}</div>
+            </td>
+            <td style="padding:10px;text-align:center">
+              <span style="background:#eff6ff;color:#1A5FA8;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">${m.especialidade}</span>
+            </td>
+            <td style="padding:10px;text-align:center;font-weight:600">${m.consultas}</td>
+            <td style="padding:10px;text-align:right;font-size:13px;font-weight:600">${fmtL(m.valorConsulta)}</td>
+            <td style="padding:10px;text-align:right">
+              <div style="font-weight:700;font-size:14px;color:${m.credito>=CFG_MEDICOS.saque_minimo?"#3BAA35":"#d97706"}">${fmtL(m.credito)}</div>
+              <div style="font-size:10px;color:#aaa">${m.credito>=CFG_MEDICOS.saque_minimo?"Disponível para saque":"Min: "+fmtL(CFG_MEDICOS.saque_minimo)}</div>
+            </td>
+            <td style="padding:8px 10px;text-align:center">
+              <div style="display:flex;gap:5px;justify-content:center">
+                ${m.credito>=CFG_MEDICOS.saque_minimo?`
+                <button onclick="processarSaque(${m.id},'${m.nome}',${m.credito})"
+                  style="padding:5px 10px;background:#3BAA35;color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit">
+                  💸 Pagar
+                </button>`:`
+                <span style="font-size:11px;color:#aaa">Aguardando min.</span>`}
+              </div>
+            </td>
+          </tr>`).join("")}
+        </tbody>
+      </table>
+      </div>
+    </div>
+
+    <!-- AGENDAMENTOS RECENTES -->
+    ${agendamentos.length>0?`
+    <div class="card">
+      <div style="font-size:13px;font-weight:600;margin-bottom:12px">Agendamentos recentes (${agendamentos.length})</div>
+      ${agendamentos.slice(-5).reverse().map(a=>`
+        <div style="padding:10px 0;border-bottom:1px solid #f5f5f5;display:flex;align-items:center;gap:12px">
+          <div style="width:36px;height:36px;background:#eff6ff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🗓️</div>
+          <div style="flex:1">
+            <div style="font-weight:600;font-size:13px">${a.paciente}</div>
+            <div style="font-size:11px;color:#888">${a.medico} · ${a.dia} às ${a.hora}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-weight:600;color:#1A5FA8">${fmtL(a.valor||0)}</div>
+            <span style="background:#f0fdf4;color:#3BAA35;padding:2px 7px;border-radius:8px;font-size:10px;font-weight:600">✓ ${a.status||"confirmado"}</span>
+          </div>
+        </div>`).join("")}
+    </div>`:""}`;
+}
+
+window.processarSaque = function(medicoId, medicoNome, credito){
+  if(!confirm(`Processar pagamento PIX de R$ ${credito.toFixed(2).replace(".",",")} para ${medicoNome}?`)) return;
+  alert(`✅ Pagamento de R$ ${credito.toFixed(2).replace(".",",")} registrado para ${medicoNome}.\n\nEnvie o PIX para a chave cadastrada do médico.\nComprovante deve ser enviado por WhatsApp.`);
+};
+
+
+// ══════════════════════════════════════════════════════════
+// SISTEMA DE FEATURE FLAGS — Módulos & Fases
+// Controla o que aparece no app, site e ERPs com um clique
+// ══════════════════════════════════════════════════════════
+
+const FLAGS_KEY = "fc_feature_flags";
+
+const FLAGS_DEFAULT = {
+  medicos:      false,  // Fase 3
+  dentistas:    false,  // Fase 4
+  fidelidade:   false,  // Fase 3
+  telemedicina: false,  // Fase 4
+  b2b_dental:   false,  // Fase 4
+  notif_push:   false,  // Fase 2 (exige backend)
+  supabase:     false,  // Fase 2
+};
+
+const FLAGS_INFO = {
+  medicos:      {label:"Consultas Médicas",      ico:"👨‍⚕️", fase:"Fase 3", cor:"#1A5FA8", desc:"Agendamento presencial com médicos parceiros. Requer ERP da secretaria médica."},
+  dentistas:    {label:"Dentistas Parceiros",    ico:"🦷",   fase:"Fase 4", cor:"#0891b2", desc:"Agendamento e compras coletivas B2B de materiais odontológicos."},
+  fidelidade:   {label:"Programa de Pontos",     ico:"⭐",   fase:"Fase 3", cor:"#d97706", desc:"Fidelização com pontos por compra e resgate em produtos."},
+  telemedicina: {label:"Teleconsulta Online",    ico:"📱",   fase:"Fase 4", cor:"#7c3aed", desc:"Consultas por vídeo. Exige CRM, prontuário homologado e CNPJ em saúde."},
+  b2b_dental:   {label:"Compras B2B Dentistas",  ico:"🛒",   fase:"Fase 4", cor:"#0891b2", desc:"Compra coletiva de materiais odontológicos para clínicas parceiras."},
+  notif_push:   {label:"Notificações Push",      ico:"🔔",   fase:"Fase 2", cor:"#3BAA35", desc:"Alertas em tempo real para clientes e motoboys. Exige backend com Supabase."},
+  supabase:     {label:"Banco de Dados Online",  ico:"☁️",   fase:"Fase 2", cor:"#3BAA35", desc:"Integração com Supabase — dados reais, login seguro, estoque em tempo real."},
+};
+
+function getFlags(){
+  return {...FLAGS_DEFAULT,...JSON.parse(localStorage.getItem(FLAGS_KEY)||"{}")};
+}
+
+function setFlag(key, value){
+  const flags = getFlags();
+  flags[key] = value;
+  localStorage.setItem(FLAGS_KEY, JSON.stringify(flags));
+  // Propaga para todos os módulos via localStorage
+  localStorage.setItem("fc_flags_updated", Date.now().toString());
+}
+
+function renderModulos(){
+  const flags = getFlags();
+  const ativos   = Object.keys(FLAGS_INFO).filter(k=>flags[k]);
+  const inativos = Object.keys(FLAGS_INFO).filter(k=>!flags[k]);
+
+  return`
+    <!-- CABEÇALHO -->
+    <div style="background:linear-gradient(135deg,#7c3aed,#5b21b6);border-radius:12px;padding:16px 20px;margin-bottom:16px;color:#fff">
+      <div style="font-size:16px;font-weight:700;margin-bottom:4px">🔧 Módulos & Fases do Sistema</div>
+      <div style="font-size:12px;opacity:.85;line-height:1.6">
+        Ative ou desative módulos com um clique. A mudança reflete imediatamente no app do cliente, site e ERP das farmácias.<br>
+        <strong>Módulos inativos ficam completamente ocultos para os usuários.</strong>
+      </div>
+    </div>
+
+    <!-- COMO FUNCIONA -->
+    <div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:#5b21b6;line-height:1.7">
+      <strong>Como funciona:</strong> Cada módulo lê uma chave no sistema antes de aparecer. Ao ativar aqui, o app e o site exibem o módulo automaticamente. Ao desativar, some de todos os lugares sem precisar mudar código.
+    </div>
+
+    <!-- MÓDULOS ATIVOS -->
+    ${ativos.length>0?`
+    <div class="card" style="margin-bottom:14px;border:1.5px solid #bbf7d0">
+      <div style="font-size:13px;font-weight:600;color:#16a34a;margin-bottom:12px">✅ Módulos ativos (${ativos.length})</div>
+      ${ativos.map(k=>{
+        const f=FLAGS_INFO[k];
+        return`<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f5f5f5">
+          <div style="width:40px;height:40px;border-radius:10px;background:${f.cor}18;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${f.ico}</div>
+          <div style="flex:1">
+            <div style="font-weight:600;font-size:13px">${f.label}</div>
+            <div style="font-size:11px;color:#9a9eb8;margin-top:2px">${f.desc}</div>
+            <span style="font-size:10px;background:${f.cor}18;color:${f.cor};padding:2px 8px;border-radius:10px;font-weight:600;margin-top:4px;display:inline-block">${f.fase}</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">
+            <div onclick="toggleFlag('${k}',false)"
+              style="width:48px;height:26px;border-radius:20px;background:#3BAA35;cursor:pointer;position:relative;transition:background .2s">
+              <div style="position:absolute;right:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.2)"></div>
+            </div>
+            <span style="font-size:10px;color:#3BAA35;font-weight:600">ATIVO</span>
+          </div>
+        </div>`;}).join("")}
+    </div>`:""}
+
+    <!-- MÓDULOS INATIVOS -->
+    <div class="card">
+      <div style="font-size:13px;font-weight:600;color:#9a9eb8;margin-bottom:12px">⏸ Módulos inativos — prontos para ativar (${inativos.length})</div>
+      ${inativos.map(k=>{
+        const f=FLAGS_INFO[k];
+        return`<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f5f5f5;opacity:.7">
+          <div style="width:40px;height:40px;border-radius:10px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${f.ico}</div>
+          <div style="flex:1">
+            <div style="font-weight:600;font-size:13px;color:#555">${f.label}</div>
+            <div style="font-size:11px;color:#9a9eb8;margin-top:2px">${f.desc}</div>
+            <span style="font-size:10px;background:#f5f5f5;color:#9a9eb8;padding:2px 8px;border-radius:10px;font-weight:600;margin-top:4px;display:inline-block">${f.fase} — Inativo</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">
+            <div onclick="toggleFlag('${k}',true)"
+              style="width:48px;height:26px;border-radius:20px;background:#e0e0e0;cursor:pointer;position:relative;transition:background .2s">
+              <div style="position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.2)"></div>
+            </div>
+            <span style="font-size:10px;color:#9a9eb8;font-weight:600">INATIVO</span>
+          </div>
+        </div>`;}).join("")}
+    </div>
+
+    <!-- ROADMAP DE FASES -->
+    <div class="card" style="margin-top:14px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:14px">📋 Roadmap do FarmaClub</div>
+      ${[
+        {fase:"Fase 1 — Atual",cor:"#3BAA35",status:"✅ Completa",itens:["ERP Central + ERP Farmácia","App Cliente + App Motoboy","Compras coletivas","Campanhas e promoções","Reposição inteligente","Módulo judicial","Sistema de pagamentos (PIX/Cartão)","Rastreamento de entregas","Agendamento médico/dentista (protótipo)"]},
+        {fase:"Fase 2 — Próxima",cor:"#1A5FA8",status:"⏳ Quando tiver receita",itens:["Integração Supabase (banco real)","Notificações push reais","Domínio farmaclub.com.br","Play Store via TWA","Estoque em tempo real","Login seguro por farmácia"]},
+        {fase:"Fase 3 — Expansão",cor:"#d97706",status:"🔮 Futuro próximo",itens:["Médicos parceiros ativados","ERP da secretaria médica","Programa de fidelidade/pontos","Histórico de saúde do cliente"]},
+        {fase:"Fase 4 — Ecossistema",cor:"#7c3aed",status:"🚀 Visão de longo prazo",itens:["Dentistas + compras B2B","Teleconsulta online","Expansão para outras cidades","App nativo iOS","Plataforma de saúde completa"]},
+      ].map(f=>`
+        <div style="border-left:4px solid ${f.cor};padding:10px 12px;margin-bottom:10px;background:${f.cor}08;border-radius:0 8px 8px 0">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <div style="font-weight:700;font-size:13px;color:${f.cor}">${f.fase}</div>
+            <span style="font-size:11px;color:${f.cor};font-weight:600">${f.status}</span>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px">
+            ${f.itens.map(i=>`<span style="font-size:11px;background:${f.cor}15;color:#555;padding:2px 8px;border-radius:10px">${i}</span>`).join("")}
+          </div>
+        </div>`).join("")}
+    </div>`;
+}
+
+window.toggleFlag = function(key, value){
+  const info = FLAGS_INFO[key];
+  const msg = value
+    ? `Ativar "${info.label}" agora?\n\nO módulo ficará visível no app, site e ERP das farmácias imediatamente.`
+    : `Desativar "${info.label}"?\n\nO módulo ficará oculto para todos os usuários.`;
+  if(!confirm(msg)) return;
+  setFlag(key, value);
+  renderContent();
+  toast(`${value?"✅ Ativado":"⏸ Desativado"}: ${info.label}`);
+};
+
+function toast(msg){
+  let t=document.getElementById("_toast_c");
+  if(!t){t=document.createElement("div");t.id="_toast_c";t.style.cssText="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;padding:10px 18px;border-radius:20px;font-size:12px;font-weight:600;z-index:999;opacity:0;transition:opacity .3s;white-space:nowrap";document.body.appendChild(t);}
+  t.textContent=msg;t.style.opacity=1;clearTimeout(t._t);t._t=setTimeout(()=>t.style.opacity=0,2500);
+}
+
+
+// ══════════════════════════════════════════════════════════
+// FASE B — ERP CENTRAL com Supabase
+// ══════════════════════════════════════════════════════════
+
+let isGestor = false;
+let dadosSupabase = { farmacias: [], pedidos: [], motoboys: [] };
+
+async function inicializarCentral() {
+  const session = typeof sb !== "undefined" && sb.auth.getSession();
+  if (session) {
+    await carregarDadosCentral();
+  } else {
+    // Modo demonstração com dados locais
+    isGestor = false;
+    atualizarBadgeCentral();
+    renderContent();
+  }
+}
+
+async function carregarDadosCentral() {
+  if (typeof sb === "undefined" || SUPABASE_ANON === "COLE_AQUI_SUA_CHAVE_ANON_PUBLIC") {
+    atualizarBadgeCentral();
+    renderContent();
+    return;
+  }
+  try {
+    const [farms, peds, motos] = await Promise.all([
+      sb.from("farmacias").order("nome").get(),
+      sb.from("pedidos").order("created_at", false).limit(100).get(),
+      sb.from("motoboys").order("nome").get(),
+    ]);
+    if (farms.data) dadosSupabase.farmacias = farms.data;
+    if (peds.data)  dadosSupabase.pedidos   = peds.data;
+    if (motos.data) dadosSupabase.motoboys  = motos.data;
+    isGestor = true;
+  } catch(e) {
+    console.warn("Supabase offline — usando dados de demo:", e.message);
+  }
+  atualizarBadgeCentral();
+  renderContent();
+}
+
+function atualizarBadgeCentral() {
+  const badge = document.getElementById("central-badge");
+  if (badge) {
+    badge.textContent = isGestor ? "🟢 Supabase conectado" : "🟡 Modo demonstração";
+    badge.style.background = isGestor ? "#f0fdf4" : "#fffbeb";
+    badge.style.color = isGestor ? "#3BAA35" : "#d97706";
+  }
+}
+
+// Função para testar conexão manualmente
+window.testarConexaoSupabase = async function() {
+  const resultado = await FC.testarConexao();
+  alert(resultado.msg);
+};
+
+// Recarregar dados do Supabase
+window.recarregarDados = async function() {
+  const btn = document.getElementById("btn-recarregar");
+  if (btn) { btn.textContent = "⏳ Carregando..."; btn.disabled = true; }
+  await carregarDadosCentral();
+  if (btn) { btn.textContent = "🔄 Atualizar dados"; btn.disabled = false; }
+};
+
+const renders={dashboard:renderDashboard,farmacias:renderFarmacias,pedidos:renderPedidos,motoboys:renderMotoboys,financeiro:renderFinanceiro,compras:renderCompras,estoque_rede:renderEstoqueRede,distribuicao:renderDistribuicao,pedidos_farmacias:renderPedidosFarmacias,campanhas_rede:renderCampanhasRede,medicos_rede:renderMedicosRede,dentistas_rede:renderDentistasRede,modulos:renderModulos,insights:renderInsights,relatorios:renderRelatorios};
 let tabAtual="dashboard";
 
 function setTab(t){
@@ -1219,7 +1728,7 @@ function renderDistCorpo(){
 function renderContent(){document.getElementById("content").innerHTML=(renders[tabAtual]||renderDashboard)();}
 window.setTab=setTab;
 window.renderContent=function(){renderContent();};
-renderContent();
+inicializarCentral();
 </script>
 </body>
 </html>
