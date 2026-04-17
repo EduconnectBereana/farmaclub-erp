@@ -1,0 +1,90 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>FarmaClub — Pagamentos e Split</title><style>
+:root{--bg:#f4f4f2;--card:#fff;--text:#1a1a1a;--muted:#6b7280;--line:#e5e7eb;--green:#3BAA35;--orange:#d97706;--blue:#2563eb}
+*{box-sizing:border-box} body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--text);margin:0} a{text-decoration:none;color:inherit} button,input,select{font:inherit}
+.layout{display:grid;grid-template-columns:240px 1fr;min-height:100vh}.side{background:#fff;border-right:1px solid var(--line);padding:20px}.side a{display:block;padding:10px 12px;border-radius:10px;margin-bottom:6px;font-weight:700;color:#4b5563}.side a.active,.side a:hover{background:#ecfdf5;color:#166534}.main{padding:20px}
+.logo{font-weight:800;font-size:22px;color:var(--green)} .logo small{display:block;font-size:11px;color:var(--muted);font-weight:600}
+.grid{display:grid;gap:16px}.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}.muted{color:var(--muted)} .pill{display:inline-flex;padding:4px 10px;border:1px solid #fde68a;border-radius:999px;background:#fffbeb;color:#b45309;font-size:11px;font-weight:800}
+input,select{width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:10px;background:#fff}.btn{padding:10px 14px;border-radius:10px;background:var(--green);border:1px solid var(--green);color:#fff;font-weight:700;cursor:pointer}
+table{width:100%;border-collapse:collapse} th,td{padding:10px 12px;border-bottom:1px solid #f0f2f5;text-align:left;font-size:13px} th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;background:#fafafa}
+.tbl{overflow:auto;border:1px solid var(--line);border-radius:14px}.notice{padding:14px;border-radius:14px;background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;font-size:13px}
+@media (max-width:900px){.layout{grid-template-columns:1fr}.grid-2,.grid-3{grid-template-columns:1fr}.side{border-right:none;border-bottom:1px solid var(--line)}}
+</style></head><body>
+<script src="/public/runtime-config.js"></script>
+<script src="/shared/farmaclub_boot.js"></script>
+<script src="/shared/farmaclub_dados.js"></script>
+<div class="layout">
+<aside class="side">
+  <div class="logo">FarmaClub<small>Pagamentos e Split</small></div>
+  <a href="/erp">Dashboard</a>
+  <a href="/farmacia">ERP Farmácia</a>
+  <a href="/cadastro-fiscal">Cadastro fiscal</a>
+  <a class="active" href="/pagamentos">Pagamentos e split</a>
+  <a href="/setup">Setup</a>
+</aside>
+<main class="main">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px">
+    <div><div class="logo">Modelo de pagamento incorporado</div><div class="muted">Melhor estrutura para o momento atual do projeto</div></div>
+    <div class="pill">MVP em 1 meio por pedido</div>
+  </div>
+  <div class="notice">Regra central do sistema: <strong>10% do Farma Club só sobre medicamentos</strong>. Frete não entra na sua base e fica 100% com o motoboy. Juros e taxa do gateway ficam transparentes e fora da sua comissão.</div>
+  <div class="grid grid-3" style="margin-top:16px">
+    <div class="card"><h3>MVP</h3><p class="muted">Pix, crédito ou débito por pedido. Sem multimeios misto na primeira fase.</p></div>
+    <div class="card"><h3>Split</h3><p class="muted">Farmácia recebe o líquido. Motoboy recebe frete integral. Farma Club recebe comissão fixa calculada internamente.</p></div>
+    <div class="card"><h3>Fase 2</h3><p class="muted">Estrutura pronta para múltiplas cobranças parciais depois, sem refazer o banco.</p></div>
+  </div>
+  <div class="grid grid-2" style="margin-top:16px">
+    <div class="card">
+      <h3>Simulador do split</h3>
+      <div style="display:grid;gap:10px">
+        <label>Medicamentos<input id="med" type="number" step="0.01" value="100"></label>
+        <label>Outros itens<input id="outros" type="number" step="0.01" value="0"></label>
+        <label>Frete<input id="frete" type="number" step="0.01" value="12"></label>
+        <label>Juros do parcelamento<input id="juros" type="number" step="0.01" value="0"></label>
+        <label>Taxa do gateway<input id="gateway" type="number" step="0.01" value="3.40"></label>
+        <label>Pagamento<select id="pg"><option value="pix">Pix</option><option value="credito">Crédito</option><option value="debito">Débito</option></select></label>
+        <button class="btn" onclick="simular()">Calcular</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Resultado</h3>
+      <div class="tbl"><table><tbody id="resultado"></tbody></table></div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <h3>Regras operacionais do MVP</h3>
+    <div class="tbl"><table><thead><tr><th>Regra</th><th>Decisão atual</th><th>Motivo</th></tr></thead><tbody>
+      <tr><td>Comissão Farma Club</td><td>10% sobre medicamentos</td><td>Evita ganhar sobre frete, juros e taxa de cartão.</td></tr>
+      <tr><td>Frete</td><td>100% motoboy</td><td>Dinheiro da corrida não passa economicamente pela farmácia.</td></tr>
+      <tr><td>Gateway fee</td><td>Transparente e fora da sua comissão</td><td>Protege a base do Farma Club.</td></tr>
+      <tr><td>Checkout</td><td>1 meio de pagamento por pedido</td><td>Menos abandono e menos complexidade operacional.</td></tr>
+      <tr><td>Multimeios</td><td>Preparado para fase 2</td><td>Banco e API já aceitam evolução futura.</td></tr>
+    </tbody></table></div>
+  </div>
+</main></div>
+<script>
+const fmt=v=>Number(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+function simular(){
+  const med=Number(document.getElementById('med').value||0);
+  const outros=Number(document.getElementById('outros').value||0);
+  const frete=Number(document.getElementById('frete').value||0);
+  const juros=Number(document.getElementById('juros').value||0);
+  const gateway=Number(document.getElementById('gateway').value||0);
+  const pg=document.getElementById('pg').value;
+  const taxaFC=+(med*0.10).toFixed(2);
+  const total=+(med+outros+frete+juros).toFixed(2);
+  const netFarm=+(total-taxaFC-frete-gateway).toFixed(2);
+  document.getElementById('resultado').innerHTML=[
+    ['Forma de pagamento', pg],
+    ['Base do Farma Club', fmt(med)],
+    ['Comissão Farma Club', fmt(taxaFC)],
+    ['Frete do motoboy', fmt(frete)],
+    ['Taxa do gateway', fmt(gateway)],
+    ['Juros do cliente', fmt(juros)],
+    ['Líquido estimado da farmácia', fmt(netFarm)],
+    ['Total cobrado do cliente', fmt(total)]
+  ].map(([a,b])=>`<tr><td><strong>${a}</strong></td><td>${b}</td></tr>`).join('');
+}
+simular();
+</script>
+</body></html>

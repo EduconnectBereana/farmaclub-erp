@@ -1,0 +1,60 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>FarmaClub — Setup</title><style>
+:root{
+  --bg:#f4f4f2; --card:#fff; --text:#1a1a1a; --muted:#6b7280; --line:#e5e7eb;
+  --green:#3BAA35; --red:#dc2626; --orange:#d97706; --blue:#2563eb; --dark:#111827;
+}
+*{box-sizing:border-box}
+body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--text);margin:0}
+a{text-decoration:none;color:inherit}
+button,input,select,textarea{font:inherit}
+.container{max-width:1180px;margin:0 auto;padding:24px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.logo{font-weight:800;font-size:22px;color:var(--green)}
+.logo small{display:block;font-size:11px;color:var(--muted);font-weight:600}
+.grid{display:grid;gap:16px}
+.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}
+.card h2,.card h3{margin:0 0 10px}
+.muted{color:var(--muted)}
+.btn{padding:10px 14px;border-radius:10px;background:#fff;border:1px solid var(--line);font-size:13px;font-weight:700;display:inline-block}
+.btn.primary{background:var(--green);border-color:var(--green);color:#fff}
+@media (max-width:900px){.grid-2{grid-template-columns:1fr}}
+</style></head><body>
+<script src="/public/runtime-config.js"></script>
+<script src="/shared/farmaclub_boot.js"></script>
+<script src="/shared/farmaclub_supabase.js"></script>
+<div class="container">
+  <div class="topbar"><div class="logo">Setup<small>Configuração inicial segura</small></div><a class="btn" href="/erp">Voltar</a></div>
+  <div class="grid grid-2">
+    <div class="card">
+      <h3>1. Configuração</h3>
+      <p class="muted">Este setup foi limpo para não gravar chave anon automaticamente em localStorage. Ajuste o objeto <code>window.FC_CONFIG</code> em <code>public/runtime-config.js</code>.</p>
+      <pre style="white-space:pre-wrap;background:#f8fafc;padding:12px;border-radius:12px;border:1px solid #e2e8f0">window.FC_CONFIG = {
+  supabaseUrl: "https://SEU-PROJETO.supabase.co",
+  supabaseAnonKey: "SUA_ANON_KEY"
+};</pre>
+    </div>
+    <div class="card">
+      <h3>2. Próximos passos</h3>
+      <ul>
+        <li>Aplicar <code>sql/farmaclub_schema.sql</code></li>
+        <li>Aplicar <code>sql/farmaclub_security.sql</code></li>
+        <li>Configurar variáveis na Vercel</li>
+        <li>Publicar primeiro em ambiente demo</li>
+      </ul>
+      <p><a class="btn primary" href="/seguranca">Abrir checklist de segurança</a></p>
+    </div>
+  </div>
+  <div class="grid grid-2" style="margin-top:16px">
+    <div class="card">
+      <h3>3. Implantação fiscal inicial</h3>
+      <p class="muted">Para farmácia sem cadastro bom, a entrada recomendada é: importar os XMLs das últimas compras, criar produtos automaticamente e revisar só as exceções fiscais.</p>
+      <p><a class="btn" href="/cadastro-fiscal">Abrir módulo de cadastro fiscal</a></p>
+    </div>
+    <div class="card">
+      <h3>4. Scanner</h3>
+      <p class="muted">Leitor de código de barras continua importante para inventário, conferência e venda rápida. Mas o NCM mestre deve nascer da nota de entrada, não do scanner.</p>
+    </div>
+  </div>
+</div>
+</body></html>

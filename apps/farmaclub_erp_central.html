@@ -1,0 +1,99 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>FarmaClub — ERP Central</title><style>
+:root{
+  --bg:#f4f4f2; --card:#fff; --text:#1a1a1a; --muted:#6b7280; --line:#e5e7eb;
+  --green:#3BAA35; --red:#dc2626; --orange:#d97706; --blue:#2563eb; --dark:#111827;
+}
+*{box-sizing:border-box}
+body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--text);margin:0}
+a{text-decoration:none;color:inherit}
+button,input,select,textarea{font:inherit}
+.container{max-width:1180px;margin:0 auto;padding:24px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.logo{font-weight:800;font-size:22px;color:var(--green)}
+.logo small{display:block;font-size:11px;color:var(--muted);font-weight:600}
+.grid{display:grid;gap:16px}
+.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}
+.card h2,.card h3{margin:0 0 10px}
+.muted{color:var(--muted)}
+.kpi .label{font-size:12px;color:var(--muted)}
+.kpi .value{font-size:28px;font-weight:800;margin-top:6px}
+.kpi .sub{font-size:11px;color:#9ca3af;margin-top:6px}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:800}
+.badge.green{background:#ecfdf5;color:#15803d;border:1px solid #bbf7d0}
+.badge.orange{background:#fffbeb;color:#b45309;border:1px solid #fde68a}
+.badge.red{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca}
+table{width:100%;border-collapse:collapse}
+th,td{padding:10px 12px;border-bottom:1px solid #f0f2f5;text-align:left;font-size:13px;vertical-align:top}
+th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;background:#fafafa}
+.tbl{overflow:auto;border:1px solid var(--line);border-radius:14px}
+.layout{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+.side{background:#fff;border-right:1px solid var(--line);padding:20px}
+.side a{display:block;padding:10px 12px;border-radius:10px;margin-bottom:6px;font-weight:700;color:#4b5563}
+.side a.active,.side a:hover{background:#ecfdf5;color:#166534}
+.main{padding:20px}
+.notice{padding:14px;border-radius:14px;background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;font-size:13px}
+@media (max-width:900px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}.layout{grid-template-columns:1fr} .side{border-right:none;border-bottom:1px solid var(--line)}}
+</style></head><body>
+<script src="/public/runtime-config.js"></script>
+<script src="/shared/farmaclub_boot.js"></script>
+<script src="/shared/farmaclub_dados.js"></script>
+<div class="layout">
+  <aside class="side">
+    <div class="logo">FarmaClub<small>ERP Central · Painel do Gestor</small></div>
+    <a class="active" href="#dashboard">Dashboard</a>
+    <a href="/farmacia">ERP Farmácia</a>
+    <a href="/cadastro-fiscal">Cadastro fiscal</a>
+    <a href="/pagamentos">Pagamentos e split</a>
+    <a href="/contabilidade">Contabilidade</a>
+    <a href="/compras">Compra coletiva</a>
+    <a href="/seguranca">Segurança</a>
+    <a href="/setup">Setup</a>
+  </aside>
+  <main class="main">
+    <div class="topbar">
+      <div><div class="logo">Dashboard</div><div class="muted">Visão consolidada da rede</div></div>
+      <div><span class="badge green">● Sistema operacional</span> <span class="badge orange">Modo demo</span></div>
+    </div>
+    <div class="grid grid-4">
+      <div class="card kpi"><div class="label">Farmácias</div><div class="value" id="kFarm">0</div><div class="sub">Parceiras cadastradas</div></div>
+      <div class="card kpi"><div class="label">Pedidos ativos</div><div class="value" id="kPed">0</div><div class="sub">Em operação</div></div>
+      <div class="card kpi"><div class="label">Cadastros fiscais validados</div><div class="value" id="kFiscal">0</div><div class="sub">Produtos com NCM confiável</div></div>
+      <div class="card kpi"><div class="label">Comissão estimada</div><div class="value" id="kCom">R$ 0</div><div class="sub">Somente sobre medicamentos</div></div>
+    </div>
+    <div class="notice">Modelo incorporado: <strong>Pix, crédito ou débito por pedido no MVP</strong>. A comissão do Farma Club incide apenas sobre medicamentos; o frete fica 100% com o motoboy e o multimeios fica preparado para a fase 2.</div>
+    <div class="grid grid-2" style="margin-top:16px">
+      <div class="card">
+        <h3>Farmácias</h3>
+        <div class="tbl"><table><thead><tr><th>Farmácia</th><th>Status</th><th>Estoque</th><th>Validação fiscal</th><th>Faturamento</th></tr></thead><tbody id="tbFarm"></tbody></table></div>
+      </div>
+      <div class="card">
+        <h3>Modelo de pagamento ativo</h3>
+        <div class="tbl"><table><thead><tr><th>Regra</th><th>Configuração atual</th></tr></thead><tbody id="tbNfe"></tbody></table></div>
+      </div>
+    </div>
+    <div class="grid grid-3">
+      <div class="card"><h3>Split financeiro</h3><p class="muted">Farmácia recebe o líquido da venda, motoboy recebe o frete integral e o Farma Club recebe somente sobre medicamentos.</p></div>
+      <div class="card"><h3>Entrada inteligente</h3><p class="muted">Scanner serve para inventário e busca rápida. O cadastro fiscal mestre nasce do XML da nota e depois entra em revisão por exceção.</p></div>
+      <div class="card"><h3>Ação imediata</h3><p class="muted">Publicar este pacote, aplicar o SQL atualizado e começar a implantação piloto com importação das últimas NF-es de compra.</p></div>
+    </div>
+  </main>
+</div>
+<script>
+const farms=window.FARMACLUB.farmacias||[];
+const pedidos=window.FARMACLUB.pedidos||[];
+const entradas=window.FARMACLUB.entradasFiscais||[];
+const fmt=v=>Number(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+document.getElementById('kFarm').textContent=farms.length;
+document.getElementById('kPed').textContent=pedidos.filter(p=>p.status!=='entregue').length;
+document.getElementById('kFiscal').textContent=farms.reduce((s,f)=>s+(f.fiscais_validados||0),0).toLocaleString('pt-BR');
+document.getElementById('kCom').textContent=fmt(pedidos.reduce((s,p)=>s+(p.taxaFarmaClub||0),0));
+document.getElementById('tbFarm').innerHTML=farms.map(f=>{
+  const pct = f.produtos_cadastrados ? Math.round((f.fiscais_validados||0)/(f.produtos_cadastrados||1)*100) : 0;
+  return `<tr><td><strong>${f.nome}</strong><div class="muted">${f.bairro}</div></td><td>${f.status}</td><td>${f.estoque_pct}%</td><td>${pct}%<div class="muted">${(f.fiscais_validados||0).toLocaleString('pt-BR')} de ${(f.produtos_cadastrados||0).toLocaleString('pt-BR')}</div></td><td>${fmt(f.faturamento)}</td></tr>`;
+}).join('');
+document.getElementById('tbNfe').innerHTML=[[ 'Modelo atual','1 meio por pedido' ],[ 'Métodos ativos',(window.FARMACLUB.pagamentosConfig?.metodosAtivos||[]).join(', ') ],[ 'Comissão Farma Club','10% só sobre medicamentos' ],[ 'Frete','100% motoboy' ],[ 'Multimeios', window.FARMACLUB.pagamentosConfig?.mixedMethods ? 'ativo' : 'preparado para fase 2' ]].map(([a,b])=>`<tr><td><strong>${a}</strong></td><td>${b}</td></tr>`).join('');
+</script>
+</body></html>

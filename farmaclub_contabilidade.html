@@ -1107,7 +1107,11 @@ function renderContent(){
   if(tabAtual==="dashboard"||tabAtual==="impostos") initCharts();
 }
 window.setTab=setTab;
+window.fcContabCtx={renders,titulos,setTab,renderContent,getTab:()=>tabAtual};
+window.fcContabData={farmacias};
 renderContent();
 </script>
+<script src="farmaclub_supabase.js"></script>
+<script src="farmaclub_contabilidade_regime.js"></script>
 </body>
 </html>

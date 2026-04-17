@@ -1,0 +1,80 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>FarmaClub — Medicamentos</title><style>
+:root{
+  --bg:#f4f4f2; --card:#fff; --text:#1a1a1a; --muted:#6b7280; --line:#e5e7eb;
+  --green:#3BAA35; --red:#dc2626; --orange:#d97706; --blue:#2563eb; --dark:#111827;
+}
+*{box-sizing:border-box}
+body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--text);margin:0}
+a{text-decoration:none;color:inherit}
+button,input,select,textarea{font:inherit}
+.container{max-width:1180px;margin:0 auto;padding:24px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.logo{font-weight:800;font-size:22px;color:var(--green)}
+.logo small{display:block;font-size:11px;color:var(--muted);font-weight:600}
+.nav{display:flex;gap:10px;flex-wrap:wrap}
+.nav a,.btn{padding:10px 14px;border-radius:10px;background:#fff;border:1px solid var(--line);font-size:13px;font-weight:700}
+.btn.primary{background:var(--green);border-color:var(--green);color:#fff}
+.grid{display:grid;gap:16px}
+.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}
+.card h2,.card h3{margin:0 0 10px}
+.muted{color:var(--muted)}
+.kpi .label{font-size:12px;color:var(--muted)}
+.kpi .value{font-size:28px;font-weight:800;margin-top:6px}
+.kpi .sub{font-size:11px;color:#9ca3af;margin-top:6px}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:800}
+.badge.green{background:#ecfdf5;color:#15803d;border:1px solid #bbf7d0}
+.badge.orange{background:#fffbeb;color:#b45309;border:1px solid #fde68a}
+.badge.red{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca}
+table{width:100%;border-collapse:collapse}
+th,td{padding:10px 12px;border-bottom:1px solid #f0f2f5;text-align:left;font-size:13px;vertical-align:top}
+th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;background:#fafafa}
+.tbl{overflow:auto;border:1px solid var(--line);border-radius:14px}
+.hero{background:linear-gradient(135deg,#0f172a,#14532d);color:#fff;border-radius:22px;padding:28px}
+.hero h1{margin:0 0 10px;font-size:36px}
+.hero p{margin:0;color:#d1d5db;max-width:760px;line-height:1.7}
+.footer{padding:30px 0;color:var(--muted);font-size:12px}
+form .row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:12px}
+input,select,textarea{width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:10px;background:#fff}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green)}
+@media (max-width:900px){
+  .grid-2,.grid-3,.grid-4, form .row{grid-template-columns:1fr}
+  .hero h1{font-size:28px}
+}
+</style></head><body>
+<script src="/public/runtime-config.js"></script>
+<script src="/shared/farmaclub_boot.js"></script>
+<script src="/shared/farmaclub_dados.js"></script>
+<div class="container">
+  <div class="topbar">
+    <div class="logo">FarmaClub<small>Medicamentos em Itaperuna</small></div>
+    <div class="nav">
+      <a href="/comprar">App Cliente</a>
+      <a href="/setup">Setup</a>
+      <a href="/erp">ERP</a>
+    </div>
+  </div>
+  <section class="hero">
+    <h1>Comprar em farmácias parceiras</h1>
+    <p>Landing pronta para demonstração comercial. Os produtos abaixo usam dados de exemplo e as rotas já ficam prontas para publicação em domínio próprio.</p>
+  </section>
+  <div class="grid grid-3" id="produtos" style="margin-top:18px"></div>
+  <div class="footer">Modo demo · sem checkout real neste pacote</div>
+</div>
+<script>
+const fmt=v=>Number(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const produtos=(window.FARMACLUB?.produtos||[]);
+document.getElementById('produtos').innerHTML=produtos.map(p=>`
+  <div class="card">
+    <div class="badge ${p.receita?'orange':'green'}">${p.receita?'Receita':'Livre'}</div>
+    <h3 style="margin-top:10px">${p.nome}</h3>
+    <div class="muted">${p.lab} · ${p.cat}</div>
+    <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:14px">
+      <div style="font-weight:800;font-size:18px">${fmt(p.preco_ref)}</div>
+      <button class="btn primary" onclick="alert('Demo: item adicionado ao carrinho')">Adicionar</button>
+    </div>
+  </div>`).join('');
+</script>
+</body></html>

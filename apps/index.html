@@ -1,0 +1,52 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>FarmaClub</title><style>
+:root{
+  --bg:#f4f4f2; --card:#fff; --text:#1a1a1a; --muted:#6b7280; --line:#e5e7eb;
+  --green:#3BAA35; --red:#dc2626; --orange:#d97706; --blue:#2563eb; --dark:#111827;
+}
+*{box-sizing:border-box}
+body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--text);margin:0}
+a{text-decoration:none;color:inherit}
+button,input,select,textarea{font:inherit}
+.container{max-width:1180px;margin:0 auto;padding:24px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.logo{font-weight:800;font-size:22px;color:var(--green)}
+.logo small{display:block;font-size:11px;color:var(--muted);font-weight:600}
+.nav{display:flex;gap:10px;flex-wrap:wrap}
+.nav a,.btn{padding:10px 14px;border-radius:10px;background:#fff;border:1px solid var(--line);font-size:13px;font-weight:700}
+.btn.primary{background:var(--green);border-color:var(--green);color:#fff}
+.grid{display:grid;gap:16px}
+.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}
+.card h2,.card h3{margin:0 0 10px}
+.muted{color:var(--muted)}
+.hero{background:linear-gradient(135deg,#0f172a,#14532d);color:#fff;border-radius:22px;padding:28px}
+.hero h1{margin:0 0 10px;font-size:36px}
+.hero p{margin:0;color:#d1d5db;max-width:760px;line-height:1.7}
+.footer{padding:30px 0;color:var(--muted);font-size:12px}
+@media (max-width:900px){.grid-3{grid-template-columns:1fr}.hero h1{font-size:28px}}
+</style></head><body>
+<div class="container">
+  <div class="topbar">
+    <div class="logo">FarmaClub<small>Ecossistema ERP + App + Site</small></div>
+    <div class="nav">
+      <a href="../apps/farmaclub_site.html">Site</a>
+      <a href="../apps/farmaclub_app_cliente.html">App Cliente</a>
+      <a href="../apps/farmaclub_app_motoboy.html">App Motoboy</a>
+      <a href="../apps/farmaclub_erp_central.html">ERP Central</a>
+      <a href="../apps/farmaclub_erp_farmacia.html">ERP Farmácia</a>
+      <a href="../apps/farmaclub_contabilidade.html">Contabilidade</a>
+      <a href="../apps/farmaclub_marketplace_pagamentos.html">Pagamentos</a>
+    </div>
+  </div>
+  <section class="hero">
+    <h1>Projeto pronto para GitHub</h1>
+    <p>Pacote reorganizado em estrutura única, com páginas principais funcionais, dados demo centralizados, API serverless endurecida, SQL inicial e arquivos de deploy. Agora também incorpora o modelo MVP de pagamentos: comissão só sobre medicamentos, frete 100% do motoboy e checkout simples para a fase piloto.</p>
+  </section>
+  <div class="grid grid-3" style="margin-top:18px">
+    <div class="card"><h3>ERP Central</h3><p class="muted">Painel consolidado da rede, farmácias, pedidos, motoboys e links para módulos.</p><p><a class="btn primary" href="../apps/farmaclub_erp_central.html">Abrir</a></p></div>
+    <div class="card"><h3>Contabilidade</h3><p class="muted">Painel contábil e simulador de regime inteligente com parâmetros fiscais básicos.</p><p><a class="btn primary" href="../apps/farmaclub_contabilidade.html">Abrir</a></p></div>
+    <div class="card"><h3>Pagamentos</h3><p class="muted">Painel do modelo atual de checkout, split financeiro e preparação para multimeios na fase 2.</p><p><a class="btn primary" href="../apps/farmaclub_marketplace_pagamentos.html">Abrir</a></p></div>
+  </div>
+  <div class="footer">FarmaClub · pacote reconstruído para publicação</div>
+</div>
+</body></html>

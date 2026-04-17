@@ -1,0 +1,186 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>FarmaClub — Cadastro Fiscal</title><style>
+:root{
+  --bg:#f4f4f2; --card:#fff; --text:#1a1a1a; --muted:#6b7280; --line:#e5e7eb;
+  --green:#3BAA35; --red:#dc2626; --orange:#d97706; --blue:#2563eb; --dark:#111827;
+}
+*{box-sizing:border-box}
+body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--text);margin:0}
+a{text-decoration:none;color:inherit}
+button,input,select,textarea{font:inherit}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.logo{font-weight:800;font-size:22px;color:var(--green)}
+.logo small{display:block;font-size:11px;color:var(--muted);font-weight:600}
+.grid{display:grid;gap:16px}
+.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}
+.card h2,.card h3{margin:0 0 10px}
+.muted{color:var(--muted)}
+.kpi .label{font-size:12px;color:var(--muted)}
+.kpi .value{font-size:28px;font-weight:800;margin-top:6px}
+.kpi .sub{font-size:11px;color:#9ca3af;margin-top:6px}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:800}
+.badge.green{background:#ecfdf5;color:#15803d;border:1px solid #bbf7d0}
+.badge.orange{background:#fffbeb;color:#b45309;border:1px solid #fde68a}
+.badge.red{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca}
+.badge.blue{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}
+table{width:100%;border-collapse:collapse}
+th,td{padding:10px 12px;border-bottom:1px solid #f0f2f5;text-align:left;font-size:13px;vertical-align:top}
+th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;background:#fafafa}
+.tbl{overflow:auto;border:1px solid var(--line);border-radius:14px}
+input,select,textarea{width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:10px;background:#fff}
+button,.btn{padding:10px 14px;border-radius:10px;border:1px solid var(--line);background:#fff;font-weight:700;cursor:pointer}
+.btn.primary{background:var(--green);border-color:var(--green);color:#fff}
+.layout{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+.side{background:#fff;border-right:1px solid var(--line);padding:20px}
+.side a{display:block;padding:10px 12px;border-radius:10px;margin-bottom:6px;font-weight:700;color:#4b5563}
+.side a.active,.side a:hover{background:#ecfdf5;color:#166534}
+.main{padding:20px}
+.notice{padding:14px;border-radius:14px;background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;font-size:13px}
+.code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f8fafc;padding:2px 6px;border-radius:6px;border:1px solid #e2e8f0}
+@media (max-width:980px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}.layout{grid-template-columns:1fr}}
+</style></head><body>
+<script src="/public/runtime-config.js"></script>
+<script src="/shared/farmaclub_boot.js"></script>
+<script src="/shared/farmaclub_dados.js"></script>
+<script src="/shared/farmaclub_fiscal.js"></script>
+<div class="layout">
+  <aside class="side">
+    <div class="logo">FarmaClub<small>Cadastro fiscal e XML</small></div>
+    <a href="/erp">Dashboard</a>
+    <a href="/farmacia">ERP Farmácia</a>
+    <a class="active" href="#">Cadastro fiscal</a>
+    <a href="/contabilidade">Contabilidade</a>
+    <a href="/setup">Setup</a>
+  </aside>
+  <main class="main">
+    <div class="topbar">
+      <div><div class="logo">Cadastro Fiscal</div><div class="muted">Entrada por XML, revisão fiscal e apoio ao scanner</div></div>
+      <div>
+        <label class="btn primary" for="xmlInput">Importar XML da NF-e</label>
+        <input id="xmlInput" type="file" accept=".xml,text/xml" multiple style="display:none" />
+      </div>
+    </div>
+
+    <div class="notice">Fluxo recomendado do Farma Club: <strong>1)</strong> importar XML da nota do fornecedor, <strong>2)</strong> criar/atualizar produto com NCM e EAN, <strong>3)</strong> revisar apenas exceções, <strong>4)</strong> usar scanner para inventário, venda e conferência física.</div>
+
+    <div class="grid grid-4" style="margin-top:16px">
+      <div class="card kpi"><div class="label">Itens importados</div><div class="value" id="kItens">0</div><div class="sub">Lidos dos XMLs</div></div>
+      <div class="card kpi"><div class="label">Novos cadastros</div><div class="value" id="kNovos">0</div><div class="sub">Sem match local</div></div>
+      <div class="card kpi"><div class="label">Itens para revisão</div><div class="value" id="kRevisao">0</div><div class="sub">Sem NCM/EAN ou regra indefinida</div></div>
+      <div class="card kpi"><div class="label">Base local validada</div><div class="value" id="kBase">0</div><div class="sub">Produtos com status fiscal validado</div></div>
+    </div>
+
+    <div class="grid grid-2" style="margin-top:16px">
+      <div class="card">
+        <h3>Entrada por XML</h3>
+        <p class="muted">Importe o XML da NF-e do distribuidor. O sistema lê fornecedor, número, série, itens, EAN, NCM, CEST, CFOP, quantidade e preço.</p>
+        <div id="notaResumo" class="muted">Nenhum XML importado ainda.</div>
+      </div>
+      <div class="card">
+        <h3>Leitura por scanner / EAN</h3>
+        <input id="eanSearch" placeholder="Passe o leitor ou digite o EAN" />
+        <div id="eanResult" class="muted" style="margin-top:12px">Aguardando leitura.</div>
+        <p class="muted" style="margin-top:12px">Scanner ajuda em inventário e conferência. O cadastro fiscal mestre continua vindo da nota.</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap">
+        <div>
+          <h3>Fila de revisão fiscal</h3>
+          <div class="muted">Ajuste manual só onde houver exceção.</div>
+        </div>
+        <div class="muted">Campos-chave: <span class="code">NCM</span> · <span class="code">CEST</span> · <span class="code">Monofásico</span> · <span class="code">ICMS-ST</span> · <span class="code">Fonte do NCM</span></div>
+      </div>
+      <div class="tbl" style="margin-top:12px"><table><thead><tr><th>Produto</th><th>Cadastro local</th><th>Fiscal</th><th>Regra</th><th>Risco</th></tr></thead><tbody id="tbFiscal"></tbody></table></div>
+    </div>
+
+    <div class="grid grid-3" style="margin-top:16px">
+      <div class="card"><h3>Quando o cadastro nasce</h3><p class="muted">Produto novo entra automaticamente quando vier na nota com descrição, EAN e NCM. Se faltar um desses pontos, entra como revisão.</p></div>
+      <div class="card"><h3>Quando o scanner entra</h3><p class="muted">Scanner serve para inventário inicial, conferência do balcão, ajuste de estoque e pesquisa rápida de preço. Não substitui o XML na parte fiscal.</p></div>
+      <div class="card"><h3>Objetivo do módulo</h3><p class="muted">Reduzir implantação manual e padronizar a inteligência tributária entre farmácias parceiras com CNPJs próprios.</p></div>
+    </div>
+  </main>
+</div>
+<script>
+const produtosLocais = window.FARMACLUB.produtos || [];
+let importedItems = [];
+let importedNotas = [];
+const fmtMoney = v => Number(v || 0).toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
+
+function refreshKPIs(){
+  document.getElementById('kItens').textContent = importedItems.length.toLocaleString('pt-BR');
+  document.getElementById('kNovos').textContent = importedItems.filter(i => !findLocalProduct(i)).length.toLocaleString('pt-BR');
+  document.getElementById('kRevisao').textContent = importedItems.filter(i => i.statusFiscal === 'revisar').length.toLocaleString('pt-BR');
+  document.getElementById('kBase').textContent = produtosLocais.filter(p => p.status_fiscal === 'validado').length.toLocaleString('pt-BR');
+}
+
+function findLocalProduct(item){
+  return produtosLocais.find(p => (item.ean && String(p.ean||'') === String(item.ean)) || String(p.nome||'').toLowerCase() === String(item.produto||'').toLowerCase());
+}
+
+function renderNotas(){
+  const el = document.getElementById('notaResumo');
+  if (!importedNotas.length) {
+    el.textContent = 'Nenhum XML importado ainda.';
+    return;
+  }
+  el.innerHTML = importedNotas.map(n => `<div style="padding:10px 0;border-bottom:1px solid #eee"><strong>${n.fornecedor || 'Fornecedor não identificado'}</strong><div class="muted">NF ${n.numero || '-'} série ${n.serie || '-'} · ${n.itens} itens · ${fmtMoney(n.valorTotal)}</div></div>`).join('');
+}
+
+function badge(label, cls){
+  return `<span class="badge ${cls}">${label}</span>`;
+}
+
+function renderTable(){
+  const rows = importedItems.map(item => {
+    const local = findLocalProduct(item);
+    const status = item.statusFiscal === 'revisar' ? badge('Revisar', 'red') : badge('Pré-validado', 'blue');
+    const risk = item.risco === 'alto' ? badge('Risco alto', 'red') : item.risco === 'médio' ? badge('Risco médio', 'orange') : badge('Risco baixo', 'green');
+    return `<tr>
+      <td><strong>${item.produto}</strong><div class="muted">Cod. fornecedor ${item.codigoFornecedor || '-'} · Qtd ${item.quantidade || 0}</div></td>
+      <td>${local ? `<strong>${local.nome}</strong><div class="muted">EAN ${local.ean || 'sem EAN'}</div>` : '<span class="muted">Novo cadastro</span>'}</td>
+      <td>
+        <div>NCM ${item.ncm || 'pendente'} · CEST ${item.cest || '—'}</div>
+        <div class="muted">EAN ${item.ean || 'sem EAN'} · CFOP ${item.cfop || '—'}</div>
+        <div class="muted">Fonte ${item.fonteNcm}</div>
+      </td>
+      <td>${status}<div class="muted" style="margin-top:6px">${item.monofasico ? 'Monofásico' : 'Não monofásico'} · ${item.icmsSt ? 'ICMS-ST' : 'ICMS normal'}<br>${item.beneficioRJ}</div></td>
+      <td>${risk}<div class="muted" style="margin-top:6px">${item.statusFiscal === 'revisar' ? 'Exigir revisão do contador/tributário.' : 'Pode seguir para cadastro e conferência.'}</div></td>
+    </tr>`;
+  });
+  document.getElementById('tbFiscal').innerHTML = rows.length ? rows.join('') : `<tr><td colspan="5" class="muted">Importe um XML para preencher a fila de revisão.</td></tr>`;
+}
+
+refreshKPIs();
+renderNotas();
+renderTable();
+
+document.getElementById('xmlInput').addEventListener('change', async (event) => {
+  const files = Array.from(event.target.files || []);
+  for (const file of files) {
+    const text = await file.text();
+    try {
+      const parsed = window.FARMACLUB_FISCAL.parseNFeXMLText(text);
+      importedNotas.push({ ...parsed.nota, itens: parsed.itens.length });
+      importedItems = importedItems.concat(parsed.itens);
+    } catch (error) {
+      alert(`Falha ao importar ${file.name}: ${error.message}`);
+    }
+  }
+  refreshKPIs();
+  renderNotas();
+  renderTable();
+});
+
+document.getElementById('eanSearch').addEventListener('input', (event) => {
+  const value = window.FARMACLUB_FISCAL.normalizeDigits(event.target.value);
+  const product = produtosLocais.find(p => String(p.ean || '') === value) || importedItems.find(i => String(i.ean || '') === value);
+  document.getElementById('eanResult').innerHTML = product
+    ? `<strong>${product.nome || product.produto}</strong><br>NCM ${product.ncm || 'pendente'} · ${product.fonte_ncm || product.fonteNcm || 'sem fonte'}<br>${product.monofasico ? 'Monofásico' : 'Não monofásico'} · ${product.icms_st || product.icmsSt ? 'ICMS-ST' : 'ICMS normal'}`
+    : (value ? 'EAN não encontrado na base local/importada.' : 'Aguardando leitura.');
+});
+</script>
+</body></html>

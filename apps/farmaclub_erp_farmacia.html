@@ -1,0 +1,96 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>FarmaClub — ERP Farmácia</title><style>
+:root{
+  --bg:#f4f4f2; --card:#fff; --text:#1a1a1a; --muted:#6b7280; --line:#e5e7eb;
+  --green:#3BAA35; --red:#dc2626; --orange:#d97706; --blue:#2563eb; --dark:#111827;
+}
+*{box-sizing:border-box}
+body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--text);margin:0}
+a{text-decoration:none;color:inherit}
+button,input,select,textarea{font:inherit}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.logo{font-weight:800;font-size:22px;color:var(--green)}
+.logo small{display:block;font-size:11px;color:var(--muted);font-weight:600}
+.grid{display:grid;gap:16px}
+.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}
+.card h2,.card h3{margin:0 0 10px}
+.muted{color:var(--muted)}
+.kpi .label{font-size:12px;color:var(--muted)}
+.kpi .value{font-size:28px;font-weight:800;margin-top:6px}
+.kpi .sub{font-size:11px;color:#9ca3af;margin-top:6px}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:800}
+.badge.green{background:#ecfdf5;color:#15803d;border:1px solid #bbf7d0}
+.badge.orange{background:#fffbeb;color:#b45309;border:1px solid #fde68a}
+.badge.red{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca}
+table{width:100%;border-collapse:collapse}
+th,td{padding:10px 12px;border-bottom:1px solid #f0f2f5;text-align:left;font-size:13px;vertical-align:top}
+th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;background:#fafafa}
+.tbl{overflow:auto;border:1px solid var(--line);border-radius:14px}
+input{width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:10px;background:#fff}
+.layout{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+.side{background:#fff;border-right:1px solid var(--line);padding:20px}
+.side a{display:block;padding:10px 12px;border-radius:10px;margin-bottom:6px;font-weight:700;color:#4b5563}
+.side a.active,.side a:hover{background:#ecfdf5;color:#166534}
+.main{padding:20px}
+.notice{padding:14px;border-radius:14px;background:#ecfdf5;border:1px solid #bbf7d0;color:#166534;font-size:13px}
+@media (max-width:900px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}.layout{grid-template-columns:1fr}}
+</style></head><body>
+<script src="/public/runtime-config.js"></script>
+<script src="/shared/farmaclub_boot.js"></script>
+<script src="/shared/farmaclub_dados.js"></script>
+<div class="layout">
+  <aside class="side">
+    <div class="logo">ERP Farmácia<small>Visão da unidade parceira</small></div>
+    <a class="active" href="#">Dashboard</a>
+    <a href="/cadastro-fiscal">Cadastro fiscal</a>
+    <a href="/contabilidade">Contabilidade</a>
+    <a href="/setup">Setup</a>
+  </aside>
+  <main class="main">
+    <div class="topbar"><div><div class="logo">Farmácia São João</div><div class="muted">Unidade demo</div></div><span class="badge green">● Aberta</span></div>
+    <div class="grid grid-4">
+      <div class="card kpi"><div class="label">Faturamento</div><div class="value">R$ 87,6 mil</div><div class="sub">Mês atual</div></div>
+      <div class="card kpi"><div class="label">Estoque</div><div class="value">92%</div><div class="sub">Cobertura</div></div>
+      <div class="card kpi"><div class="label">Produtos validados</div><div class="value" id="kValidos">0</div><div class="sub">Base fiscal pronta</div></div>
+      <div class="card kpi"><div class="label">Comissão</div><div class="value">10%</div><div class="sub">FarmaClub</div></div>
+    </div>
+    <div class="notice">Nova rotina sugerida: <strong>importar XML da nota</strong> para criar/atualizar produtos e usar o <strong>scanner</strong> para inventário, busca e conferência física.</div>
+    <div class="grid grid-2" style="margin-top:16px">
+      <div class="card">
+        <h3>Produtos prioritários</h3>
+        <div class="tbl"><table><thead><tr><th>Produto</th><th>Fiscal</th><th>Preço</th></tr></thead><tbody id="tbProd"></tbody></table></div>
+      </div>
+      <div class="card">
+        <h3>Entradas recentes por nota</h3>
+        <div id="entradas"></div>
+      </div>
+    </div>
+    <div class="grid grid-3">
+      <div class="card">
+        <h3>Busca por código de barras</h3>
+        <input id="barcodeSearch" placeholder="Passe o leitor ou digite o EAN" />
+        <div id="barcodeResult" class="muted" style="margin-top:12px">Aguardando leitura.</div>
+      </div>
+      <div class="card"><h3>Uso do scanner</h3><p class="muted">Use para inventário, venda rápida e conferência. Não use o scanner como única fonte do NCM; a fonte mestre deve ser a nota fiscal de entrada.</p></div>
+      <div class="card"><h3>Próximo passo</h3><p class="muted">Abrir o módulo <strong>Cadastro fiscal</strong> para importar XML e revisar só as exceções.</p></div>
+    </div>
+  </main>
+</div>
+<script>
+const produtos=(window.FARMACLUB.produtos||[]);
+const entradas=(window.FARMACLUB.entradasFiscais||[]);
+const fmt=v=>Number(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+document.getElementById('kValidos').textContent = produtos.filter(p=>p.status_fiscal==='validado').length.toLocaleString('pt-BR');
+document.getElementById('tbProd').innerHTML=produtos.map(p=>`<tr><td><strong>${p.nome}</strong><div class="muted">${p.lab} · EAN ${p.ean || 'sem cadastro'}</div></td><td><div>NCM ${p.ncm || 'pendente'}</div><div class="muted">${p.monofasico?'Monofásico':'Não monofásico'} · ${p.icms_st?'ICMS-ST':'ICMS normal'}</div></td><td>R$ ${p.preco_ref.toFixed(2).replace('.',',')}</td></tr>`).join('');
+document.getElementById('entradas').innerHTML=entradas.map(n=>`<div style="padding:12px 0;border-bottom:1px solid #eee"><strong>${n.fornecedor}</strong><div class="muted">NF ${n.numero}/${n.serie} · ${n.itens} itens · ${fmt(n.valorTotal)}</div><div class="muted">${n.novosCadastros} novos cadastros · ${n.revisaoFiscal} em revisão</div></div>`).join('');
+document.getElementById('barcodeSearch').addEventListener('input', (e)=>{
+  const value = String(e.target.value||'').replace(/\D+/g,'');
+  const product = produtos.find(p => String(p.ean||'') === value);
+  document.getElementById('barcodeResult').innerHTML = product
+    ? `<strong>${product.nome}</strong><br>NCM ${product.ncm || 'pendente'} · ${product.fonte_ncm || 'sem fonte'}<br>${product.monofasico?'Monofásico':'Não monofásico'} · ${product.icms_st?'ICMS-ST':'ICMS normal'}`
+    : (value ? 'EAN não encontrado na base local.' : 'Aguardando leitura.');
+});
+</script>
+</body></html>

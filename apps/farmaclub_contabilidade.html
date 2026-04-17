@@ -1,0 +1,133 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>FarmaClub — ERP Contabilidade</title><style>
+:root{
+  --bg:#f4f4f2; --card:#fff; --text:#1a1a1a; --muted:#6b7280; --line:#e5e7eb;
+  --green:#3BAA35; --red:#dc2626; --orange:#d97706; --blue:#2563eb; --dark:#111827;
+}
+*{box-sizing:border-box}
+body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--text);margin:0}
+a{text-decoration:none;color:inherit}
+button,input,select,textarea{font:inherit}
+.container{max-width:1180px;margin:0 auto;padding:24px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.logo{font-weight:800;font-size:22px;color:var(--green)}
+.logo small{display:block;font-size:11px;color:var(--muted);font-weight:600}
+.nav{display:flex;gap:10px;flex-wrap:wrap}
+.nav a,.btn{padding:10px 14px;border-radius:10px;background:#fff;border:1px solid var(--line);font-size:13px;font-weight:700}
+.btn.primary{background:var(--green);border-color:var(--green);color:#fff}
+.grid{display:grid;gap:16px}
+.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}
+.card h2,.card h3{margin:0 0 10px}
+.muted{color:var(--muted)}
+.kpi .label{font-size:12px;color:var(--muted)}
+.kpi .value{font-size:28px;font-weight:800;margin-top:6px}
+.kpi .sub{font-size:11px;color:#9ca3af;margin-top:6px}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:800}
+.badge.green{background:#ecfdf5;color:#15803d;border:1px solid #bbf7d0}
+.badge.orange{background:#fffbeb;color:#b45309;border:1px solid #fde68a}
+.badge.red{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca}
+table{width:100%;border-collapse:collapse}
+th,td{padding:10px 12px;border-bottom:1px solid #f0f2f5;text-align:left;font-size:13px;vertical-align:top}
+th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;background:#fafafa}
+.tbl{overflow:auto;border:1px solid var(--line);border-radius:14px}
+.hero{background:linear-gradient(135deg,#0f172a,#14532d);color:#fff;border-radius:22px;padding:28px}
+.hero h1{margin:0 0 10px;font-size:36px}
+.hero p{margin:0;color:#d1d5db;max-width:760px;line-height:1.7}
+.footer{padding:30px 0;color:var(--muted);font-size:12px}
+form .row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:12px}
+input,select,textarea{width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:10px;background:#fff}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green)}
+@media (max-width:900px){
+  .grid-2,.grid-3,.grid-4, form .row{grid-template-columns:1fr}
+  .hero h1{font-size:28px}
+}
+
+.layout{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+.side{background:#fff;border-right:1px solid var(--line);padding:20px}
+.side a{display:block;padding:10px 12px;border-radius:10px;margin-bottom:6px;font-weight:700;color:#4b5563}
+.side a.active,.side a:hover{background:#ecfdf5;color:#166534}
+.main{padding:20px}
+.res{padding:14px;border-radius:14px;background:linear-gradient(135deg,#14532d,#16a34a);color:#fff}
+.small{font-size:12px;opacity:.9}
+@media (max-width:900px){.layout{grid-template-columns:1fr}}
+</style></head><body>
+<script src="/public/runtime-config.js"></script>
+<script src="/shared/farmaclub_boot.js"></script>
+<script src="/shared/farmaclub_dados.js"></script>
+<div class="layout">
+  <aside class="side">
+    <div class="logo">Contabilidade<small>FarmaClub · Itaperuna/RJ</small></div>
+    <a class="active" href="#">Dashboard</a>
+    <a href="#simulador">Regime inteligente</a>
+    <a href="/erp">ERP Central</a>
+  </aside>
+  <main class="main">
+    <div class="topbar"><div><div class="logo">Painel contábil</div><div class="muted">Visão consolidada das farmácias demo</div></div><span class="badge green">● Sincronizado</span></div>
+    <div class="grid grid-4">
+      <div class="card kpi"><div class="label">Faturamento da rede</div><div class="value" id="fatRede">R$ 0</div><div class="sub">Base demo</div></div>
+      <div class="card kpi"><div class="label">Comissão FarmaClub</div><div class="value" id="comRede">R$ 0</div><div class="sub">10% estimado</div></div>
+      <div class="card kpi"><div class="label">DAS projetado</div><div class="value" id="dasRede">R$ 0</div><div class="sub">Simples 6%</div></div>
+      <div class="card kpi"><div class="label">CNPJs</div><div class="value" id="cnpjRede">0</div><div class="sub">Ativos</div></div>
+    </div>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>Visão por farmácia</h3>
+        <div class="tbl"><table><thead><tr><th>Farmácia</th><th>Regime</th><th>Faturamento</th><th>Comissão</th></tr></thead><tbody id="tbCont"></tbody></table></div>
+      </div>
+      <div class="card" id="simulador">
+        <h3>Regime inteligente</h3>
+        <form onsubmit="event.preventDefault(); calc();">
+          <div class="row">
+            <div><label>Faturamento mensal</label><input id="fat" type="number" value="110000"></div>
+            <div><label>Folha + pró-labore</label><input id="folha" type="number" value="12000"></div>
+          </div>
+          <div class="row">
+            <div><label>% monofásico</label><input id="mono" type="number" value="60"></div>
+            <div><label>% ST</label><input id="st" type="number" value="10"></div>
+          </div>
+          <button class="btn primary">Calcular</button>
+        </form>
+        <div id="resultado" style="margin-top:14px"></div>
+      </div>
+    </div>
+  </main>
+</div>
+<script>
+const farms=window.FARMACLUB.farmacias||[];
+const fmt=v=>Number(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const total=farms.reduce((s,f)=>s+f.faturamento,0);
+document.getElementById('fatRede').textContent=fmt(total);
+document.getElementById('comRede').textContent=fmt(total*0.10);
+document.getElementById('dasRede').textContent=fmt(total*0.06);
+document.getElementById('cnpjRede').textContent=farms.length;
+document.getElementById('tbCont').innerHTML=farms.map(f=>`<tr><td><strong>${f.nome}</strong><div class="muted">${f.cnpj}</div></td><td>Simples Nacional</td><td>${fmt(f.faturamento)}</td><td>${fmt(f.faturamento*0.10)}</td></tr>`).join('');
+function calc(){
+  const fat=Number(document.getElementById('fat').value||0);
+  const folha=Number(document.getElementById('folha').value||0);
+  const mono=Number(document.getElementById('mono').value||0);
+  const st=Number(document.getElementById('st').value||0);
+  const simples = fat * Math.max(0.035, 0.06 - (mono/100)*0.009 - (st/100)*0.004);
+  const presumido = fat * 0.115;
+  const real = fat * 0.095 + folha*0.02;
+  const cenarios = [
+    {nome:'Simples Nacional', valor:simples},
+    {nome:'Lucro Presumido', valor:presumido},
+    {nome:'Lucro Real', valor:real}
+  ].sort((a,b)=>a.valor-b.valor);
+  const best=cenarios[0], worst=cenarios[2];
+  document.getElementById('resultado').innerHTML = `
+    <div class="res">
+      <div class="small">REGIME RECOMENDADO</div>
+      <div style="font-size:28px;font-weight:800">${best.nome}</div>
+      <div class="small">Economia anual máxima estimada: ${fmt((worst.valor-best.valor)*12)}</div>
+    </div>
+    <div class="tbl" style="margin-top:12px">
+      <table><thead><tr><th>Cenário</th><th>Custo mensal estimado</th></tr></thead>
+      <tbody>${cenarios.map(c=>`<tr><td>${c.nome}</td><td>${fmt(c.valor)}</td></tr>`).join('')}</tbody></table>
+    </div>`;
+}
+calc();
+</script>
+</body></html>
