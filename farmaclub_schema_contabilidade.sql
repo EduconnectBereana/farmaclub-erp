@@ -1,5 +1,5 @@
--- FARMA CLUB — MÓDULO CONTABILIDADE / REGIME INTELIGENTE
--- Rode este arquivo no SQL Editor do Supabase depois do farmaclub_schema.sql
+-- FARMA DO BAIRRO — MÓDULO CONTABILIDADE / REGIME INTELIGENTE
+-- Rode este arquivo no SQL Editor do Supabase depois do farma-do-bairro_schema.sql
 
 ALTER TABLE produtos ADD COLUMN IF NOT EXISTS ncm TEXT;
 ALTER TABLE produtos ADD COLUMN IF NOT EXISTS cest TEXT;

@@ -1,7 +1,7 @@
 {
-  "name": "FarmaClub Motoboy",
-  "short_name": "FC Motoboy",
-  "description": "App de entregas para motoboys parceiros FarmaClub em Itaperuna/RJ.",
+  "name": "Farma do Bairro Motoboy",
+  "short_name": "FdB Motoboy",
+  "description": "App de entregas para motoboys parceiros Farma do Bairro em Itaperuna/RJ.",
   "start_url": "/farmaclub_app_motoboy.html",
   "scope": "/",
   "display": "standalone",

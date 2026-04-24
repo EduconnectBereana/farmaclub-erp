@@ -1,5 +1,5 @@
 ﻿/**
- * FARMACLUB — INTEGRAÇÃO SUPABASE
+ * FARMADOBAIRRO — INTEGRAÇÃO SUPABASE
  * Fase B: banco de dados real, autenticação por farmácia, dados em tempo real
  *
  * CONFIGURAÇÃO (preencher com suas chaves):
@@ -343,4 +343,4 @@ const FC = {
 window.sb = sb;
 window.FC = FC;
 
-console.log("🟢 FarmaClub Supabase carregado —", SUPABASE_URL);
+console.log("🟢 Farma do Bairro Supabase carregado —", SUPABASE_URL);

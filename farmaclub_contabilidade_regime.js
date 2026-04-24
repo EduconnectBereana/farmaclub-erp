@@ -459,7 +459,7 @@
         </div>
       </div>
       <div class="card">
-        <div class="sec-tit"><span>Leitura operacional</span><span class="fc-mini">O que fazer dentro do Farma Club</span></div>
+        <div class="sec-tit"><span>Leitura operacional</span><span class="fc-mini">O que fazer dentro do Farma do Bairro</span></div>
         <div class="grid3" style="margin-bottom:0">
           <div class="fc-box"><strong>Excelente para Simples</strong><div class="fc-note" style="margin-top:8px">Folha mais pesada, busca por simplicidade e ganho pequeno ao sair do DAS.</div></div>
           <div class="fc-box"><strong>Excelente para Presumido</strong><div class="fc-note" style="margin-top:8px">Muito monofásico, ST relevante, folha enxuta e cadastro fiscal bem classificado.</div></div>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>FarmaClub — Frete Inteligente</title>
+<title>Farma do Bairro — Frete Inteligente</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:system-ui,-apple-system,sans-serif;background:#f4f4f2;color:#1a1a1a;font-size:14px}
@@ -39,7 +39,7 @@ input:focus{border-color:#3BAA35}
 <div class="app">
 
 <div class="hero">
-  <div style="font-size:19px;font-weight:700">🛵 FarmaClub — Frete por Endereço</div>
+  <div style="font-size:19px;font-weight:700">🛵 Farma do Bairro — Frete por Endereço</div>
   <div style="font-size:12px;opacity:.8;margin-top:3px">Busca rua real · GPS · Itaperuna/RJ · OpenStreetMap</div>
   <div style="font-size:11px;opacity:.7;margin-top:6px" id="hero-info">Carregando...</div>
 </div>
@@ -108,11 +108,11 @@ input:focus{border-color:#3BAA35}
 <!-- FARMÁCIAS -->
 <div id="tab-farmacias" style="display:none">
   <div class="card">
-    <div style="font-weight:600;font-size:13px;margin-bottom:4px">Farmácias parceiras FarmaClub</div>
+    <div style="font-weight:600;font-size:13px;margin-bottom:4px">Farmácias parceiras Farma do Bairro</div>
     <div style="font-size:11px;color:#888;margin-bottom:14px">Dados do cadastro central — mesma fonte usada pela contabilidade</div>
     <div id="lista-farms-full"></div>
     <div style="margin-top:14px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px;font-size:12px;color:#1d4ed8;line-height:1.6">
-      <strong>Arquitetura FarmaClub:</strong> cada farmácia é cadastrada uma única vez com CNPJ, endereço e coordenadas. O frete, o app do cliente, a contabilidade e o ERP central puxam todos do mesmo cadastro — sem repetição, sem inconsistência.
+      <strong>Arquitetura Farma do Bairro:</strong> cada farmácia é cadastrada uma única vez com CNPJ, endereço e coordenadas. O frete, o app do cliente, a contabilidade e o ERP central puxam todos do mesmo cadastro — sem repetição, sem inconsistência.
     </div>
   </div>
 </div>
@@ -163,7 +163,7 @@ let cfg={base:3,km:1.5,pico:1.4,gratis:150,vel:25};
 const fmt=v=>"R$ "+v.toFixed(2).replace(".",",");
 
 // FARMÁCIAS — usa cadastro central se disponível
-const farms=(typeof FARMACLUB!=="undefined")?FARMACLUB.farmacias:[
+const farms=(typeof FARMADOBAIRRO!=="undefined")?FARMADOBAIRRO.farmacias:[
   {id:1,nome:"Farmácia São João",bairro:"Centro",endereco_completo:"Rua Getúlio Vargas, 342 — Centro",cnpj:"12.345.678/0001-90",telefone:"(22) 3822-1234",horario:"Seg–Sex 8h–20h · Sáb 8h–18h",lat:-21.2062,lng:-41.8878,aberto:true,nota:4.9,cor:"#3BAA35"},
   {id:2,nome:"Vida & Saúde",bairro:"Parque Noel",endereco_completo:"Av. Amaro Soares, 88 — Parque Noel",cnpj:"23.456.789/0001-01",telefone:"(22) 3822-5678",horario:"Seg–Sáb 7h–22h",lat:-21.1980,lng:-41.8820,aberto:true,nota:4.7,cor:"#2563eb"},
   {id:3,nome:"Farmácia Popular",bairro:"São Cristóvão",endereco_completo:"Rua 7 de Setembro, 201",cnpj:"34.567.890/0001-12",telefone:"(22) 3822-9012",horario:"Seg–Sex 8h–19h",lat:-21.2120,lng:-41.8950,aberto:false,nota:4.5,cor:"#dc2626"},
@@ -239,7 +239,7 @@ function buscarEnd(q){
   timer=setTimeout(async()=>{
     try{
       const url=`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q+" Itaperuna RJ Brasil")}&format=json&limit=6&addressdetails=1&accept-language=pt-BR`;
-      const r=await fetch(url,{headers:{"User-Agent":"FarmaClub/1.0"}});
+      const r=await fetch(url,{headers:{"User-Agent":"Farma do Bairro/1.0"}});
       const d=await r.json();
       document.getElementById("st-busca").textContent="";
       if(!d.length){l.innerHTML=`<div class="ac-item"><span>🔍</span><div><div style="font-weight:500">Sem resultado para "${q}"</div><div style="font-size:10px;color:#888">Tente outro nome de rua ou bairro</div></div></div>`;l.style.display="block";return;}

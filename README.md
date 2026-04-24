@@ -1,34 +1,35 @@
-# FarmaClub
+# Farma do Bairro
 
-Pacote preparado para publicação no GitHub/Vercel com foco em apresentação de uma farmácia piloto.
+> Marketplace hiperlocal de farmácias independentes em Itaperuna/RJ.
+> Uma iniciativa da **VMV Ventures Ltda**.
 
-## Canais prontos
-- Site público
-- App Cliente
-- App Motoboy
-- ERP Central
-- ERP Farmácia
-- Cadastro fiscal com entrada por XML da NF-e
-- Painel de pagamentos e split
-- Portal de apresentação do piloto
+🌐 **Site:** [farmadobairro.com.br](https://farmadobairro.com.br) (em configuração)
+📦 **Deploy atual:** [farmaclub-erp.vercel.app](https://farmaclub-erp.vercel.app)
 
-## Modelo financeiro atual do sistema
-- comissão do Farma Club: **10% apenas sobre medicamentos**
-- frete: **100% do motoboy**
-- gateway fee e juros: **fora da base da comissão**
-- checkout MVP: **1 meio de pagamento por pedido** (`pix`, `credito` ou `debito`)
-- multimeios: **preparado para fase 2**
+---
 
-## Arquivos de implantação
-- `public/runtime-config.js` → preencher Supabase real
-- `vercel.json` → rotas limpas do projeto
-- `api/health.js` → checagem simples do ambiente
-- `docs/FARMACLUB_DEPLOY_GUIDE.md` → ordem de publicação
+## Canais do sistema
 
-## Rotas de demonstração
-- `/site`
-- `/comprar`
-- `/motoboy`
-- `/erp`
-- `/farmacia`
-- `/piloto`
+- **Site público** — apresentação da marca e catálogo das farmácias parceiras
+- **App Cliente** (PWA) — compra de medicamentos das farmácias locais
+- **App Motoboy** (PWA) — recepção e gerenciamento de entregas
+- **ERP Central** — dashboard administrativo da operação
+- **ERP Farmácia** — gestão individual por farmácia parceira
+- **Contabilidade** — análise tributária e relatórios fiscais
+
+## Modelo financeiro
+
+- Comissão Farma do Bairro: **10% apenas sobre medicamentos**
+- Frete: **100% do motoboy**
+- Gateway fee e juros: **fora da base da comissão**
+
+## Identidade visual
+
+- **Verde principal:** `#3BAA35`
+- **Azul principal:** `#1A5FA8`
+- **Logo produto:** `farma-do-bairro-logo.png`
+- **Logo holding:** `vmv-ventures-logo.png`
+
+---
+
+© 2026 VMV Ventures Ltda. Todos os direitos reservados.

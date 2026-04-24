@@ -1,9 +1,9 @@
 // ══════════════════════════════════════════════════════════
-// FARMACLUB — SERVICE WORKER
+// FARMA DO BAIRRO — SERVICE WORKER
 // Gerencia cache para funcionamento offline dos apps
 // ══════════════════════════════════════════════════════════
 
-const CACHE_VERSION = 'farmaclub-v1.2';
+const CACHE_VERSION = 'farmadobairro-v2.0';
 
 // Arquivos que ficam em cache (funcionam sem internet)
 const CACHE_ESTATICO = [
@@ -17,18 +17,18 @@ const CACHE_ESTATICO = [
   '/farmaclub_contabilidade.html',
   '/farmaclub_frete.html',
   '/farmaclub_dados.js',
-  '/farmaclub_logo.png',
+  '/farma-do-bairro-logo.png',
   '/manifest-cliente.json',
   '/manifest-motoboy.json',
 ];
 
 // ── INSTALAÇÃO — baixa e salva todos os arquivos ──
 self.addEventListener('install', event => {
-  console.log('[SW FarmaClub] Instalando versão:', CACHE_VERSION);
+  console.log('[SW Farma do Bairro] Instalando versão:', CACHE_VERSION);
   event.waitUntil(
     caches.open(CACHE_VERSION)
       .then(cache => {
-        console.log('[SW FarmaClub] Salvando arquivos em cache...');
+        console.log('[SW Farma do Bairro] Salvando arquivos em cache...');
         // Salvar um por um para não falhar tudo se um arquivo não existir
         return Promise.allSettled(
           CACHE_ESTATICO.map(url =>
@@ -37,7 +37,7 @@ self.addEventListener('install', event => {
         );
       })
       .then(() => {
-        console.log('[SW FarmaClub] Cache instalado!');
+        console.log('[SW Farma do Bairro] Cache instalado!');
         return self.skipWaiting(); // ativa imediatamente sem esperar reload
       })
   );
@@ -45,14 +45,14 @@ self.addEventListener('install', event => {
 
 // ── ATIVAÇÃO — remove caches antigos ──
 self.addEventListener('activate', event => {
-  console.log('[SW FarmaClub] Ativando versão:', CACHE_VERSION);
+  console.log('[SW Farma do Bairro] Ativando versão:', CACHE_VERSION);
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames
           .filter(name => name !== CACHE_VERSION)
           .map(name => {
-            console.log('[SW FarmaClub] Removendo cache antigo:', name);
+            console.log('[SW Farma do Bairro] Removendo cache antigo:', name);
             return caches.delete(name);
           })
       );
@@ -101,7 +101,7 @@ self.addEventListener('fetch', event => {
             if (event.request.destination === 'document') {
               return caches.match('/farmaclub_app_cliente.html')
                 || new Response(
-                  `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FarmaClub — Offline</title>
+                  `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Farma do Bairro — Offline</title>
                   <style>body{font-family:system-ui,sans-serif;background:#f4f4f2;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;text-align:center;padding:20px}
                   .box{background:#fff;border-radius:16px;padding:32px;max-width:320px}
                   h1{font-size:20px;color:#3BAA35;margin-bottom:8px}p{color:#666;font-size:14px;line-height:1.6}
@@ -123,7 +123,7 @@ self.addEventListener('fetch', event => {
 // ── SINCRONIZAÇÃO EM BACKGROUND (quando voltar internet) ──
 self.addEventListener('sync', event => {
   if (event.tag === 'sync-pedidos') {
-    console.log('[SW FarmaClub] Sincronizando pedidos com o servidor...');
+    console.log('[SW Farma do Bairro] Sincronizando pedidos com o servidor...');
     // Quando integrar com Supabase:
     // event.waitUntil(sincronizarPedidosPendentes());
   }
@@ -134,7 +134,7 @@ self.addEventListener('push', event => {
   if (!event.data) return;
   const data = event.data.json();
   const options = {
-    body: data.body || 'Nova atualização do FarmaClub',
+    body: data.body || 'Nova atualização do Farma do Bairro',
     icon: '/icons/cliente-192.png',
     badge: '/icons/cliente-72.png',
     vibrate: [200, 100, 200],
@@ -142,7 +142,7 @@ self.addEventListener('push', event => {
     actions: data.actions || []
   };
   event.waitUntil(
-    self.registration.showNotification(data.title || 'FarmaClub', options)
+    self.registration.showNotification(data.title || 'Farma do Bairro', options)
   );
 });
 
@@ -159,4 +159,4 @@ self.addEventListener('notificationclick', event => {
   );
 });
 
-console.log('[SW FarmaClub] Service Worker carregado — versão', CACHE_VERSION);
+console.log('[SW Farma do Bairro] Service Worker carregado — versão', CACHE_VERSION);

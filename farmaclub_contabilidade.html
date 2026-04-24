@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>FarmaClub — ERP Contabilidade</title>
+<title>Farma do Bairro — ERP Contabilidade</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -99,7 +99,7 @@ input:focus,select:focus,textarea:focus{border-color:#3BAA35}
 <div id="sidebar">
   <div class="logo">
     <div class="logo-title">Contabilidade</div>
-    <div class="logo-sub">FarmaClub · Itaperuna/RJ<br>Oliveira & Associados</div>
+    <div class="logo-sub">Farma do Bairro · Itaperuna/RJ<br>Oliveira & Associados</div>
   </div>
 
   <div class="nav-divider">Fiscal</div>
@@ -186,7 +186,7 @@ const impostosSimples=[
 const documentos=[
   {id:1,tipo:"NF-e",desc:"Entrada Distribuidora Farmanobre",cnpj:"São João",data:"2026-03-10",valor:4820,status:"escriturado",arquivo:"nfe_4521.xml"},
   {id:2,tipo:"NF-e",desc:"Entrada Distribuidora EMS",cnpj:"São João",data:"2026-03-05",valor:1240,status:"escriturado",arquivo:"nfe_8821.xml"},
-  {id:3,tipo:"NFS-e",desc:"Serviços de consultoria — FarmaClub",cnpj:"Todas",data:"2026-03-01",valor:8760,status:"pendente",arquivo:"—"},
+  {id:3,tipo:"NFS-e",desc:"Serviços de consultoria — Farma do Bairro",cnpj:"Todas",data:"2026-03-01",valor:8760,status:"pendente",arquivo:"—"},
   {id:4,tipo:"Recibo",desc:"Aluguel — João Imóveis",cnpj:"São João",data:"2026-03-01",valor:2800,status:"escriturado",arquivo:"rec_alug_mar.pdf"},
   {id:5,tipo:"DARF",desc:"Simples Nacional Fev/2026",cnpj:"Todas",data:"2026-03-18",valor:18200,status:"pago",arquivo:"darf_fev26.pdf"},
   {id:6,tipo:"GPS",desc:"INSS/FGTS Fevereiro",cnpj:"Todas",data:"2026-03-07",valor:5400,status:"pago",arquivo:"gps_fev26.pdf"},
@@ -204,9 +204,9 @@ const folha=[
 
 const mensagens=[
   {de:"Carlos Oliveira (contador)",para:"São João",data:"2026-03-15 14:32",assunto:"DAS Março — dados confirmados",msg:"Confirmei os dados do faturamento de março. DAS calculado em R$ 5.256,00. Prazo até 20/04. Enviarei o DARF até sexta.",lida:true,urgente:false},
-  {de:"Sistema FarmaClub",para:"Todas",data:"2026-03-14 09:00",assunto:"NF-e Distribuidora Vital — XML pendente",msg:"A nota fiscal da Distribuidora Vital (R$ 3.100,00) foi registrada manualmente mas o XML ainda não foi importado. Por favor solicitar ao fornecedor para escrituração.",lida:false,urgente:true},
+  {de:"Sistema Farma do Bairro",para:"Todas",data:"2026-03-14 09:00",assunto:"NF-e Distribuidora Vital — XML pendente",msg:"A nota fiscal da Distribuidora Vital (R$ 3.100,00) foi registrada manualmente mas o XML ainda não foi importado. Por favor solicitar ao fornecedor para escrituração.",lida:false,urgente:true},
   {de:"Ana Souza (contadora)",para:"Boa Saúde",data:"2026-03-12 11:15",assunto:"DEFIS 2025 — documentos necessários",msg:"Para a DEFIS anual preciso dos extratos bancários de Jan a Dez/2025 e do livro caixa. Prazo final 31/03. Favor enviar até 25/03.",lida:false,urgente:true},
-  {de:"Mury (FarmaClub)",para:"Todos contadores",data:"2026-03-10 16:00",assunto:"Relatório março — envio em 01/04",msg:"Lembrando que o relatório consolidado de março para os donos das farmácias será enviado no dia 01/04. Precisarei do DRE individualizado de cada CNPJ.",lida:true,urgente:false},
+  {de:"Mury (Farma do Bairro)",para:"Todos contadores",data:"2026-03-10 16:00",assunto:"Relatório março — envio em 01/04",msg:"Lembrando que o relatório consolidado de março para os donos das farmácias será enviado no dia 01/04. Precisarei do DRE individualizado de cada CNPJ.",lida:true,urgente:false},
 ];
 
 // ═══ HELPERS ═══
@@ -449,14 +449,14 @@ function renderDRE(){
         <div style="margin:8px 0 4px;font-size:11px;color:#aaa;font-weight:600;letter-spacing:.5px">DESPESAS OPERACIONAIS</div>
         ${linhaDRE("Folha de pagamento (14 func.)",-desp.folha,true)}
         ${linhaDRE("Aluguéis (6 pontos)",-desp.aluguel,true)}
-        ${linhaDRE("Comissão FarmaClub (10%)",-desp.comissaoFR,true)}
+        ${linhaDRE("Comissão Farma do Bairro (10%)",-desp.comissaoFR,true)}
         ${linhaDRE("Energia elétrica",-desp.energia,true)}
         ${linhaDRE("Outros operacionais",-desp.outros,true)}
         ${linhaDRE("= EBITDA",ebitda,false,true,ebitda>0?GN:RD)}
         ${linhaDRE("(−) Impostos (DAS 6,0%)",-impostos,true)}
         ${linhaDRE("= LUCRO LÍQUIDO",lucLiq,false,true,lucLiq>0?T:RD)}
         <div style="background:#f8f8f8;border-radius:8px;padding:10px;margin-top:10px">
-          <div style="font-size:11px;color:#888;margin-bottom:4px">Participação da comissão FarmaClub</div>
+          <div style="font-size:11px;color:#888;margin-bottom:4px">Participação da comissão Farma do Bairro</div>
           <div style="font-size:12px;color:#555">R$ ${fmt(desp.comissaoFR)} = 10% do faturamento bruto individual de cada farmácia</div>
         </div>
       </div>
@@ -489,7 +489,7 @@ function renderDRE(){
 // Quando o Supabase for integrado, esta seção é substituída
 // por chamadas ao banco e os dados ficam em qualquer lugar.
 // ═══════════════════════════════════════════════════════════
-const FC_STORAGE_KEY = "farmaclub_cadastro_farmacias_v1";
+const FC_STORAGE_KEY = "farma-do-bairro_cadastro_farmacias_v1";
 
 const FARMS_DEMO = [
     {id:1,ativo:true,aberto:true,nome:"Farmácia São João",razao_social:"São João Farmácia Ltda",cnpj:"12.345.678/0001-90",ie:"123.456.78-9",crf:"CRF-RJ 12345",responsavel:"João Carlos Oliveira",telefone:"(22) 3822-1234",email:"saojao@email.com",endereco:"Rua Getúlio Vargas, 342",bairro:"Centro",cep:"28300-000",lat:-21.2062,lng:-41.8878,horario:"Seg–Sex 8h–20h · Sáb 8h–18h",regime:"Simples Nacional",abertura:"01/03/2024",contador:"Oliveira & Associados",faturamento:87600,comissao_pct:10,situacao:"regular",nota:5.0,cor:"#3BAA35",obs:"Farmácia âncora — ponto de consolidação da compra coletiva"},
@@ -510,8 +510,8 @@ function carregarFarmacias() {
     }
   } catch(e) {}
   // 2. Dados do farmaclub_dados.js se disponível
-  if (typeof FARMACLUB !== "undefined" && FARMACLUB.farmacias) {
-    return JSON.parse(JSON.stringify(FARMACLUB.farmacias));
+  if (typeof FARMADOBAIRRO !== "undefined" && FARMADOBAIRRO.farmacias) {
+    return JSON.parse(JSON.stringify(FARMADOBAIRRO.farmacias));
   }
   // 3. Dados de demonstração
   return JSON.parse(JSON.stringify(FARMS_DEMO));
@@ -520,7 +520,7 @@ function carregarFarmacias() {
 function persistirFarmacias(farms) {
   try {
     localStorage.setItem(FC_STORAGE_KEY, JSON.stringify(farms));
-    if (typeof FARMACLUB !== "undefined") FARMACLUB.farmacias = farms;
+    if (typeof FARMADOBAIRRO !== "undefined") FARMADOBAIRRO.farmacias = farms;
     return true;
   } catch(e) {
     alert("Erro ao salvar dados. Verifique se o navegador permite armazenamento local.");
@@ -677,7 +677,7 @@ function renderCadastro(){
             <input type="text" id="f-contador" value="${f.contador||""}" placeholder="Nome do escritório">
           </div>
           <div>
-            <label class="form-lbl">Comissão FarmaClub (%)</label>
+            <label class="form-lbl">Comissão Farma do Bairro (%)</label>
             <input type="number" id="f-com" value="${f.comissao_pct||10}" min="0" max="100" step="0.5">
           </div>
           <div>
@@ -925,7 +925,7 @@ function renderConsolidado(){
   const comissao=fat*0.10;
   return`
     <div class="alert alert-success" style="margin-bottom:16px">
-      <div style="font-size:12px;color:#14532d"><strong>Visão exclusiva Mury — FarmaClub Itaperuna.</strong> Esta tela consolida tudo que você ganha e deve, separado das farmácias parceiras.</div>
+      <div style="font-size:12px;color:#14532d"><strong>Visão exclusiva Mury — Farma do Bairro Itaperuna.</strong> Esta tela consolida tudo que você ganha e deve, separado das farmácias parceiras.</div>
     </div>
     <div class="grid4" style="margin-bottom:18px">
       <div class="kpi"><div class="kpi-lbl">Comissão total (10%)</div><div class="kpi-val" style="color:${T}">${fmt(comissao)}</div><div class="kpi-sub">Março/2026</div></div>
@@ -969,7 +969,7 @@ function renderConsolidado(){
         <div style="background:#fef3c7;border-radius:8px;padding:10px;margin-top:12px">
           <div style="font-size:11px;color:#92400e;font-weight:600;margin-bottom:4px">⚠ Atenção fiscal</div>
           <div style="font-size:11px;color:#78350f;line-height:1.6">
-            Receber comissão como PF gera carnê-leão obrigatório. Considere abrir um CNPJ para a FarmaClub — pode reduzir a carga tributária em até 40%. Consulte seu contador.
+            Receber comissão como PF gera carnê-leão obrigatório. Considere abrir um CNPJ para a Farma do Bairro — pode reduzir a carga tributária em até 40%. Consulte seu contador.
           </div>
         </div>
       </div>

@@ -1,4 +1,4 @@
--- FARMACLUB — SCHEMA SUPABASE (versão corrigida)
+-- FARMA DO BAIRRO — SCHEMA SUPABASE (versão corrigida)
 -- Cole tudo no SQL Editor e clique em Run
 
 CREATE TABLE IF NOT EXISTS farmacias (

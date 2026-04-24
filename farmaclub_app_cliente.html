@@ -3,16 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
-<title>FarmaClub — Medicamentos em Itaperuna/RJ</title>
+<title>Farma do Bairro — Medicamentos em Itaperuna/RJ</title>
 <link rel="manifest" href="manifest-cliente.json">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="farmaclub_supabase.js"></script>
 <meta name="theme-color" content="#3BAA35">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="FarmaClub">
+<meta name="apple-mobile-web-app-title" content="Farma do Bairro">
 <link rel="apple-touch-icon" href="icons/cliente-192.png">
-<meta name="description" content="Compre medicamentos nas farmácias parceiras FarmaClub em Itaperuna/RJ com entrega rápida.">
+<meta name="description" content="Compre medicamentos nas farmácias parceiras Farma do Bairro em Itaperuna/RJ com entrega rápida.">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{font-family:system-ui,-apple-system,sans-serif;background:#f4f4f2;color:#1a1a2e;font-size:14px;min-height:100vh;display:flex;flex-direction:column;max-width:480px;margin:0 auto}
@@ -117,8 +117,8 @@ a{text-decoration:none;color:inherit}
 
 <div class="topbar">
   <div class="top-logo" onclick="navTo('inicio')">
-    <img src="farmaclub_logo.png" alt="" onerror="this.style.display='none'">
-    <span class="top-nome">FarmaClub</span>
+    <img src="farma-do-bairro-logo.png" alt="" onerror="this.style.display='none'">
+    <span class="top-nome">Farma do Bairro</span>
   </div>
   <div class="top-right">
     <button class="top-cart" onclick="navTo('carrinho')">
@@ -154,13 +154,13 @@ function getFlag(key){
 }
 
 // ── RODAPÉ LEGAL ──
-const FOOTER_LEGAL=`<div style="background:#1a1a2e;color:rgba(255,255,255,.5);font-size:10px;line-height:1.8;padding:20px 16px;margin-top:8px"><div style="border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:10px;margin-bottom:10px;font-size:11px;color:rgba(255,255,255,.7);font-weight:600">FarmaClub Itaperuna — Rede de Farmácias Independentes</div><div style="margin-bottom:8px">FarmaClub Gestão e Tecnologia Ltda. | CNPJ: 00.000.000/0001-00 | Rua Getúlio Vargas, 342 | Centro | Itaperuna (RJ) | CEP 28300-000 | WhatsApp (22) 9XXXX-XXXX</div><div style="background:rgba(255,255,255,.05);border-radius:8px;padding:10px;margin-bottom:8px;border-left:3px solid #3BAA35">⚕️ Informações deste app não substituem orientações médicas. Consulte um médico.</div><div style="margin-bottom:8px">Preços válidos para compras neste canal. FarmaClub segue determinações da ANVISA e LGPD Lei 13.709/2018.</div><div style="border-top:1px solid rgba(255,255,255,.1);padding-top:8px;font-size:9px;text-align:center">© 2026 FarmaClub Itaperuna · Todos os direitos reservados</div></div>`;
+const FOOTER_LEGAL=`<div style="background:#1a1a2e;color:rgba(255,255,255,.5);font-size:10px;line-height:1.8;padding:20px 16px;margin-top:8px"><div style="border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:10px;margin-bottom:10px;font-size:11px;color:rgba(255,255,255,.7);font-weight:600">Farma do Bairro Itaperuna — Rede de Farmácias Independentes</div><div style="margin-bottom:8px">VMV Ventures Ltda. | CNPJ: 00.000.000/0001-00 | Rua Getúlio Vargas, 342 | Centro | Itaperuna (RJ) | CEP 28300-000 | WhatsApp (22) 9XXXX-XXXX</div><div style="background:rgba(255,255,255,.05);border-radius:8px;padding:10px;margin-bottom:8px;border-left:3px solid #3BAA35">⚕️ Informações deste app não substituem orientações médicas. Consulte um médico.</div><div style="margin-bottom:8px">Preços válidos para compras neste canal. Farma do Bairro segue determinações da ANVISA e LGPD Lei 13.709/2018.</div><div style="border-top:1px solid rgba(255,255,255,.1);padding-top:8px;font-size:9px;text-align:center">© 2026 Farma do Bairro Itaperuna · Todos os direitos reservados</div></div>`;
 
 // ══════════════════════════════════════════
 // DADOS
 // ══════════════════════════════════════════
-const farms=(typeof FARMACLUB!=="undefined"&&FARMACLUB.farmacias)
-  ?FARMACLUB.farmacias.filter(f=>f.ativo)
+const farms=(typeof FARMADOBAIRRO!=="undefined"&&FARMADOBAIRRO.farmacias)
+  ?FARMADOBAIRRO.farmacias.filter(f=>f.ativo)
   :[
     {id:1,nome:"Farmácia São João",bairro:"Centro",endereco:"Rua Getúlio Vargas, 342",lat:-21.2062,lng:-41.8878,aberto:true,nota:4.9,horario:"8h–20h",cor:"#3BAA35"},
     {id:2,nome:"Vida & Saúde",bairro:"Parque Noel",endereco:"Av. Amaro Soares, 88",lat:-21.1980,lng:-41.8820,aberto:true,nota:4.7,horario:"7h–22h",cor:"#1A5FA8"},
@@ -281,7 +281,7 @@ function authLogin(){return `
     <div class="modal-handle"></div>
     <div style="text-align:center;margin-bottom:20px">
       <div style="font-size:32px;margin-bottom:8px">👋</div>
-      <div style="font-size:18px;font-weight:700">Bem-vindo ao FarmaClub</div>
+      <div style="font-size:18px;font-weight:700">Bem-vindo à Farma do Bairro</div>
       <div style="font-size:13px;color:#9a9eb8;margin-top:4px">Entre para finalizar sua compra</div>
     </div>
     <div id="auth-msg" class="msg-auth"></div>
@@ -562,9 +562,9 @@ function rInicio(){
            <div style="font-size:22px;font-weight:800;color:#1a1a2e;margin-bottom:4px">${usuarioLogado.nome.split(" ")[0]}</div>`
         :`<div style="margin-bottom:14px">
             <div style="width:52px;height:52px;background:linear-gradient(135deg,#3BAA35,#2E8A2A);border-radius:14px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center">
-              <img src="farmaclub_logo.png" style="height:36px;filter:brightness(0) invert(1)" onerror="this.style.display='none'">
+              <img src="farma-do-bairro-logo.png" style="height:36px;filter:brightness(0) invert(1)" onerror="this.style.display='none'">
             </div>
-            <div style="font-size:22px;font-weight:800;color:#1a1a2e;margin-bottom:4px">FarmaClub</div>
+            <div style="font-size:22px;font-weight:800;color:#1a1a2e;margin-bottom:4px">Farma do Bairro</div>
             <div style="font-size:13px;color:#9a9eb8">Medicamentos, agendamentos e saúde em Itaperuna</div>
           </div>`}
 
@@ -1077,11 +1077,11 @@ function rPagamento(){
 
 // PIX — QR Code + copia e cola
 function rPix(total){
-  const chave="11.111.111/0001-11"; // CNPJ FarmaClub
-  const txId="FARMACLUB"+Date.now().toString().slice(-8);
+  const chave="11.111.111/0001-11"; // CNPJ Farma do Bairro
+  const txId="FDB"+Date.now().toString().slice(-8);
   // Payload PIX simplificado (simulado — em produção usa API de pagamento)
-  const payload=`00020126580014BR.GOV.BCB.PIX0136${chave}520400005303986540${total.toFixed(2).replace(".","").padStart(7,"0")}5802BR5913FarmaClub6009Itaperuna62070503***6304`;
-  const copiaECola=`00020126580014BR.GOV.BCB.PIX0136${chave}52040000530398654${total.toFixed(2).replace(".","").padStart(7,"0")}5802BR5913FarmaClub6009Itaperuna62070503***6304ABCD`;
+  const payload=`00020126580014BR.GOV.BCB.PIX0136${chave}520400005303986540${total.toFixed(2).replace(".","").padStart(7,"0")}5802BR5915Farma do Bairro6009Itaperuna62070503***6304`;
+  const copiaECola=`00020126580014BR.GOV.BCB.PIX0136${chave}52040000530398654${total.toFixed(2).replace(".","").padStart(7,"0")}5802BR5915Farma do Bairro6009Itaperuna62070503***6304ABCD`;
 
   return`
     <div style="background:#fff;padding:12px 16px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:10px;position:sticky;top:52px;z-index:90">
@@ -1196,7 +1196,7 @@ function confirmarPedido(nm,tel,end,bairro){
     pagamento:PAGAMENTO[pagSel]?.label||"PIX",
     pagSel,
     status:"aguardando",
-    farmacia:f?f.nome:"FarmaClub",
+    farmacia:f?f.nome:"Farma do Bairro",
     farmId:fid,
     farmLat:f?.lat||(-21.2062),
     farmLng:f?.lng||(-41.8878),
@@ -1307,7 +1307,7 @@ function rRastreamento(){
     <div style="margin:0 12px 12px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:16px;text-align:center">
       <div style="font-size:32px;margin-bottom:6px">⭐</div>
       <div style="font-weight:700;font-size:15px;color:#16a34a;margin-bottom:4px">Entrega confirmada!</div>
-      <div style="font-size:12px;color:#9a9eb8">Obrigado por comprar no FarmaClub!</div>
+      <div style="font-size:12px;color:#9a9eb8">Obrigado por comprar no Farma do Bairro!</div>
     </div>`:""}
 
     <!-- RESUMO -->
@@ -1337,7 +1337,7 @@ function initMapaRastreamento(){
   L.polyline([[ped.farmLat,ped.farmLng],[ped.clienteLat,ped.clienteLng]],{color:"#d97706",weight:3,dashArray:"8 4",opacity:.6}).addTo(mapaTrack);
   if(ped.status==="entregando"||ped.status==="entregue"){
     const mkMoto=L.divIcon({html:`<div style="background:#d97706;width:40px;height:40px;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-size:20px">🛵</div>`,iconSize:[40,40],iconAnchor:[20,20],className:""});
-    marcadorMotoboy=L.marker([ped.motoboyLat||ped.farmLat,ped.motoboyLng||ped.farmLng],{icon:mkMoto,zIndexOffset:1000}).addTo(mapaTrack).bindPopup(`<strong>${ped.motoboy||"Motoboy FarmaClub"}</strong><br>A caminho`);
+    marcadorMotoboy=L.marker([ped.motoboyLat||ped.farmLat,ped.motoboyLng||ped.farmLng],{icon:mkMoto,zIndexOffset:1000}).addTo(mapaTrack).bindPopup(`<strong>${ped.motoboy||"Motoboy Farma do Bairro"}</strong><br>A caminho`);
     if(ped.status==="entregando"&&!ped.confirmadoCliente) simularMovimento(ped);
   }
   mapaTrack.fitBounds([[ped.farmLat,ped.farmLng],[ped.clienteLat,ped.clienteLng]],{padding:[30,30]});
@@ -1593,11 +1593,11 @@ function notificarMotoboysPorDistancia(pedido){
 
 
 // ══════════════════════════════════════════════════════════
-// MÓDULO MÉDICOS — FarmaClub
+// MÓDULO MÉDICOS — Farma do Bairro
 // Agendamento presencial, créditos, bonificação 3% prescrições
 // ══════════════════════════════════════════════════════════
 
-const COMISSAO_FARMACLUB_CONSULTA = 0.10; // 10% da consulta
+const COMISSAO_FARMA DO BAIRRO_CONSULTA = 0.10; // 10% da consulta
 const BONIFICACAO_PRESCRICAO = 0.03;      // 3% da venda de remédios prescritos
 
 // Médicos cadastrados (virão do Supabase na fase 2)
@@ -1704,7 +1704,7 @@ function rMedicos(){
     </div>
 
     <div style="padding:16px;background:#f0fdf4;margin:0 12px 16px;border-radius:12px;border:1px solid #bbf7d0">
-      <div style="font-size:12px;font-weight:700;color:#16a34a;margin-bottom:6px">💊 Vantagem FarmaClub</div>
+      <div style="font-size:12px;font-weight:700;color:#16a34a;margin-bottom:6px">💊 Vantagem Farma do Bairro</div>
       <div style="font-size:12px;color:#166534;line-height:1.6">
         Após sua consulta, o médico pode indicar os medicamentos. Compre aqui com praticidade e seu médico recebe uma bonificação por cada compra.
       </div>
@@ -1794,7 +1794,7 @@ function rAgendamento(){
   if(!agendSlot) return rMedicos();
   const m = getMedico(agendSlot.medicoId);
   if(!m) return rMedicos();
-  const taxaPlat = +(m.valor*COMISSAO_FARMACLUB_CONSULTA).toFixed(2);
+  const taxaPlat = +(m.valor*COMISSAO_FARMA DO BAIRRO_CONSULTA).toFixed(2);
   const medicoRecebe = +(m.valor-taxaPlat).toFixed(2);
 
   return`
@@ -1842,7 +1842,7 @@ function rAgendamento(){
     <div style="background:#f8f8f8;padding:14px 16px;border-bottom:1px solid #f0f0f0">
       <div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid #eee"><span>Valor da consulta</span><span style="font-weight:600">${fmt(m.valor)}</span></div>
       <div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0">
-        <span style="color:#9a9eb8">Taxa de plataforma FarmaClub (10%)</span>
+        <span style="color:#9a9eb8">Taxa de plataforma Farma do Bairro (10%)</span>
         <span style="color:#9a9eb8">${fmt(taxaPlat)}</span>
       </div>
       <div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-top:1px solid #eee">
@@ -1853,7 +1853,7 @@ function rAgendamento(){
     </div>
 
     <div style="background:#f0fdf4;border:1px solid #bbf7d0;margin:12px;border-radius:10px;padding:12px;font-size:12px;color:#166534;line-height:1.6">
-      💊 <strong>Dica:</strong> Após a consulta, os medicamentos prescritos podem ser comprados aqui no FarmaClub. Seu médico recebe 3% do valor como bonificação.
+      💊 <strong>Dica:</strong> Após a consulta, os medicamentos prescritos podem ser comprados aqui no Farma do Bairro. Seu médico recebe 3% do valor como bonificação.
     </div>
 
     <div style="padding:0 12px 20px">
@@ -1903,7 +1903,7 @@ window.confirmarAgendamento = function(){
         <div style="font-size:12px;color:#166534;line-height:1.8">
           1. Confirme pelo WhatsApp do consultório: ${m.tel}<br>
           2. Chegue 10 minutos antes com documento de identidade<br>
-          3. Após a consulta, compre os remédios aqui no FarmaClub<br>
+          3. Após a consulta, compre os remédios aqui no Farma do Bairro<br>
           4. Código do agendamento: <strong>${agend.id}</strong>
         </div>
       </div>
@@ -1946,7 +1946,7 @@ if('serviceWorker' in navigator){
     if(window.matchMedia('(display-mode: standalone)').matches||localStorage.getItem('fc_pwa'))return;
     const b=document.createElement('div');
     b.style.cssText='position:fixed;bottom:72px;left:12px;right:12px;background:#fff;border-radius:14px;padding:14px;box-shadow:0 8px 30px rgba(0,0,0,.2);z-index:9999;border:1.5px solid #3BAA35;display:flex;align-items:center;gap:12px';
-    b.innerHTML=`<img src="icons/cliente-72.png" style="width:44px;height:44px;border-radius:10px;flex-shrink:0"><div style="flex:1"><div style="font-weight:700;font-size:13px">Instalar FarmaClub</div><div style="font-size:11px;color:#666">Acesso rápido na tela inicial</div></div><div style="display:flex;gap:6px"><button onclick="this.closest('div').remove();localStorage.setItem('fc_pwa','1')" style="padding:6px 10px;background:#f5f5f5;border:none;border-radius:7px;font-size:12px;cursor:pointer">Não</button><button id="_binst" style="padding:6px 10px;background:#3BAA35;border:none;border-radius:7px;font-size:12px;font-weight:700;color:#fff;cursor:pointer">Instalar</button></div>`;
+    b.innerHTML=`<img src="icons/cliente-72.png" style="width:44px;height:44px;border-radius:10px;flex-shrink:0"><div style="flex:1"><div style="font-weight:700;font-size:13px">Instalar Farma do Bairro</div><div style="font-size:11px;color:#666">Acesso rápido na tela inicial</div></div><div style="display:flex;gap:6px"><button onclick="this.closest('div').remove();localStorage.setItem('fc_pwa','1')" style="padding:6px 10px;background:#f5f5f5;border:none;border-radius:7px;font-size:12px;cursor:pointer">Não</button><button id="_binst" style="padding:6px 10px;background:#3BAA35;border:none;border-radius:7px;font-size:12px;font-weight:700;color:#fff;cursor:pointer">Instalar</button></div>`;
     document.body.appendChild(b);
     document.getElementById('_binst').addEventListener('click',async()=>{if(dp){dp.prompt();const{outcome}=await dp.userChoice;if(outcome==='accepted')localStorage.setItem('fc_pwa','1');}b.remove();});
     setTimeout(()=>{if(b.parentNode)b.remove();},8000);

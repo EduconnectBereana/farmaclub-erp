@@ -1,5 +1,5 @@
 /**
- * FARMACLUB — DADOS CENTRAIS
+ * FARMADOBAIRRO — DADOS CENTRAIS
  * Arquivo único de configuração compartilhado por todos os módulos.
  * Quando integrado ao Supabase, este arquivo será substituído por
  * chamadas ao banco de dados. Por ora, é a fonte única de verdade.
@@ -8,7 +8,7 @@
  * Coordenadas: use maps.google.com, clique no endereço, copie lat/lng.
  */
 
-window.FARMACLUB = {
+window.FARMADOBAIRRO = {
 
   // ═══════════════════════════════════════════════
   // FARMÁCIAS PARCEIRAS
@@ -193,7 +193,7 @@ window.FARMACLUB = {
   // CONFIGURAÇÃO GERAL
   // ═══════════════════════════════════════════════
   config: {
-    nome_rede: "FarmaClub",
+    nome_rede: "Farma do Bairro",
     cidade: "Itaperuna",
     uf: "RJ",
     centro_lat: -21.2062,   // centro do mapa (usado como referência)

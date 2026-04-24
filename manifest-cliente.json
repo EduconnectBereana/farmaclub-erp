@@ -1,7 +1,7 @@
 {
-  "name": "FarmaClub — Medicamentos em Itaperuna",
-  "short_name": "FarmaClub",
-  "description": "Compre medicamentos das farmácias parceiras FarmaClub em Itaperuna/RJ com entrega rápida.",
+  "name": "Farma do Bairro — Medicamentos em Itaperuna",
+  "short_name": "Farma do Bairro",
+  "description": "Compre medicamentos das farmácias parceiras Farma do Bairro em Itaperuna/RJ com entrega rápida.",
   "start_url": "/farmaclub_app_cliente.html",
   "scope": "/",
   "display": "standalone",
@@ -66,7 +66,7 @@
       "sizes": "390x844",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Tela inicial do FarmaClub"
+      "label": "Tela inicial do Farma do Bairro"
     }
   ],
   "shortcuts": [

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
-<title>FarmaClub — App Motoboy</title>
+<title>Farma do Bairro — App Motoboy</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{font-family:system-ui,-apple-system,sans-serif;background:#1a1a2e;color:#fff;font-size:14px;min-height:100vh;display:flex;flex-direction:column;max-width:480px;margin:0 auto}
@@ -39,14 +39,14 @@ input{font-family:inherit;outline:none}
 .scanner-wrap{background:#0d0d1a;border-radius:14px;padding:24px;text-align:center;margin:0 12px 12px;border:2px dashed rgba(255,255,255,.2)}
 </style>
 
-  <!-- PWA — FarmaClub Motoboy -->
+  <!-- PWA — Farma do Bairro Motoboy -->
   <link rel="manifest" href="manifest-motoboy.json">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="FC Motoboy">
   <meta name="theme-color" content="#1a1a2e">
-  <meta name="description" content="App de entregas para motoboys parceiros FarmaClub em Itaperuna/RJ.">
+  <meta name="description" content="App de entregas para motoboys parceiros Farma do Bairro em Itaperuna/RJ.">
   <link rel="apple-touch-icon" href="icons/motoboy-192.png">
   <link rel="apple-touch-icon" sizes="152x152" href="icons/motoboy-152.png">
 </head>
@@ -54,7 +54,7 @@ input{font-family:inherit;outline:none}
 
 <div class="topbar">
   <div class="logo-row">
-    <img src="farmaclub_logo.png" alt="" onerror="this.style.display='none'">
+    <img src="farma-do-bairro-logo.png" alt="" onerror="this.style.display='none'">
     <span class="logo-txt">Motoboy</span>
   </div>
   <button class="status-pill" id="status-btn" onclick="toggleStatus()">
@@ -510,7 +510,7 @@ async function buscarPedidosSupabase() {
       if (!alertas.find(a => a.pedidoId === ped.id)) {
         alertas.push({
           pedidoId: ped.id,
-          farmacia: ped.farmacia_nome || "FarmaClub",
+          farmacia: ped.farmacia_nome || "Farma do Bairro",
           endereco: ped.endereco_entrega || "",
           total: ped.total_final || 0,
           motoboysFila: [],

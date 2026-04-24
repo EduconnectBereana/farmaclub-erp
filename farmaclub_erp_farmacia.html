@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>FarmaClub — ERP Farmácia</title>
+<title>Farma do Bairro — ERP Farmácia</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -46,7 +46,7 @@ tr:hover td{background:#fafafa}
 <body>
 <div id="sidebar">
   <div class="logo-title">ERP Farmácia</div>
-  <div class="logo-sub" id="sidebar-farm-nome">Farmácia São João<br>FarmaClub</div>
+  <div class="logo-sub" id="sidebar-farm-nome">Farmácia São João<br>Farma do Bairro</div>
   <div class="nav-sec">Operação</div>
   <button class="nav-btn ativo" data-tab="dashboard" onclick="setTab('dashboard')"><span style="font-size:10px">▣</span> Dashboard</button>
   <button class="nav-btn" data-tab="pdv" onclick="setTab('pdv')"><span style="font-size:10px">◉</span> PDV / Vendas</button>
@@ -65,7 +65,7 @@ tr:hover td{background:#fafafa}
   <div class="nav-sec" style="color:#d97706;margin-top:4px">🛒 Reposição</div>
   <button class="nav-btn" data-tab="pedido_reposicao" onclick="setTab('pedido_reposicao')" style="border-left-color:#d97706;color:#d97706;font-weight:600"><span style="font-size:10px">📤</span> Pedir à Central</button>
   <div style="margin-top:auto;padding-top:12px;border-top:1px solid #eee;font-size:10px;color:#aaa;padding-left:8px;line-height:1.8">
-    <span style="color:#3BAA35">●</span> FarmaClub: online<br>
+    <span style="color:#3BAA35">●</span> Farma do Bairro: online<br>
     CNPJ: 12.345.678/0001-90<br>
     CRF-RJ 12345
   </div>
@@ -108,7 +108,7 @@ const produtos=[
 const contasPagar=[
   {credor:"Distribuidora Farmanobre",venc:"2026-03-20",valor:4820,status:"pendente",tipo:"fornecedor"},
   {credor:"Aluguel — Proprietário",venc:"2026-03-25",valor:2800,status:"pendente",tipo:"aluguel"},
-  {credor:"FarmaClub — Comissão 10%",venc:"2026-03-31",valor:876,status:"pendente",tipo:"comissão"},
+  {credor:"Farma do Bairro — Comissão 10%",venc:"2026-03-31",valor:876,status:"pendente",tipo:"comissão"},
   {credor:"Distribuidora EMS",venc:"2026-03-15",valor:1240,status:"pago",tipo:"fornecedor"},
 ];
 
@@ -139,7 +139,7 @@ function renderDashboard(){
       <div class="card">
         <div style="font-size:13px;font-weight:600;margin-bottom:10px">Alertas</div>
         ${criticos>0?`<div class="alert" style="background:#fef2f2;border-left:3px solid ${RD}"><span style="font-size:12px;color:${RD}"><strong>${criticos} produtos</strong> em estoque crítico — repor urgente</span></div>`:""}
-        <div class="alert" style="background:#eff6ff;border-left:3px solid ${BL}"><span style="font-size:12px;color:${BL}">FarmaClub: você está sincronizado · 3 pedidos ativos agora</span></div>
+        <div class="alert" style="background:#eff6ff;border-left:3px solid ${BL}"><span style="font-size:12px;color:${BL}">Farma do Bairro: você está sincronizado · 3 pedidos ativos agora</span></div>
         <div class="alert" style="background:#fffbeb;border-left:3px solid ${AM}"><span style="font-size:12px;color:${AM}">Losartana e Amoxicilina vencem em 60–90 dias</span></div>
       </div>
     </div>
@@ -1035,7 +1035,7 @@ function renderFinanceiro(){
   return`
     <div class="grid4" style="margin-bottom:16px">
       ${kpi("Receita do mês",fmt(87600),"Março/2026",T)}
-      ${kpi("A receber",fmt(4244),"FarmaClub + convênios")}
+      ${kpi("A receber",fmt(4244),"Farma do Bairro + convênios")}
       ${kpi("A pagar",fmt(pagar),"contas em aberto",AM)}
       ${kpi("Saldo projetado",fmt(4244-pagar+87600*0.3),"estimado")}
     </div>
@@ -1054,7 +1054,7 @@ function renderFinanceiro(){
       <div>
         <div style="font-size:13px;font-weight:600;margin-bottom:10px">Contas a receber</div>
         ${tbl(["Cliente","Valor","Forma","Status"],
-          [["FarmaClub — Pedido #4521",156.30,"Débito","pendente"],["FarmaClub — Pedido #4519",87.50,"Pix","pendente"],["Convênio Prefeitura",2100,"convênio","pendente"]].map(([c,v,f,s])=>`<tr>
+          [["Farma do Bairro — Pedido #4521",156.30,"Débito","pendente"],["Farma do Bairro — Pedido #4519",87.50,"Pix","pendente"],["Convênio Prefeitura",2100,"convênio","pendente"]].map(([c,v,f,s])=>`<tr>
             ${td(`<strong>${c}</strong>`)}${td(fmt(v),"font-weight:700;text-align:right")}${td(f,"color:#888")}${td(dot(s))}
           </tr>`).join(""))}
       </div>
@@ -1080,7 +1080,7 @@ function renderRelatorios(){
     {tit:"Produtos perto do vencimento",desc:"Lista com 30/60/90 dias de antecedência.",tipo:"Estoque",c:AM},
     {tit:"Projeção de fluxo de caixa",desc:"Projeta o caixa dos próximos 30/60/90 dias com IA.",tipo:"IA",c:BL},
     {tit:"Clientes inativos 60+ dias",desc:"Gera lista para campanha de reativação via WhatsApp.",tipo:"CRM",c:PU},
-    {tit:"Quanto FarmaClub me economizou",desc:"ROI da parceria: preço coletivo vs individual.",tipo:"IA",c:T},
+    {tit:"Quanto Farma do Bairro me economizou",desc:"ROI da parceria: preço coletivo vs individual.",tipo:"IA",c:T},
   ];
   return`
     <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
@@ -1379,7 +1379,7 @@ function renderJudOrcamento(total, farmInfo, dtHoje, dtVal, redeDisponivel){
         <!-- CONSULTA NA REDE -->
         ${judItens.length>0?`
         <div class="card" style="margin-bottom:14px;border:1px solid #bbf7d0">
-          <div style="font-size:12px;font-weight:700;color:#16a34a;margin-bottom:8px">🔗 Consulta na rede FarmaClub</div>
+          <div style="font-size:12px;font-weight:700;color:#16a34a;margin-bottom:8px">🔗 Consulta na rede Farma do Bairro</div>
           <div style="font-size:11px;color:#555;margin-bottom:8px">Se não tiver estoque suficiente, outras farmácias parceiras podem suprir:</div>
           ${redeDisponivel.map(r=>`
             <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f5f5f5;font-size:12px">
@@ -1418,7 +1418,7 @@ function renderJudAprovado(total, farmInfo, dtHoje){
         <strong>Como proceder:</strong><br>
         1. O paciente chega com o dinheiro em espécie (valor aprovado pelo fórum)<br>
         2. Confira se o valor bate com o orçamento aprovado<br>
-        3. Separe os medicamentos do estoque (ou solicite à rede FarmaClub)<br>
+        3. Separe os medicamentos do estoque (ou solicite à rede Farma do Bairro)<br>
         4. Registre a venda abaixo — ela ficará marcada como "Venda Judicial" no financeiro<br>
         5. Entregue os medicamentos e o comprovante ao paciente
       </div>
@@ -1627,7 +1627,7 @@ window.judImprimir = function(){
       <div style="font-size:10px;color:#555">
         Este orçamento é válido por ${judPaciente.validade} dias a partir de ${dtHoje}.
         Os preços podem sofrer variação conforme disponibilidade de estoque.
-        Farmácia parceira da rede FarmaClub Itaperuna.
+        Farmácia parceira da rede Farma do Bairro Itaperuna.
       </div>
     </div>
     <div class="assinatura">
@@ -1784,7 +1784,7 @@ function renderPedidoReposicao(){
     <!-- CABEÇALHO -->
     <div style="background:linear-gradient(135deg,#d97706,#b45309);border-radius:12px;padding:16px 20px;margin-bottom:16px;color:#fff;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
       <div>
-        <div style="font-size:16px;font-weight:700">🛒 Pedido de Reposição à Central FarmaClub</div>
+        <div style="font-size:16px;font-weight:700">🛒 Pedido de Reposição à Central Farma do Bairro</div>
         <div style="font-size:12px;opacity:.85;margin-top:3px">O sistema sugere — você decide o que pedir. Sazonalidade de <strong>${mesNome}</strong> aplicada.</div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -1921,7 +1921,7 @@ function renderRepSugestao(totalUn, totalVal){
           </button>
           <button onclick="enviarPedido()" ${aceitosCount===0?"disabled":""}
             style="padding:12px;background:${aceitosCount>0?"#d97706":"#ccc"};color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:${aceitosCount>0?"pointer":"not-allowed"};font-family:inherit">
-            📤 Enviar pedido à Central FarmaClub
+            📤 Enviar pedido à Central Farma do Bairro
           </button>
           <button onclick="gerarSugestao();renderContent()" style="padding:10px;background:transparent;border:1px solid #ddd;color:#888;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit">
             ↻ Regenerar sugestão do sistema
@@ -2047,9 +2047,9 @@ function renderRepEnviado(totalUn, totalVal){
   return`
     <div class="card" style="text-align:center;padding:40px;max-width:600px;margin:0 auto">
       <div style="font-size:52px;margin-bottom:16px">📤</div>
-      <div style="font-size:20px;font-weight:700;color:#d97706;margin-bottom:8px">Pedido enviado à Central FarmaClub!</div>
+      <div style="font-size:20px;font-weight:700;color:#d97706;margin-bottom:8px">Pedido enviado à Central Farma do Bairro!</div>
       <div style="font-size:13px;color:#888;line-height:1.7;margin-bottom:20px">
-        Seu pedido de <strong>${totalUn} unidades</strong> (${fmt(totalVal)}) foi recebido pela Central FarmaClub.<br>
+        Seu pedido de <strong>${totalUn} unidades</strong> (${fmt(totalVal)}) foi recebido pela Central Farma do Bairro.<br>
         Mury vai revisar, consolidar com os pedidos das outras farmácias e confirmar a compra com o fornecedor.<br>
         Você receberá a confirmação no sistema quando a compra for fechada.
       </div>
@@ -2147,7 +2147,7 @@ window.confirmarTroca = function(prodId, prodNome){
 window.enviarPedido = function(){
   const aceitos = repItens.filter(i=>i.aceito);
   if(!aceitos.length){ alert("Nenhum produto selecionado."); return; }
-  const confirmMsg = `Confirmar envio de ${aceitos.length} produto(s) à Central FarmaClub?\n\nTotal estimado: ${fmt(aceitos.reduce((s,i)=>s+i.qtdFinal*i.custo,0))}`;
+  const confirmMsg = `Confirmar envio de ${aceitos.length} produto(s) à Central Farma do Bairro?\n\nTotal estimado: ${fmt(aceitos.reduce((s,i)=>s+i.qtdFinal*i.custo,0))}`;
   if(!confirm(confirmMsg)) return;
   // Salvar pedido no localStorage (simulado)
   const pedidos = JSON.parse(localStorage.getItem("rep_pedidos")||"[]");
@@ -2637,7 +2637,7 @@ function renderLogin() {
     <div style="background:#fff;border-radius:20px;padding:36px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.2)">
       <div style="text-align:center;margin-bottom:28px">
         <div style="width:64px;height:64px;background:linear-gradient(135deg,#3BAA35,#2E8A2A);border-radius:16px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:32px">🏥</div>
-        <div style="font-size:22px;font-weight:800;color:#1a1a2e">FarmaClub ERP</div>
+        <div style="font-size:22px;font-weight:800;color:#1a1a2e">Farma do Bairro ERP</div>
         <div style="font-size:13px;color:#9a9eb8;margin-top:4px">Acesso exclusivo para farmácias parceiras</div>
       </div>
 
@@ -2674,7 +2674,7 @@ function renderLogin() {
       </div>
 
       <div style="border-top:1px solid #f0f0f0;margin-top:20px;padding-top:16px;font-size:11px;color:#9a9eb8;text-align:center;line-height:1.6">
-        Problema para acessar? Contate a FarmaClub<br>
+        Problema para acessar? Contate a Farma do Bairro<br>
         <strong style="color:#3BAA35">WhatsApp (22) 9XXXX-XXXX</strong>
       </div>
     </div>
