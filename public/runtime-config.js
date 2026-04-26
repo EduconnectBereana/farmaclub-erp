@@ -30,7 +30,7 @@ window.FC_CONFIG = {
 
   // ── Supabase (banco de dados + autenticação) ──
   supabaseUrl:        "https://eswwvonedfexvxlzkoof.supabase.co",
-  supabasePublishableKey: "https://supabase.com/dashboard/project/eswwvonedfexvxlzkoof/settings/api-keys#:~:text=sb_publishable_FidUGTjUCcIjGHU_uNJBUA_AKHYwrxg",  // ← cole aqui
+  supabasePublishableKey: "sb_publishable_FidUGTjUCcIjGHU_uNJBUA_AKHYwrxg",  // ← cole aqui
 
   // ── Configurações de negócio ──
   cidadeOperacao:    "Itaperuna",
